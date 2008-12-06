@@ -1,0 +1,6 @@
+Signal	DbgV3	Net		GPIO	V0: C2	V1: C2
+------	-----	-------		----	------	------
+CLK	3	SPI_CLK0	E13	C2CK	C2D
+MOSI	4	SPI_MOSI0	E12	C2D	-
+MISO	5	SPI_MISO0	E11	-	C2CK
+nSS	6	SS0		G2	-	-

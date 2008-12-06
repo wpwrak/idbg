@@ -28,13 +28,24 @@ static void flash_device(void *data, size_t size)
     size_t len;
     uint8_t buf[256];
 
+    for (i = 0; i < size; i += 256)
+	fputc('-', stderr);
+    fputc('\r', stderr);
+
     flash_init();
     flash_device_erase();
+
     for (i = 0; i < size; i += 256) {
+	fputc('*', stderr);
+	fflush(stderr);
 	len = size-i <= 256 ? size-i : 256;
 	flash_block_write(i, data+i, len);
     }
+    fputc('\r', stderr);
+
     for (i = 0; i < size; i += 256) {
+	fputc('#', stderr);
+	fflush(stderr);
 	len = size-i <= 256 ? size-i : 256;
 	flash_block_read(i, buf, len);
 	if (memcmp(buf, data+i, len)) {
@@ -44,6 +55,7 @@ static void flash_device(void *data, size_t size)
 	    exit(1);
 	}
     }
+    fputc('\n', stderr);
 }
 
 

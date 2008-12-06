@@ -1,15 +1,17 @@
 CC=sdcc
-CFLAGS=-I../common
+# SDCC doesn't like shell meta-characters in this define
+CFLAGS=-I../common -DDATE='\"`date | tr \   _`\"'
 
-OBJS=main.rel uart.rel
+MAIN=main
+OBJS=$(MAIN).rel uart.rel usb.rel
 
 .SUFFIXES:	.rel .ihx .bin
 
-.PHONY:		test clean upload spotless
+.PHONY:		test clean upload spotless $(MAIN).c
 
-all:		main.bin
+all:		$(MAIN).bin
 
-main.bin:	$(OBJS)
+$(MAIN).ihx:	$(OBJS)
 		$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS)
 
 .ihx.bin:
@@ -22,10 +24,13 @@ main.bin:	$(OBJS)
 		$(CC) $(CFLAGS) -c $<
 
 clean:
-		rm -f *.ihx *.asm *.lnk *.lst *.map *.mem *.rel *.rst *.sym
+		rm -f $(OBJS)
+		rm -f $(OBJS:%.rel=%.asm) $(OBJS:%.rel=%.lst)
+		rm -f $(OBJS:%.rel=%.rst) $(OBJS:%.rel=%.sym)
+		rm -f $(MAIN).ihx $(MAIN).lnk $(MAIN).map $(MAIN).mem
 
 spotless:	clean
-		rm -f *.bin
+		rm -f $(MAIN).bin
 
 upload:
-		ssh lab neo 'cat \>main.bin' <main.bin
+		ssh lab neo 'cat \>$(MAIN).bin' <$(MAIN).bin

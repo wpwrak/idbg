@@ -1,0 +1,59 @@
+#include "usb.h"
+
+
+/*
+ * Device descriptor
+ */
+
+const uint8_t device_descriptor[18] = {
+	18,			/* bLength */
+	USB_DT_DEVICE,		/* bDescriptorType */
+	LE(0x2000),		/* bcdUSB */
+	USB_CLASS_VENDOR_SPEC,	/* bDeviceClass */
+	0x00,			/* bDeviceSubClass */
+	0x00,			/* bDeviceProtocol */
+	64,			/* bMaxPacketSize */
+	LE(0x1234),		/* idVendor */
+	LE(0x0001),		/* idProduct */
+	LE(0x0001),		/* bcdDevice */
+	0,			/* iManufacturer */
+	0,			/* iProduct */
+	0,			/* iSerialNumber */
+	1			/* bNumConfigurations */
+};
+
+
+/*
+ * Our configuration
+ *
+ * While in DFU mode, we're always bus-powered.
+ */
+
+const static uint8_t config_descriptor[] = {
+	9,			/* bLength */
+	USB_DT_CONFIG,		/* bDescriptorType */
+	LE(9+9),		/* wTotalLength */
+	1,			/* bNumInterfaces */
+	0,			/* bConfigurationValue */
+	0,			/* iConfiguration */
+//	USB_ATTR_SELF_POWERED | USB_ATTR_BUS_POWERED,
+	USB_ATTR_BUS_POWERED,	/* bmAttributes */
+	15,			/* bMaxPower */
+
+	/* Interface #0 */
+
+	9,			/* bLength */
+	USB_DT_INTERFACE,	/* bDescriptorType */
+	0,			/* bInterfaceNumber */
+	0,			/* bAlternateSetting */
+	0,			/* bNumEndpoints */
+	USB_CLASS_VENDOR_SPEC,	/* bInterfaceClass */
+	0,			/* bInterfaceSubClass */
+	0,			/* bInterfaceProtocol */
+	0,			/* iInterface */
+};
+
+
+const uint8_t *config_descriptors[] = {
+	config_descriptor,
+};

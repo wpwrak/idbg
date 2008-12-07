@@ -1,3 +1,10 @@
+#ifndef REGS_H
+#define REGS_H
+
+#include <mcs51/C8051F326.h>
+#include "usb-regs.h"
+
+
 /* OSCICN */
 #define	IFCN0	0x01	/* Internal Oscillator Frequency Control */
 #define	IFCN1	0x02	/* 00: /8, 01: /4, 10: /2, 11: /1 */
@@ -12,11 +19,18 @@
 #define VDMEN	0x80	/* VDD Monitor Enable */
 #define	VDDSTAT	0x40	/* VDD Status */
 
+/* USB0XCN */
+#define	Dn	0x01	/* D- Signal Status */
+#define	Dp	0x02	/* D+ Signal Status */
+#define	DFREC	0x04	/* Differential Receiver */
+#define	PHYTST0	0x08	/* Physical Layer Test */
+#define	PHYTST1	0x10	/* 00: normal, 01: "1", 10: "0", 11: SE0 */
+#define	SPEED	0x20	/* USB0 Speed Select */
+#define	PHYEN	0x40	/* Physical Layer Enable */
+#define	PREN	0x80	/* Internal Pullup Resistor Enable */
+
 /* USB0ADR */
 #define	BUSY	0x80	/* USB0 Register Read Busy Flag */
-
-#define	CLKREC	0x0f	/* Clock Recovery Control */
-#define	CRE	0x80	/* Clock Recovery Enable (CLKREC) */
 
 /* SMOD0 */
 #define	S0DL0	0x04	/* Data Length */
@@ -27,3 +41,5 @@
 #define	SB0PS1	0x02	/* 00: /12, 01: /4, 10: /48, 11: /1 */
 #define	SB0RUN	0x40	/* Baud Rate Generator Enable */
 #define	SB0CLK	0x80	/* Baud Rate Clock Source */
+
+#endif /* REGS_H */

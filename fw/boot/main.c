@@ -1,63 +1,93 @@
 #include <stdint.h>
-#include <mcs51/C8051F326.h>
 
+#include "version.h"
 #include "regs.h"
 #include "uart.h"
+#include "usb.h"
 
 
-#define BIT	P0_4
-
-
-static void usb_write(uint8_t reg, uint8_t value)
+static void delay(void)
 {
-    while (USB0ADR & BUSY);
-    USB0ADR = reg;
-    USB0DAT = value;
-}
+	int x;
 
+	for (x = 0; x < 500; x)
+		x++;
+}
 
 void main(void)
 {
-    /*
-     * @@@ soft reset -> DFU
-     */
-
-    /*
-     * USB Full Speed Clock Settings, section 10.5.2
-     *
-     * -> SYSCLK = 12 MHz 
-     */
-
-    CLKMUL = 0;			/* disable clock multiplier */
-    OSCICN |= IFCN0 | IFCN1;	/* SYSCLK = osc/1 */
-    CLKSEL = 0;			/* USBCLK = 4 x SYSCLK */
-    usb_write(CLKREC, CRE);	/* enable USB clock recovery */
-
-    /*
-     * VDD monitor enable sequence, section 7.2
-     *
-     * - enable voltage monitor
-     * - wait for monitor to stabilize
-     * - enable VDD monitor reset
-     */
-    VDM0CN = VDMEN;
-    while (!(VDM0CN & VDDSTAT));
-    RSTSRC = PORSF;
-
-    /*
-     * @@@ if VBUS && AUX -> DFU
-     * @@@ else -> boot payload
-     */
-
-#if 1
-    uart_init();
-    print("Hello\r\n");
-    while (1);
+	/* straight from the example in F326_USB_Main.c */
+#ifdef LOW_SPEED
+	OSCICN |= 0x03;
+	CLKSEL = 0; // SYS_INT_OSC
+	CLKSEL |= 0x10; // USB_INT_OSC_DIV_2
 #else
-    P0MDOUT |= 1 << 4;
-    while (1) {
-	BIT = 1;
-	BIT = 0;
-    }
+	OSCICN |= 0x03;
+	CLKMUL = 0;
+	CLKMUL |= 0x80;
+	delay();
+	CLKMUL |= 0xc0;
+	while(!(CLKMUL & 0x20));
+	CLKSEL = 0; // SYS_INT_OSC
+	CLKSEL |= 0x00; // USB_4X_CLOCK
+	CLKSEL = 0x02;
 #endif
+
+#if 0
+
+	/*
+	 * Make sure we're running with clock divider /8
+	 * Thus, SYSCLK = 1.5MHz
+	 */
+	OSCICN &= ~(IFCN0 | IFCN1);
+
+	/*
+	 * Clock multiplier enable sequence, section 10.4
+	 *
+	 * - reset the multiplier
+	 * - select the multiplier input source
+	 * - enable the multiplier
+	 * - delay for 5us
+	 * - initialize the multiplier
+	 * - poll for multiplier to be ready
+	 */
+	CLKMUL = 0;
+#if 1
+	CLKMUL |= MULEN;
+    
+	// cycles(5);	/* 4*1.5us = 6us */
+	CLKMUL |= MULEN;
+	CLKMUL |= MULEN;
+	CLKMUL |= MULEN;
+	CLKMUL |= MULEN;
+
+	CLKMUL |= MULINIT | MULEN;
+	while (!(CLKMUL & MULRDY));
+#endif
+
+	/* Set SYSCLK to 12MHz */
+	OSCICN |= IFCN1 | IFCN0;
+	CLKSEL = 0;		/* USBCLK = 4 x int., SYSCLK = int. */
+
+	/*
+	 * VDD monitor enable sequence, section 7.2
+	 *
+	 * - enable voltage monitor
+	 * - wait for monitor to stabilize
+	 * - enable VDD monitor reset
+	 */
+	VDM0CN = VDMEN;
+	while (!(VDM0CN & VDDSTAT));
+	RSTSRC = PORSF;
+
+	/*
+	 * @@@ if VBUS && AUX -> DFU
+	 * @@@ else -> boot payload
+	 */
+#endif
+
+	uart_init();
+	printk("%s #%u\n", BUILD_DATE, BUILD_NUMBER);
+	usb_init();
+	while (1);
 }

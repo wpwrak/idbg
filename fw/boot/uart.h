@@ -1,10 +1,10 @@
 #ifndef UART_H
 #define UART_H
 
-#define print	uart_send_noint	/* sort of printk ... */
+#define debug printk
 
-
-void uart_send_noint(const char *s);
+void putchar(char c);
+void printk(const char *fmt, ...);
 void uart_init(void);
 
 #endif /* UART_H */

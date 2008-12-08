@@ -73,7 +73,7 @@
 
 
 extern const uint8_t device_descriptor[];
-extern const uint8_t *config_descriptors[];
+extern const uint8_t config_descriptor[];
 
 
 void usb_init(void);

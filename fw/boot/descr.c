@@ -29,7 +29,7 @@ const uint8_t device_descriptor[18] = {
  * While in DFU mode, we're always bus-powered.
  */
 
-const static uint8_t config_descriptor[] = {
+const uint8_t config_descriptor[] = {
 	9,			/* bLength */
 	USB_DT_CONFIG,		/* bDescriptorType */
 	LE(9+9),		/* wTotalLength */
@@ -51,9 +51,4 @@ const static uint8_t config_descriptor[] = {
 	0,			/* bInterfaceSubClass */
 	0,			/* bInterfaceProtocol */
 	0,			/* iInterface */
-};
-
-
-const uint8_t *config_descriptors[] = {
-	config_descriptor,
 };

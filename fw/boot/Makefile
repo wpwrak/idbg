@@ -26,7 +26,7 @@ $(MAIN).ihx:	$(OBJS:%=%.rel)
 
 .ihx.bin:
 		objcopy -I ihex $< -O binary $@
-		ls -l $@
+		@echo "build #`cat .version`, `ls -l $@`"
 
 .rel.ihx:
 		$(CC) $(CFLAGS) $<

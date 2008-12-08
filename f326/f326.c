@@ -97,9 +97,10 @@ int main(int argc, char **argv)
     c2_init();
     identify();
 
-    if (argc == 2)
+    if (argc == 2) {
 	do_flash(argv[1]);
-    identify();
+	identify();
+    }
     c2_reset();
 
     return 0;

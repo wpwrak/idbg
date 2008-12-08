@@ -34,8 +34,43 @@ static uint16_t usb_read_word(uint8_t reg)
 }
 
 
-static void usb_reply(void *d, uint8_t size)
+static void usb_reply(const void *d, uint8_t size)
 {
+	uint8_t i;
+
+	for (i = 0; i != size; i++) {
+		debug("%02x ", ((const uint8_t *) d)[i]);
+		usb_write(FIFO0, ((const uint8_t *) d)[i]);
+	}
+}
+
+
+static bit get_descriptor(uint8_t type, uint8_t index, uint16_t length)
+{
+	const void *p;
+	uint8_t size;
+
+	debug("get_descriptor(0x%02x, 0x%02x, 0x%04x)\n", type, index, length);
+
+	switch (type) {
+	case USB_DT_DEVICE:
+putchar('D');
+		p = device_descriptor;
+		break;
+	case USB_DT_CONFIG:
+putchar('C');
+		if (index)
+			return 0;
+		p = config_descriptor;
+		break;
+	default:
+		return 0;
+	}
+	size = *(const uint8_t *) p;
+	if (length < size)
+		size = length;
+	usb_reply(p, size);
+	return 1;
 }
 
 
@@ -46,10 +81,28 @@ static void usb_reply(void *d, uint8_t size)
 
 static void setup(void)
 {
+	static uint8_t addr = 0xff;
 	uint8_t bmRequestType, bRequest;
 	uint16_t wValue, wIndex, wLength;
 	bit ok = 0;
+	uint8_t csr, ack = DATAEND | SOPRDY;
 
+	if (addr != 0xff) {
+//		printk("[%d]\n", addr);
+		usb_write(FADDR, addr);
+		putchar('A');
+		addr = 0xff;
+	}
+
+	csr = usb_read(E0CSR);
+	if (csr & SUEND) {
+		putchar('S');
+		usb_write(E0CSR, SSUEND);
+	}
+	if (!(csr & OPRDY))
+		return;
+
+//	printk("fifo=%d\n", usb_read(E0CNT));
 	BUG_ON(usb_read(E0CNT) < 8);
 
 	bmRequestType = usb_read(FIFO0);
@@ -67,22 +120,31 @@ static void setup(void)
 	 */
 
 	case FROM_DEVICE(GET_STATUS):
-		printk("GET_STATUS\n");
+		debug("GET_STATUS\n");
 		if (wLength != 2)
 			goto stall;
 		usb_reply("\000", 2);
 		break;
 	case TO_DEVICE(CLEAR_FEATURE):
 		printk("CLEAR_FEATURE\n");
+		ok = 1;
 		break;
 	case TO_DEVICE(SET_FEATURE):
-		printk("SET_FEATURE\n");
+		debug("SET_FEATURE\n");
 		break;
 	case TO_DEVICE(SET_ADDRESS):
-		printk("SET_ADDRESS\n");
+		debug("SET_ADDRESS (0x%x)\n", wValue);
+//		putchar('A');
+//		printk("A=%x\n", wValue);
+	P2_0 = 0;
+	P2_0 = 1;
+		addr = wValue;
+		ok = 1;
+		ack |= INPRDY;
 		break;
 	case FROM_DEVICE(GET_DESCRIPTOR):
-		printk("GET_DESCRIPTOR\n");
+		ok = get_descriptor(wValue, wValue >> 8, wLength);
+		ack |= INPRDY;
 		break;
 	case TO_DEVICE(SET_DESCRIPTOR):
 		printk("SET_DESCRIPTOR\n");
@@ -122,25 +184,27 @@ static void setup(void)
 		printk("GET_STATUS\n");
 		break;
 	case TO_ENDPOINT(CLEAR_FEATURE):
-		printk("CLEAR_FEATURE\n");
+		printk("CLEAR_FEATURE(EP)\n");
 		break;
 	case TO_ENDPOINT(SET_FEATURE):
-		printk("SET_FEATURE\n");
+		printk("SET_FEATURE(EP)\n");
 		break;
 	case FROM_ENDPOINT(SYNCH_FRAME):
 		printk("SYNCH_FRAME\n");
 		break;
 
 	default:
-		printk("Unrecognized SETUP(%0x2 %02x ...\n",
+		printk("Unrecognized SETUP(%02x %02x ...\n",
 		    bmRequestType, bRequest);
 	}
 
 	if (ok) {
-		usb_write(E0CSR, SOPRDY);
+		usb_write(E0CSR, ack);
+		debug("OK");
 		return;
 	}
 stall:
+	printk("STALL\n");
 	usb_write(E0CSR, SDSTL);
 }
 
@@ -164,12 +228,11 @@ static void poll(void)
 				setup();
 			if (flags & IN1)
 				/* handle IN */;
-			break;
 		}
 
 		flags = usb_read(OUT1INT);
 		if (flags) {
-			printk("OUT1INT 0x%02x\n", flags);
+			debug("OUT1INT 0x%02x\n", flags);
 			/* handle OUT */
 		}
     }

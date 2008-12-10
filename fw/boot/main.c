@@ -1,3 +1,9 @@
+/*
+ * This code follows the register read/write sequences from the examples in
+ * SiLabs/MCU/Examples/C8051F326_7/USB_Interrupt/Firmware/F326_USB_Main.c and 
+ * SiLabs/MCU/Examples/C8051F326_7/USB_Interrupt/Firmware/F326_USB_ISR.c
+ */
+
 #include <stdint.h>
 
 #include "version.h"
@@ -40,30 +46,13 @@ void main(void)
 	 * high, we must still stay in the 100ms budget for raising KEEPACT.
 	 */
 
-	/* straight from the example in F326_USB_Main.c */
+	OSCICN |= IFCN0 | IFCN1;
+
 #ifdef LOW_SPEED
-	OSCICN |= 0x03;
-	CLKSEL = 0; // SYS_INT_OSC
-	CLKSEL |= 0x10; // USB_INT_OSC_DIV_2
-#else
-	OSCICN |= 0x03;
-	CLKMUL = 0;
-	CLKMUL |= 0x80;
-	delay();
-	CLKMUL |= 0xc0;
-	while(!(CLKMUL & 0x20));
-	CLKSEL = 0; // SYS_INT_OSC
-	CLKSEL |= 0x00; // USB_4X_CLOCK
-	CLKSEL = 0x02;
-#endif
 
-#if 0
+	CLKSEL = 0x10;	/* USBCLK = int/2, SYS_INT_OSC = int */
 
-	/*
-	 * Make sure we're running with clock divider /8
-	 * Thus, SYSCLK = 1.5MHz
-	 */
-	OSCICN &= ~(IFCN0 | IFCN1);
+#else /* LOW_SPEED */
 
 	/*
 	 * Clock multiplier enable sequence, section 10.4
@@ -75,23 +64,16 @@ void main(void)
 	 * - initialize the multiplier
 	 * - poll for multiplier to be ready
 	 */
-	CLKMUL = 0;
-#if 1
-	CLKMUL |= MULEN;
-    
-	// cycles(5);	/* 4*1.5us = 6us */
-	CLKMUL |= MULEN;
-	CLKMUL |= MULEN;
-	CLKMUL |= MULEN;
-	CLKMUL |= MULEN;
 
+	CLKMUL = 0;
+	CLKMUL |= MULEN;
+	delay();
 	CLKMUL |= MULINIT | MULEN;
 	while (!(CLKMUL & MULRDY));
-#endif
+	CLKSEL = 0;	/* USBCLK = 4*int, SYSCLK = int */
+	CLKSEL = 0x02;	/* F326_USB_Main.c does this (sets 24MHz). Why ? */
 
-	/* Set SYSCLK to 12MHz */
-	OSCICN |= IFCN1 | IFCN0;
-	CLKSEL = 0;		/* USBCLK = 4 x int., SYSCLK = int. */
+#endif /* !LOW_SPEED */
 
 	/*
 	 * VDD monitor enable sequence, section 7.2
@@ -108,7 +90,6 @@ void main(void)
 	 * @@@ if VBUS && AUX -> DFU
 	 * @@@ else -> boot payload
 	 */
-#endif
 
 	uart_init();
 	printk("%s #%u\n", BUILD_DATE, BUILD_NUMBER);

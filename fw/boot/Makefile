@@ -1,5 +1,5 @@
 CC=sdcc
-CFLAGS=-I../common  # -DLOW_SPEED
+CFLAGS=-I../common # -DLOW_SPEED
 
 MAIN=main
 OBJS=$(MAIN) uart usb descr

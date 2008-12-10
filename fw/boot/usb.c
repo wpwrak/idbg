@@ -4,6 +4,13 @@
  * - doesn't handle packet fragmentation yet (so low-speed doesn't work)
  */
 
+/*
+ * This code follows the register read/write sequences from the examples in
+ * SiLabs/MCU/Examples/C8051F326_7/USB_Interrupt/Firmware/F326_USB_Main.c and
+ * SiLabs/MCU/Examples/C8051F326_7/USB_Interrupt/Firmware/F326_USB_ISR.c
+ */
+
+
 #include <stdint.h>
 
 #include "regs.h"
@@ -153,7 +160,10 @@ static void setup(void)
 		printk("SET_DESCRIPTOR\n");
 		break;
 	case FROM_DEVICE(GET_CONFIGURATION):
-		printk("GET_CONFIGURATION\n");
+		debug("GET_CONFIGURATION\n");
+		ep0 = "";
+		ep0_end = ep0+1;
+		ok = 1;
 		break;
 	case TO_DEVICE(SET_CONFIGURATION):
 		debug("SET_CONFIGURATION\n");
@@ -301,29 +311,15 @@ static void poll(void)
 
 void usb_init(void)
 {
-	/* from the example in F326_USB_ISR.c */
-	usb_write(POWER, 8);
+	usb_write(POWER, USBRST);
 #ifdef LOW_SPEED
-	USB0XCN = 0xc0;
-	usb_write(CLKREC, 0xa0);
+	USB0XCN = PHYEN | PREN;
+	usb_write(CLKREC, CRE | CRLOW);
 #else
-	USB0XCN = 0xe0;
-	usb_write(CLKREC, 0x80);
+	USB0XCN = PHYEN | PREN | SPEED;
+	usb_write(CLKREC, CRE);
 #endif
 	//usb_write(POWER, 0x01);	/* we don't implement suspend yet */
 	usb_write(POWER, 0x00);
 	poll();
-
-#if 0
-	//usb_write(POWER, USBRST | USBINH);	/* reset USB0 */
-	usb_write(POWER, USBRST | USBINH);	/* reset USB0 */
-	USB0XCN = PHYEN | SPEED;	/* configure and enable transceiver */
-	usb_write(POWER, 0);		/* enable USB0 */
-	// usb_write(CLKREC, 0x09 | CRE | CRSSEN);
-					/* enable USB clock recovery */
-	usb_write(CLKREC, 0x00 | CRE);	/* enable USB clock recovery */
-	USB0XCN |= PREN;		/* enable pull-up */
-
-	USB0XCN &= ~PREN;		/* disable pull-up */
-#endif
 }

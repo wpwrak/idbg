@@ -2,6 +2,7 @@
 
 from tmc.wave import *
 from tmc.dxplore import dxplore
+from tmc.decode import d_usb_stream
 
 
 #
@@ -70,7 +71,8 @@ wd.save("_diff")
 #
 # Run clock recovery on D+/D-. We only need one, but check both to be sure.
 #
-p = 1/1.5e6
+#p = 1/1.5e6
+p = 1/12e6
 dp_t, viol = recover(dp, p, p*0.9, p*1.1)
 print viol
 dm_t, viol = recover(dm, p, p*.9, p*1.1, t0 = dp.data[0])
@@ -97,6 +99,9 @@ dd.save("_clk")
 dpd = []
 dmd = []
 dck = []
+
+# err, silly, seems that we've mixed up D+ and D- all over the place :-)
+print d_usb_stream(dm_bv[:], dp_bv[:])
 
 for v in dp_bv:
     dpd.append(v)

@@ -1,16 +1,16 @@
 CC=sdcc
-CFLAGS=-I../common -DLOW_SPEED
+CFLAGS=-I../common  # -DLOW_SPEED
 
 MAIN=main
 OBJS=$(MAIN) uart usb descr
 
 .SUFFIXES:	.rel .ihx .bin
 
-.PHONY:		test clean upload spotless version.h
+.PHONY:		test clean upload spotless version
 
 all:		$(MAIN).bin
 
-version.h:
+version:
 		@if [ -f .version ]; then \
 		    v=`cat .version`; \
 		    expr $$v + 1 >.version; \
@@ -20,6 +20,8 @@ version.h:
 		@[ -s .version ] || echo 0 >.version
 		@echo "#define BUILD_DATE \"`date`\"" >version.h
 		@echo "#define BUILD_NUMBER `cat .version`" >>version.h
+
+main.rel:	version
 
 $(MAIN).ihx:	$(OBJS:%=%.rel)
 		$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS:%=%.rel)
@@ -49,8 +51,8 @@ endif
 
 clean:
 		rm -f $(OBJS:%=%.rel) .depend
-		rm -f $(OBJS:%.rel=%.asm) $(OBJS:%.rel=%.lst)
-		rm -f $(OBJS:%.rel=%.rst) $(OBJS:%.rel=%.sym)
+		rm -f $(OBJS:%=%.asm) $(OBJS:%=%.lst)
+		rm -f $(OBJS:%=%.rst) $(OBJS:%=%.sym)
 		rm -f $(MAIN).ihx $(MAIN).lnk $(MAIN).map $(MAIN).mem
 
 spotless:	clean

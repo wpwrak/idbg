@@ -16,6 +16,30 @@ static void delay(void)
 
 void main(void)
 {
+	/*
+	 * @@@ if we don't have VBUS, proceed as follows:
+	 * - stay at 3MHz (current < 2mA)
+	 * - jump directly to the payload
+	 */
+
+	/*
+	 * If we have VBUS, proceed as follows:
+	 * - bring up USB
+	 * - try to contact the PMU (in a loop)
+	 * - possible transitions:
+	 *   - DFU gets selected -> enter DFU mode
+	 *   - PMU responds -> jump to payload
+	 *
+	 * In DFU mode, the following transitions are possible:
+	 * - VBUS drops -> reset
+	 * - USB bus reset -> reset
+	 */
+
+	/*
+	 * Note: if we do anything that delays CPU bringup after nRESET goes
+	 * high, we must still stay in the 100ms budget for raising KEEPACT.
+	 */
+
 	/* straight from the example in F326_USB_Main.c */
 #ifdef LOW_SPEED
 	OSCICN |= 0x03;

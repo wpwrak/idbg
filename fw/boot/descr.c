@@ -8,11 +8,15 @@
 const uint8_t device_descriptor[18] = {
 	18,			/* bLength */
 	USB_DT_DEVICE,		/* bDescriptorType */
-	LE(0x2000),		/* bcdUSB */
+	LE(0x200),		/* bcdUSB */
 	USB_CLASS_VENDOR_SPEC,	/* bDeviceClass */
 	0x00,			/* bDeviceSubClass */
 	0x00,			/* bDeviceProtocol */
+#ifdef LOW_SPEED
+	8,			/* bMaxPacketSize */
+#else
 	64,			/* bMaxPacketSize */
+#endif
 	LE(0x1234),		/* idVendor */
 	LE(0x0001),		/* idProduct */
 	LE(0x0001),		/* bcdDevice */
@@ -34,7 +38,7 @@ const uint8_t config_descriptor[] = {
 	USB_DT_CONFIG,		/* bDescriptorType */
 	LE(9+9),		/* wTotalLength */
 	1,			/* bNumInterfaces */
-	0,			/* bConfigurationValue */
+	1,			/* bConfigurationValue (> 0 !) */
 	0,			/* iConfiguration */
 //	USB_ATTR_SELF_POWERED | USB_ATTR_BUS_POWERED,
 	USB_ATTR_BUS_POWERED,	/* bmAttributes */

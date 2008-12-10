@@ -66,7 +66,7 @@
  * uint8_t. Hence the cast.
  */
 
-#define LE(x) ((uint16_t) (x) >> 8), (x)
+#define LE(x) (x), ((uint16_t) (x) >> 8)
 
 #define LO(x) (((uint8_t *) &(x))[0])
 #define HI(x) (((uint8_t *) &(x))[1])

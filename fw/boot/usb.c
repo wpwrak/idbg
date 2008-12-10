@@ -1,3 +1,9 @@
+/*
+ * Known issues:
+ * - no suspend/resume
+ * - doesn't handle packet fragmentation yet (so low-speed doesn't work)
+ */
+
 #include <stdint.h>
 
 #include "regs.h"
@@ -5,7 +11,32 @@
 #include "usb.h"
 
 
+#ifndef NULL
+#define NULL 0
+#endif
+
+
 #define BUG_ON(x)
+
+
+#define N 2
+#define NO_ADDRESS	0xff	/* null value for function address */
+
+
+const uint8_t *ep0 = NULL, *ep0_end;
+uint8_t addr = NO_ADDRESS;
+
+
+static void trigger(void)
+{
+	static uint16_t count = 0;
+
+	if (++count == N) {
+		P2_0 = 0;
+		P2_0 = 1;
+		putchar('*');
+	}
+}
 
 
 static void usb_write(uint8_t reg, uint8_t value)
@@ -34,42 +65,34 @@ static uint16_t usb_read_word(uint8_t reg)
 }
 
 
-static void usb_reply(const void *d, uint8_t size)
-{
-	uint8_t i;
-
-	for (i = 0; i != size; i++) {
-		debug("%02x ", ((const uint8_t *) d)[i]);
-		usb_write(FIFO0, ((const uint8_t *) d)[i]);
-	}
-}
-
-
 static bit get_descriptor(uint8_t type, uint8_t index, uint16_t length)
 {
-	const void *p;
 	uint8_t size;
 
 	debug("get_descriptor(0x%02x, 0x%02x, 0x%04x)\n", type, index, length);
 
 	switch (type) {
 	case USB_DT_DEVICE:
-putchar('D');
-		p = device_descriptor;
+//putchar('D');
+		ep0 = device_descriptor;
 		break;
 	case USB_DT_CONFIG:
-putchar('C');
-		if (index)
+		if (index) {
+putchar('?');
 			return 0;
-		p = config_descriptor;
+		}
+//putchar('C');
+//printk("%d", length);
+trigger();
+		ep0 = config_descriptor;
 		break;
 	default:
 		return 0;
 	}
-	size = *(const uint8_t *) p;
-	if (length < size)
+//	size = *ep0;
+//	if (length < size)
 		size = length;
-	usb_reply(p, size);
+	ep0_end = ep0+size;
 	return 1;
 }
 
@@ -81,26 +104,9 @@ putchar('C');
 
 static void setup(void)
 {
-	static uint8_t addr = 0xff;
 	uint8_t bmRequestType, bRequest;
 	uint16_t wValue, wIndex, wLength;
 	bit ok = 0;
-	uint8_t csr, ack = DATAEND | SOPRDY;
-
-	if (addr != 0xff) {
-//		printk("[%d]\n", addr);
-		usb_write(FADDR, addr);
-		putchar('A');
-		addr = 0xff;
-	}
-
-	csr = usb_read(E0CSR);
-	if (csr & SUEND) {
-		putchar('S');
-		usb_write(E0CSR, SSUEND);
-	}
-	if (!(csr & OPRDY))
-		return;
 
 //	printk("fifo=%d\n", usb_read(E0CNT));
 	BUG_ON(usb_read(E0CNT) < 8);
@@ -123,7 +129,8 @@ static void setup(void)
 		debug("GET_STATUS\n");
 		if (wLength != 2)
 			goto stall;
-		usb_reply("\000", 2);
+		ep0 = "\000";
+		ep0_end = ep0+2;
 		break;
 	case TO_DEVICE(CLEAR_FEATURE):
 		printk("CLEAR_FEATURE\n");
@@ -136,15 +143,11 @@ static void setup(void)
 		debug("SET_ADDRESS (0x%x)\n", wValue);
 //		putchar('A');
 //		printk("A=%x\n", wValue);
-	P2_0 = 0;
-	P2_0 = 1;
 		addr = wValue;
 		ok = 1;
-		ack |= INPRDY;
 		break;
 	case FROM_DEVICE(GET_DESCRIPTOR):
 		ok = get_descriptor(wValue, wValue >> 8, wLength);
-		ack |= INPRDY;
 		break;
 	case TO_DEVICE(SET_DESCRIPTOR):
 		printk("SET_DESCRIPTOR\n");
@@ -153,7 +156,8 @@ static void setup(void)
 		printk("GET_CONFIGURATION\n");
 		break;
 	case TO_DEVICE(SET_CONFIGURATION):
-		printk("SET_CONFIGURATION\n");
+		debug("SET_CONFIGURATION\n");
+		ok = wValue == config_descriptor[5];
 		break;
 
 	/*
@@ -173,7 +177,13 @@ static void setup(void)
 		printk("GET_INTERFACE\n");
 		break;
 	case TO_DEVICE(SET_INTERFACE):
-		printk("SET_INTERFACE\n");
+		debug("SET_INTERFACE\n");
+		{
+			uint8_t *interface_descriptor = config_descriptor+9;
+
+			ok = wIndex == interface_descriptor[2] &&
+			    wValue == interface_descriptor[3];
+		}
 		break;
 
 	/*
@@ -199,13 +209,62 @@ static void setup(void)
 	}
 
 	if (ok) {
-		usb_write(E0CSR, ack);
+		if (bmRequestType & 0x80)
+			usb_write(E0CSR, SOPRDY);
+		else
+			usb_write(E0CSR, SOPRDY | DATAEND);
 		debug("OK");
 		return;
 	}
 stall:
 	printk("STALL\n");
 	usb_write(E0CSR, SDSTL);
+}
+
+
+static void handle_ep0(void)
+{
+	uint8_t csr;
+
+	if (addr != NO_ADDRESS) {
+//		printk("[%d]\n", addr);
+		usb_write(FADDR, addr);
+		putchar('A');
+		addr = NO_ADDRESS;
+	}
+
+	csr = usb_read(E0CSR);
+
+	/* clear sent stall indication */
+	if (csr & STSTL)
+		usb_write(E0CSR, 0);
+
+	/* if transaction was interrupted, clean up */
+	if (csr & SUEND) {
+		putchar('S');
+		usb_write(E0CSR, DATAEND | SSUEND);
+		ep0 = NULL;
+	}
+
+	if (csr & OPRDY)
+		setup();
+
+	if (!ep0)
+		return;
+
+	csr = usb_read(E0CSR);
+	if (csr & INPRDY)
+		return;
+	if (csr & (SUEND | OPRDY))
+		return;
+
+	while (ep0 != ep0_end)
+		usb_write(FIFO0, *ep0++);
+
+	ep0 = NULL;
+	csr |= INPRDY | DATAEND;
+
+	usb_write(E0CSR, csr);
 }
 
 
@@ -218,14 +277,15 @@ static void poll(void)
 		if (flags) {
 			debug("CMINT 0x%02x\n", flags);
 			if (flags & RSTINT)
-				usb_write(POWER, 1);
+				usb_write(POWER, 0);
+				    /* @@@ 1 for suspend signaling */
 		}
 
 		flags = usb_read(IN1INT);
 		if (flags) {
 			debug("IN1INT 0x%02x\n", flags);
 			if (flags & EP0)
-				setup();
+				handle_ep0();
 			if (flags & IN1)
 				/* handle IN */;
 		}

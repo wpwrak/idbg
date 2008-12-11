@@ -72,8 +72,20 @@
 #define HI(x) (((uint8_t *) &(x))[1])
 
 
+#ifdef LOW_SPEED
+#define	EP0_SIZE	8
+#else
+#define	EP0_SIZE	64
+#endif
+
 extern const uint8_t device_descriptor[];
 extern const uint8_t config_descriptor[];
+
+
+#define usb_send(ep, buf, size, callback, user) \
+	usb_io(ep, EP_TX, buf, size, callback, user)
+#define usb_recv(ep, buf, size, callback, user) \
+	usb_io(ep, EP_RX, buf, size, callback, user)
 
 
 void usb_init(void);

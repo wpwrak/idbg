@@ -92,7 +92,7 @@ void main(void)
 	 */
 
 	uart_init();
-	printk("%s #%u\n", BUILD_DATE, BUILD_NUMBER);
+	printk("%s #%u\n", build_date, build_number);
 	usb_init();
 	while (1);
 }

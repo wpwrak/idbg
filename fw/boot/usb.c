@@ -30,8 +30,34 @@
 #define NO_ADDRESS	0xff	/* null value for function address */
 
 
-const uint8_t *ep0 = NULL, *ep0_end;
+enum ep_state {
+	EP_IDLE,
+	EP_RX,
+	EP_TX,
+};
+
+struct ep_descr {
+	enum ep_state state;
+	uint8_t *buf;
+	uint8_t *end;
+	void (*callback)(void *user) __reentrant;
+	void *user;
+} ep0;
+
+
 uint8_t addr = NO_ADDRESS;
+
+
+void usb_io(struct ep_descr *ep, enum ep_state state, uint8_t *buf,
+    uint8_t size, void (*callback)(void *user), void *user)
+{
+	BUG_ON(ep->state);
+	ep->state = state;
+	ep->buf = buf;
+	ep->end = buf+size;
+	ep->callback = callback;
+	ep->user = user;
+}
 
 
 static void trigger(void)
@@ -74,32 +100,28 @@ static uint16_t usb_read_word(uint8_t reg)
 
 static bit get_descriptor(uint8_t type, uint8_t index, uint16_t length)
 {
+	const uint8_t *reply;
 	uint8_t size;
 
 	debug("get_descriptor(0x%02x, 0x%02x, 0x%04x)\n", type, index, length);
 
 	switch (type) {
 	case USB_DT_DEVICE:
-//putchar('D');
-		ep0 = device_descriptor;
+		reply = device_descriptor;
+		size = reply[0];
 		break;
 	case USB_DT_CONFIG:
-		if (index) {
-putchar('?');
+		if (index)
 			return 0;
-		}
-//putchar('C');
-//printk("%d", length);
-trigger();
-		ep0 = config_descriptor;
+		reply = config_descriptor;
+		size = reply[2];
 		break;
 	default:
 		return 0;
 	}
-//	size = *ep0;
-//	if (length < size)
+	if (length < size)
 		size = length;
-	ep0_end = ep0+size;
+	usb_send(&ep0, reply, size, NULL, NULL);
 	return 1;
 }
 
@@ -115,7 +137,6 @@ static void setup(void)
 	uint16_t wValue, wIndex, wLength;
 	bit ok = 0;
 
-//	printk("fifo=%d\n", usb_read(E0CNT));
 	BUG_ON(usb_read(E0CNT) < 8);
 
 	bmRequestType = usb_read(FIFO0);
@@ -136,8 +157,8 @@ static void setup(void)
 		debug("GET_STATUS\n");
 		if (wLength != 2)
 			goto stall;
-		ep0 = "\000";
-		ep0_end = ep0+2;
+		usb_send(&ep0, "\000", 2, NULL, NULL);
+		ok = 1;
 		break;
 	case TO_DEVICE(CLEAR_FEATURE):
 		printk("CLEAR_FEATURE\n");
@@ -161,8 +182,7 @@ static void setup(void)
 		break;
 	case FROM_DEVICE(GET_CONFIGURATION):
 		debug("GET_CONFIGURATION\n");
-		ep0 = "";
-		ep0_end = ep0+1;
+		usb_send(&ep0, "", 1, NULL, NULL);
 		ok = 1;
 		break;
 	case TO_DEVICE(SET_CONFIGURATION):
@@ -232,14 +252,32 @@ stall:
 }
 
 
+static void ep0_data(void)
+{
+	uint8_t fifo;
+
+	fifo = usb_read(E0CNT);
+	if (fifo > ep0.end-ep0.buf) {
+		usb_write(E0CSR, SDSTL);
+		return;
+	}
+	while (fifo--)
+		*ep0.buf++ = usb_read(FIFO0);
+	if (ep0.buf == ep0.end) {
+		ep0.state = EP_IDLE;
+		if (ep0.callback)
+			ep0.callback(ep0.user);
+	}
+}
+
+
 static void handle_ep0(void)
 {
-	uint8_t csr;
+	uint8_t csr, size, left;
 
 	if (addr != NO_ADDRESS) {
-//		printk("[%d]\n", addr);
 		usb_write(FADDR, addr);
-		putchar('A');
+//		putchar('A');
 		addr = NO_ADDRESS;
 	}
 
@@ -253,13 +291,17 @@ static void handle_ep0(void)
 	if (csr & SUEND) {
 		putchar('S');
 		usb_write(E0CSR, DATAEND | SSUEND);
-		ep0 = NULL;
+		ep0.state = EP_IDLE;
 	}
 
-	if (csr & OPRDY)
-		setup();
+	if (csr & OPRDY) {
+		if (ep0.state == EP_RX)
+			ep0_data();
+		else
+			setup();
+	}
 
-	if (!ep0)
+	if (ep0.state != EP_TX)
 		return;
 
 	csr = usb_read(E0CSR);
@@ -268,13 +310,22 @@ static void handle_ep0(void)
 	if (csr & (SUEND | OPRDY))
 		return;
 
-	while (ep0 != ep0_end)
-		usb_write(FIFO0, *ep0++);
+	size = ep0.end-ep0.buf;
+	if (size > EP0_SIZE)
+		size = EP0_SIZE;
+	for (left = size; left; left--)
+		usb_write(FIFO0, *ep0.buf++);
 
-	ep0 = NULL;
-	csr |= INPRDY | DATAEND;
+	csr |= INPRDY;
+	if (size < EP0_SIZE) {
+		ep0.state = EP_IDLE;
+		csr |= DATAEND;
+	}
 
 	usb_write(E0CSR, csr);
+
+	if (ep0.state == EP_IDLE && ep0.callback)
+		ep0.callback(ep0.user);
 }
 
 
@@ -286,9 +337,11 @@ static void poll(void)
 		flags = usb_read(CMINT);
 		if (flags) {
 			debug("CMINT 0x%02x\n", flags);
-			if (flags & RSTINT)
+			if (flags & RSTINT) {
+				ep0.state = EP_IDLE;
 				usb_write(POWER, 0);
 				    /* @@@ 1 for suspend signaling */
+			}
 		}
 
 		flags = usb_read(IN1INT);

@@ -12,11 +12,7 @@ const uint8_t device_descriptor[18] = {
 	USB_CLASS_VENDOR_SPEC,	/* bDeviceClass */
 	0x00,			/* bDeviceSubClass */
 	0x00,			/* bDeviceProtocol */
-#ifdef LOW_SPEED
-	8,			/* bMaxPacketSize */
-#else
-	64,			/* bMaxPacketSize */
-#endif
+	EP0_SIZE,		/* bMaxPacketSize */
 	LE(0x1234),		/* idVendor */
 	LE(0x0001),		/* idProduct */
 	LE(0x0001),		/* bcdDevice */

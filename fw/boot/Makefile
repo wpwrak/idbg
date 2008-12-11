@@ -2,7 +2,7 @@ CC=sdcc
 CFLAGS=-I../common # -DLOW_SPEED
 
 MAIN=main
-OBJS=$(MAIN) uart usb descr
+OBJS=$(MAIN) uart usb descr version
 
 .SUFFIXES:	.rel .ihx .bin
 
@@ -18,10 +18,12 @@ version:
 		    echo 0 >.version; \
 		fi
 		@[ -s .version ] || echo 0 >.version
-		@echo "#define BUILD_DATE \"`date`\"" >version.h
-		@echo "#define BUILD_NUMBER `cat .version`" >>version.h
+		@echo '#include "version.h"' >version.c
+		@echo "const char *build_date = \"`date`\";" >>version.c
+		@echo "const uint16_t build_number = `cat .version`;" \
+		  >>version.c
 
-main.rel:	version
+version.rel:	version
 
 $(MAIN).ihx:	$(OBJS:%=%.rel)
 		$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS:%=%.rel)

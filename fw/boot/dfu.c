@@ -36,6 +36,7 @@ const uint8_t device_descriptor[] = {
 	EP0_SIZE,		/* bMaxPacketSize */
 	LE(USB_VENDOR),		/* idVendor */
 	LE(USB_PRODUCT),	/* idProduct */
+	LE(0x0001),		/* bcdDevice */
 	0,			/* iManufacturer */
 	0,			/* iProduct */
 	0,			/* iSerialNumber */
@@ -181,7 +182,7 @@ static bit my_setup(struct setup_request *setup) __reentrant
 			debug("bad block\n");
 			return 0;
 		}
-		if (!setup->wValue) {
+		if (!setup->wLength) {
 			debug("DONE\n");
 			dfu.state = dfuIDLE;
 			return 1;
@@ -194,7 +195,7 @@ static bit my_setup(struct setup_request *setup) __reentrant
 		printk("DFU_UPLOAD\n");
 		break;
 	case DFU_FROM_DEV(DFU_GETSTATUS):
-		debug("DFU_UPLOAD\n");
+		debug("DFU_GETSTATUS\n");
 		usb_send(&ep0, &dfu, sizeof(dfu), NULL, NULL);
 		return 1;
 	case DFU_TO_DEV(DFU_CLRSTATUS):
@@ -212,6 +213,9 @@ static bit my_setup(struct setup_request *setup) __reentrant
 		dfu.status = OK;
 		return 1;
 	default:
+printk("0x%x =? 0x%x %u\n",
+	setup->bmRequestType | setup->bRequest << 8,
+ DFU_FROM_DEV(DFU_GETSTATUS), DFU_GETSTATUS);
 		return 0;
 	}
 	return 0;

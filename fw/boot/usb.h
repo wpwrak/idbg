@@ -63,8 +63,8 @@
 #define	GET_CONFIGURATION	0x08
 #define	SET_CONFIGURATION	0x09
 #define	GET_INTERFACE		0x0a
-#define	SET_INTERFACE		0x11
-#define	SYNCH_FRAME		0x12
+#define	SET_INTERFACE		0x0b
+#define	SYNCH_FRAME		0x0c
 
 
 /*
@@ -89,6 +89,7 @@ enum ep_state {
 	EP_IDLE,
 	EP_RX,
 	EP_TX,
+	EP_STALL,
 };
 
 struct ep_descr {

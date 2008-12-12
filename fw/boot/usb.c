@@ -198,10 +198,10 @@ static void handle_setup(void)
 	case TO_INTERFACE(SET_FEATURE):
 		printk("SET_FEATURE\n");
 		break;
-	case FROM_DEVICE(GET_INTERFACE):
+	case FROM_INTERFACE(GET_INTERFACE):
 		printk("GET_INTERFACE\n");
 		break;
-	case TO_DEVICE(SET_INTERFACE):
+	case TO_INTERFACE(SET_INTERFACE):
 		debug("SET_INTERFACE\n");
 		{
 			uint8_t *interface_descriptor = config_descriptor+9;
@@ -249,6 +249,7 @@ static void handle_setup(void)
 stall:
 	printk("STALL\n");
 	usb_write(E0CSR, SDSTL);
+	ep0.state = EP_STALL;
 }
 
 
@@ -299,10 +300,17 @@ static void handle_ep0(void)
 	}
 
 	if (csr & OPRDY) {
-		if (ep0.state == EP_RX)
-			ep0_data();
-		else
+		switch (ep0.state) {
+		case EP_IDLE:
 			handle_setup();
+			break;
+		case EP_RX:
+			ep0_data();
+			break;
+		default:
+			printk("???\n");
+			break;
+		}
 	}
 
 	if (ep0.state != EP_TX)

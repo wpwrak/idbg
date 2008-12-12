@@ -12,6 +12,9 @@
 #include "usb.h"
 
 
+void dfu_init(void);
+
+
 static void delay(void)
 {
 	int x;
@@ -19,6 +22,7 @@ static void delay(void)
 	for (x = 0; x < 500; x)
 		x++;
 }
+
 
 void main(void)
 {
@@ -93,6 +97,7 @@ void main(void)
 
 	uart_init();
 	printk("%s #%u\n", build_date, build_number);
+	dfu_init();
 	usb_init();
 	while (1);
 }

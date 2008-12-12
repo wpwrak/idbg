@@ -78,14 +78,43 @@
 #define	EP0_SIZE	64
 #endif
 
+
+enum ep_state {
+	EP_IDLE,
+	EP_RX,
+	EP_TX,
+};
+
+struct ep_descr {
+	enum ep_state state;
+	uint8_t *buf;
+	uint8_t *end;
+	void (*callback)(void *user) __reentrant;
+	void *user;
+} ep0;
+
+struct setup_request {
+	uint8_t bmRequestType;
+	uint8_t bRequest;
+	uint16_t wValue;
+	uint16_t wIndex;
+	uint16_t wLength;
+};
+
+
 extern const uint8_t device_descriptor[];
 extern const uint8_t config_descriptor[];
+extern struct ep_descr ep0;
+extern bit (*user_setup)(struct setup_request *setup);
 
 
 #define usb_send(ep, buf, size, callback, user) \
 	usb_io(ep, EP_TX, buf, size, callback, user)
 #define usb_recv(ep, buf, size, callback, user) \
 	usb_io(ep, EP_RX, buf, size, callback, user)
+
+void usb_io(struct ep_descr *ep, enum ep_state state, uint8_t *buf,
+    uint8_t size, void (*callback)(void *user), void *user);
 
 
 void usb_init(void);

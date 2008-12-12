@@ -1,8 +1,8 @@
 CC=sdcc
-CFLAGS=-I../common # -DLOW_SPEED
+CFLAGS=-I../common -DLOW_SPEED
 
 MAIN=main
-OBJS=$(MAIN) uart usb descr version
+OBJS=$(MAIN) uart usb descr dfu version
 
 .SUFFIXES:	.rel .ihx .bin
 

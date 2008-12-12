@@ -30,22 +30,11 @@
 #define NO_ADDRESS	0xff	/* null value for function address */
 
 
-enum ep_state {
-	EP_IDLE,
-	EP_RX,
-	EP_TX,
-};
+struct ep_descr ep0;
 
-struct ep_descr {
-	enum ep_state state;
-	uint8_t *buf;
-	uint8_t *end;
-	void (*callback)(void *user) __reentrant;
-	void *user;
-} ep0;
+bit (*user_setup)(struct setup_request *setup);
 
-
-uint8_t addr = NO_ADDRESS;
+static uint8_t addr = NO_ADDRESS;
 
 
 void usb_io(struct ep_descr *ep, enum ep_state state, uint8_t *buf,
@@ -131,21 +120,20 @@ static bit get_descriptor(uint8_t type, uint8_t index, uint16_t length)
  */
 
 
-static void setup(void)
+static void handle_setup(void)
 {
-	uint8_t bmRequestType, bRequest;
-	uint16_t wValue, wIndex, wLength;
+	struct setup_request setup;
 	bit ok = 0;
 
 	BUG_ON(usb_read(E0CNT) < 8);
 
-	bmRequestType = usb_read(FIFO0);
-	bRequest = usb_read(FIFO0);
-	wValue = usb_read_word(FIFO0);
-	wIndex = usb_read_word(FIFO0);
-	wLength = usb_read_word(FIFO0);
+	setup.bmRequestType = usb_read(FIFO0);
+	setup.bRequest = usb_read(FIFO0);
+	setup.wValue = usb_read_word(FIFO0);
+	setup.wIndex = usb_read_word(FIFO0);
+	setup.wLength = usb_read_word(FIFO0);
 
-	switch (bmRequestType | bRequest << 8) {
+	switch (setup.bmRequestType | setup.bRequest << 8) {
 
 	/*
 	 * Device request
@@ -155,7 +143,7 @@ static void setup(void)
 
 	case FROM_DEVICE(GET_STATUS):
 		debug("GET_STATUS\n");
-		if (wLength != 2)
+		if (setup.wLength != 2)
 			goto stall;
 		usb_send(&ep0, "\000", 2, NULL, NULL);
 		ok = 1;
@@ -168,14 +156,15 @@ static void setup(void)
 		debug("SET_FEATURE\n");
 		break;
 	case TO_DEVICE(SET_ADDRESS):
-		debug("SET_ADDRESS (0x%x)\n", wValue);
+		debug("SET_ADDRESS (0x%x)\n", setup.wValue);
 //		putchar('A');
-//		printk("A=%x\n", wValue);
-		addr = wValue;
+//		printk("A=%x\n", setup.wValue);
+		addr = setup.wValue;
 		ok = 1;
 		break;
 	case FROM_DEVICE(GET_DESCRIPTOR):
-		ok = get_descriptor(wValue, wValue >> 8, wLength);
+		ok = get_descriptor(setup.wValue, setup.wValue >> 8,
+		    setup.wLength);
 		break;
 	case TO_DEVICE(SET_DESCRIPTOR):
 		printk("SET_DESCRIPTOR\n");
@@ -187,7 +176,7 @@ static void setup(void)
 		break;
 	case TO_DEVICE(SET_CONFIGURATION):
 		debug("SET_CONFIGURATION\n");
-		ok = wValue == config_descriptor[5];
+		ok = setup.wValue == config_descriptor[5];
 		break;
 
 	/*
@@ -211,8 +200,8 @@ static void setup(void)
 		{
 			uint8_t *interface_descriptor = config_descriptor+9;
 
-			ok = wIndex == interface_descriptor[2] &&
-			    wValue == interface_descriptor[3];
+			ok = setup.wIndex == interface_descriptor[2] &&
+			    setup.wValue == interface_descriptor[3];
 		}
 		break;
 
@@ -234,12 +223,17 @@ static void setup(void)
 		break;
 
 	default:
+		if (user_setup) {
+			ok = user_setup(&setup);
+			if (ok)
+				break;
+		}
 		printk("Unrecognized SETUP(%02x %02x ...\n",
-		    bmRequestType, bRequest);
+		    setup.bmRequestType, setup.bRequest);
 	}
 
 	if (ok) {
-		if (bmRequestType & 0x80)
+		if ((setup.bmRequestType & 0x80) || ep0.state == EP_RX)
 			usb_write(E0CSR, SOPRDY);
 		else
 			usb_write(E0CSR, SOPRDY | DATAEND);
@@ -268,6 +262,10 @@ static void ep0_data(void)
 		if (ep0.callback)
 			ep0.callback(ep0.user);
 	}
+	if (ep0.state == EP_IDLE)
+		usb_write(E0CSR, SOPRDY | DATAEND);
+	else
+		usb_write(E0CSR, SOPRDY);
 }
 
 
@@ -298,7 +296,7 @@ static void handle_ep0(void)
 		if (ep0.state == EP_RX)
 			ep0_data();
 		else
-			setup();
+			handle_setup();
 	}
 
 	if (ep0.state != EP_TX)

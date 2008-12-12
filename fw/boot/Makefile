@@ -1,8 +1,9 @@
 CC=sdcc
 CFLAGS=-I../common -DLOW_SPEED
+LDFLAGS=--code-size 0x4000 --xram-size 1024
 
 MAIN=main
-OBJS=$(MAIN) uart usb descr dfu version
+OBJS=$(MAIN) uart usb dfu version
 
 .SUFFIXES:	.rel .ihx .bin
 

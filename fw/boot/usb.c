@@ -32,7 +32,10 @@
 
 struct ep_descr ep0;
 
-bit (*user_setup)(struct setup_request *setup);
+bit (*user_setup)(struct setup_request *setup) __reentrant;
+bit (*user_get_descriptor)(uint8_t type, uint8_t index,
+    const uint8_t * const *reply, uint8_t *size) __reentrant;
+
 
 static uint8_t addr = NO_ADDRESS;
 
@@ -106,7 +109,10 @@ static bit get_descriptor(uint8_t type, uint8_t index, uint16_t length)
 		size = reply[2];
 		break;
 	default:
-		return 0;
+		if (!user_get_descriptor)
+			return 0;
+		if (!user_get_descriptor(type, index, &reply, &size))
+			return 0;
 	}
 	if (length < size)
 		size = length;

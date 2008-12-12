@@ -5,6 +5,11 @@
 #include <stdint.h>
 
 
+/* all fake ... */
+#define	USB_VENDOR	0x1234
+#define	USB_PRODUCT	0x0001
+
+
 /*
  * Descriptor types
  *
@@ -23,6 +28,7 @@
  * Reuse libusb naming scheme (/usr/include/usb.h)
  */
 
+#define USB_CLASS_PER_INTERFACE	0xfe
 #define USB_CLASS_VENDOR_SPEC	0xff
 
 /*
@@ -66,7 +72,7 @@
  * uint8_t. Hence the cast.
  */
 
-#define LE(x) (x), ((uint16_t) (x) >> 8)
+#define LE(x) ((uint16_t) (x) & 0xff), ((uint16_t) (x) >> 8)
 
 #define LO(x) (((uint8_t *) &(x))[0])
 #define HI(x) (((uint8_t *) &(x))[1])
@@ -105,7 +111,9 @@ struct setup_request {
 extern const uint8_t device_descriptor[];
 extern const uint8_t config_descriptor[];
 extern struct ep_descr ep0;
-extern bit (*user_setup)(struct setup_request *setup);
+extern bit (*user_setup)(struct setup_request *setup) __reentrant;
+extern bit (*user_get_descriptor)(uint8_t type, uint8_t index,
+    const uint8_t * const *reply, uint8_t *size) __reentrant;
 
 
 #define usb_send(ep, buf, size, callback, user) \

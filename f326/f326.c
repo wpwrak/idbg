@@ -59,6 +59,37 @@ static void flash_device(void *data, size_t size)
 }
 
 
+static void dump_flash(size_t size)
+{
+    int i, j;
+    size_t len;
+    uint8_t buf[256], last[256];
+    int skipping = 0;
+
+    flash_init();
+    for (i = 0; i < size; i += 16) {
+	len = size-i <= 16 ? size-i : 16;
+	flash_block_read(i, buf, len);
+	if (i && !memcmp(last, buf, len)) {
+	    printf("%04x: *%c", i, skipping ? '\r' : '\n');
+	    fflush(stdout);
+	    skipping = 1;
+	    continue;
+	}
+	skipping = 0;
+	memcpy(last, buf, len);
+	printf("%04x:", i);
+	for (j = 0; j != len; j++)
+	    printf(" %02x", buf[j]);
+	printf("  ");
+	for (j = 0; j != len; j++)
+	    printf("%c", buf[j] >= ' ' && buf[j] <= '~' ? buf[j] : '.');
+	putchar('\n');
+	fflush(stdout);
+    }
+}
+
+
 static void identify(void)
 {
     int i;
@@ -98,8 +129,12 @@ int main(int argc, char **argv)
     identify();
 
     if (argc == 2) {
-	do_flash(argv[1]);
-	identify();
+	if (!strcmp(argv[1], "-d"))	
+		dump_flash(0x4000);
+	else {
+		do_flash(argv[1]);
+		identify();
+	}
     }
     c2_reset();
 

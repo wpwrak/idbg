@@ -22,8 +22,8 @@
 #endif
 
 
-#undef debug
-#define debug printk
+//#undef debug
+//#define debug printk
 
 
 const uint8_t device_descriptor[] = {
@@ -128,10 +128,10 @@ static void flash_write_page(uint16_t addr, uint8_t value)
 
 static void block_write(void *user)
 {
+	uint16_t *size = user;
 	uint8_t *p;
 
-	user; /* suppress warning */
-	for (p = buf; p != buf+sizeof(buf); p++) {
+	for (p = buf; p != buf+*size; p++) {
 		if (!(payload & 511))
 			flash_erase_page(payload);
 		flash_write_page(payload, *p);
@@ -142,6 +142,8 @@ static void block_write(void *user)
 
 static bit block_receive(uint16_t length)
 {
+	static uint16_t size;
+
 	if (payload < PAYLOAD_START || payload+length > PAYLOAD_END) {
 		dfu.state = dfuERROR;	
 		dfu.status = errADDRESS;
@@ -152,7 +154,8 @@ static bit block_receive(uint16_t length)
 		dfu.status = errUNKNOWN;
 		return 0;
 	}
-	usb_recv(&ep0, &buf, sizeof(buf), block_write, NULL);
+	size = length;
+	usb_recv(&ep0, &buf, size, block_write, &size);
 	return 1;
 }
 

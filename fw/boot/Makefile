@@ -1,5 +1,5 @@
 CC=sdcc
-CFLAGS=-I../common -DLOW_SPEED
+CFLAGS=-I../common # -DLOW_SPEED
 LDFLAGS=--code-size 0x4000 --xram-size 1024
 
 MAIN=main

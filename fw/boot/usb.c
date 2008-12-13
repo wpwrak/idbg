@@ -86,7 +86,7 @@ static uint16_t usb_read_word(uint8_t reg)
 	uint8_t low;
 
 	low = usb_read(reg);
-	return low | usb_read(reg);
+	return low | usb_read(reg) << 8;
 }
 
 
@@ -155,7 +155,7 @@ static void handle_setup(void)
 		ok = 1;
 		break;
 	case TO_DEVICE(CLEAR_FEATURE):
-		printk("CLEAR_FEATURE\n");
+		debug("CLEAR_FEATURE\n");
 		ok = 1;
 		break;
 	case TO_DEVICE(SET_FEATURE):
@@ -163,17 +163,15 @@ static void handle_setup(void)
 		break;
 	case TO_DEVICE(SET_ADDRESS):
 		debug("SET_ADDRESS (0x%x)\n", setup.wValue);
-//		putchar('A');
-//		printk("A=%x\n", setup.wValue);
 		addr = setup.wValue;
 		ok = 1;
 		break;
 	case FROM_DEVICE(GET_DESCRIPTOR):
-		ok = get_descriptor(setup.wValue, setup.wValue >> 8,
+		ok = get_descriptor(setup.wValue >> 8, setup.wValue,
 		    setup.wLength);
 		break;
 	case TO_DEVICE(SET_DESCRIPTOR):
-		printk("SET_DESCRIPTOR\n");
+		error("SET_DESCRIPTOR\n");
 		break;
 	case FROM_DEVICE(GET_CONFIGURATION):
 		debug("GET_CONFIGURATION\n");

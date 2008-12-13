@@ -1,4 +1,8 @@
 /*
+ * http://www.usb.org/developers/devclass_docs/DFU_1.1.pdf
+ */
+
+/*
  * A few, erm, shortcuts:
  *
  * - we don't bother with the app* states since DFU is all this firmware does
@@ -20,10 +24,6 @@
 #ifndef NULL
 #define NULL 0
 #endif
-
-
-//#undef debug
-//#define debug printk
 
 
 const uint8_t device_descriptor[] = {
@@ -97,10 +97,10 @@ static uint16_t payload;
 
 
 #define	PAYLOAD_START	0x2000
-#define	PAYLOAD_END	0x4000
+#define	PAYLOAD_END	0x3e00	/* last 512 bytes are reserved */
 
 
-static uint8_t buf[EP0_SIZE];
+static __xdata uint8_t buf[EP0_SIZE];
 
 
 static void flash_erase_page(uint16_t addr)
@@ -160,30 +160,60 @@ static bit block_receive(uint16_t length)
 }
 
 
+static bit block_transmit(uint16_t length)
+{
+	uint16_t left;
+
+	if (payload < PAYLOAD_START || payload > PAYLOAD_END) {
+		dfu.state = dfuERROR;	
+		dfu.status = errADDRESS;
+		return 1;
+	}
+	if (length > EP0_SIZE) {
+		dfu.state = dfuERROR;	
+		dfu.status = errUNKNOWN;
+		return 1;
+	}
+	left = PAYLOAD_END-payload;
+	if (left < length) {
+		length = left;
+		dfu.state = dfuIDLE;
+	}
+	usb_send(&ep0, (__code uint8_t *) payload, length, NULL, NULL);
+	payload += length;
+	return 1;
+}
+
+
 static bit my_setup(struct setup_request *setup) __reentrant
 {
 	bit ok;
 
 	switch (setup->bmRequestType | setup->bRequest << 8) {
 	case DFU_TO_DEV(DFU_DETACH):
-		printk("DFU_DETACH\n");
+		error("DFU_DETACH\n");
 		/* protocol 1 only */
-		break;
+		return 0;
 	case DFU_TO_DEV(DFU_DNLOAD):
 		debug("DFU_DNLOAD\n");
 		if (dfu.state == dfuIDLE) {
-			next_block = 0;
+			next_block = setup->wValue;
 			payload = PAYLOAD_START;
 		}
-		else if (dfu.state != dfuDNLOAD_IDLE)
+		else if (dfu.state != dfuDNLOAD_IDLE) {
+			error("bad state\n");
 			return 0;
-		if (next_block && setup->wValue == next_block-1) {
+		}
+		if (dfu.state != dfuIDLE && setup->wValue == next_block-1) {
 			debug("retransmisson\n");
 			return 1;
 		}
 		if (setup->wValue != next_block) {
-			debug("bad block\n");
-			return 0;
+			debug("bad block (%d vs. %d)\n",
+			    setup->wValue, next_block);
+			dfu.state = dfuERROR;
+			dfu.status = errUNKNOWN;
+			return 1;
 		}
 		if (!setup->wLength) {
 			debug("DONE\n");
@@ -195,8 +225,31 @@ static bit my_setup(struct setup_request *setup) __reentrant
 		dfu.state = dfuDNLOAD_IDLE;
 		return ok;
 	case DFU_FROM_DEV(DFU_UPLOAD):
-		printk("DFU_UPLOAD\n");
-		break;
+		debug("DFU_UPLOAD\n");
+		if (dfu.state == dfuIDLE) {
+			next_block = setup->wValue;
+			payload = PAYLOAD_START;
+		}
+		else if (dfu.state != dfuUPLOAD_IDLE)
+			return 0;
+		if (dfu.state != dfuIDLE && setup->wValue == next_block-1) {
+			debug("retransmisson\n");
+			/* @@@ try harder */
+			dfu.state = dfuERROR;
+			dfu.status = errUNKNOWN;
+			return 1;
+		}
+		if (setup->wValue != next_block) {
+			debug("bad block (%d vs. %d)\n",
+			    setup->wValue, next_block);
+			dfu.state = dfuERROR;
+			dfu.status = errUNKNOWN;
+			return 1;
+		}
+		ok = block_transmit(setup->wLength);
+		next_block++;
+		dfu.state = dfuUPLOAD_IDLE;
+		return ok;
 	case DFU_FROM_DEV(DFU_GETSTATUS):
 		debug("DFU_GETSTATUS\n");
 		usb_send(&ep0, &dfu, sizeof(dfu), NULL, NULL);
@@ -216,12 +269,10 @@ static bit my_setup(struct setup_request *setup) __reentrant
 		dfu.status = OK;
 		return 1;
 	default:
-printk("0x%x =? 0x%x %u\n",
-	setup->bmRequestType | setup->bRequest << 8,
- DFU_FROM_DEV(DFU_GETSTATUS), DFU_GETSTATUS);
+		printk("DFU rt %x, rq%x ?\n",
+		    setup->bmRequestType, setup->bRequest);
 		return 0;
 	}
-	return 0;
 }
 
 

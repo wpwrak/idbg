@@ -1,43 +1,22 @@
-Cmp-Mod V01 Created by CVpcb (20081019-unstable) date = 5/12/2008-01:31:24
+Cmp-Mod V01 Created by CVpcb (20081019-unstable) date = 17/12/2008-13:21:18
 
 BeginCmp
 TimeStamp = /49330C80;
 Reference = C1;
-ValeurCmp = C;
+ValeurCmp = 1uF;
 IdModule  = 0402;
 EndCmp
 
 BeginCmp
 TimeStamp = /49330ADE;
 Reference = C2;
-ValeurCmp = C;
-IdModule  = 0402;
-EndCmp
-
-BeginCmp
-TimeStamp = /49330ACB;
-Reference = D1;
-ValeurCmp = ZENER;
-IdModule  = 0402;
-EndCmp
-
-BeginCmp
-TimeStamp = /49330ACA;
-Reference = D2;
-ValeurCmp = ZENER;
-IdModule  = 0402;
-EndCmp
-
-BeginCmp
-TimeStamp = /49330AC6;
-Reference = D3;
-ValeurCmp = ZENER;
+ValeurCmp = 100nF;
 IdModule  = 0402;
 EndCmp
 
 BeginCmp
 TimeStamp = /49330B57;
-Reference = D4;
+Reference = D1;
 ValeurCmp = DDSCHCC;
 IdModule  = VMD3;
 EndCmp
@@ -46,7 +25,7 @@ BeginCmp
 TimeStamp = /49330AF6;
 Reference = P1;
 ValeurCmp = CONN_6;
-IdModule  = UX60RA_MB_5ST;
+IdModule  = ZX62R_B_5P;
 EndCmp
 
 BeginCmp
@@ -199,15 +178,22 @@ EndCmp
 BeginCmp
 TimeStamp = /493883A1;
 Reference = R2;
-ValeurCmp = 1k;
+ValeurCmp = 330;
 IdModule  = 0603;
 EndCmp
 
 BeginCmp
 TimeStamp = /493883AC;
 Reference = R3;
-ValeurCmp = 1k;
+ValeurCmp = 330;
 IdModule  = 0603;
+EndCmp
+
+BeginCmp
+TimeStamp = /4948FC85;
+Reference = R4;
+ValeurCmp = 0;
+IdModule  = 0402;
 EndCmp
 
 BeginCmp
@@ -215,6 +201,13 @@ TimeStamp = /493301F0;
 Reference = U1;
 ValeurCmp = C8051F326;
 IdModule  = QFN28_5_315;
+EndCmp
+
+BeginCmp
+TimeStamp = /4948E4A1;
+Reference = U2;
+ValeurCmp = AOZ8205;
+IdModule  = SC-89-6;
 EndCmp
 
 EndListe

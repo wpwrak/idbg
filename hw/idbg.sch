@@ -72,30 +72,20 @@ Wire Wire Line
 	4300 3700 4900 3700
 Connection ~ 5500 3150
 Wire Wire Line
-	6050 3150 5500 3150
-Wire Wire Line
-	5500 3150 5050 3150
-Wire Wire Line
-	5050 3150 4850 3150
+	6050 3150 4850 3150
 Wire Wire Line
 	5500 950  5500 3150
 Wire Wire Line
-	6050 3900 5600 3900
-Wire Wire Line
-	5600 3900 5400 3900
+	6050 3900 5400 3900
 Connection ~ 5850 3750
 Wire Wire Line
-	5850 4100 5850 3750
-Wire Wire Line
-	5850 3750 5850 3600
+	5850 4100 5850 3600
 Wire Wire Line
 	5850 3600 6050 3600
 Wire Wire Line
 	6050 3750 5850 3750
 Wire Wire Line
-	1350 3450 2850 3450
-Wire Wire Line
-	2850 3450 6050 3450
+	1350 3450 6050 3450
 Wire Wire Line
 	3450 4350 3450 4150
 Wire Wire Line
@@ -105,14 +95,10 @@ Wire Wire Line
 Wire Wire Line
 	1350 3250 1850 3250
 Wire Wire Line
-	1350 3050 1850 3050
-Wire Wire Line
-	1850 3050 2400 3050
+	1350 3050 2400 3050
 Connection ~ 1850 3050
 Wire Wire Line
-	1350 3350 3050 3350
-Wire Wire Line
-	3050 3350 5850 3350
+	1350 3350 5850 3350
 Wire Wire Line
 	5850 3350 5850 3300
 Wire Wire Line
@@ -123,9 +109,7 @@ Connection ~ 3450 3550
 Wire Wire Line
 	8350 5050 8350 4850
 Wire Wire Line
-	3800 5050 3800 4100
-Wire Wire Line
-	3800 4100 3800 3550
+	3800 5050 3800 3550
 Wire Wire Line
 	7000 4850 7000 5050
 Connection ~ 3800 4100
@@ -163,15 +147,11 @@ Wire Wire Line
 	5050 3150 5050 2950
 Connection ~ 5050 3150
 Wire Wire Line
-	3800 3550 3450 3550
-Wire Wire Line
-	3450 3550 2650 3550
-Wire Wire Line
-	2650 3550 1350 3550
+	3800 3550 1350 3550
 Wire Wire Line
 	7300 2050 7300 950 
 Wire Wire Line
-	4250 950  4250 1900
+	4250 1200 4250 2150
 Wire Wire Line
 	7300 4850 7300 5750
 Wire Wire Line
@@ -185,9 +165,7 @@ Wire Wire Line
 	2650 3750 2650 3550
 Connection ~ 2650 3550
 Wire Wire Line
-	7000 5050 5100 5050
-Wire Wire Line
-	5100 5050 4900 5050
+	7000 5050 4900 5050
 Wire Wire Line
 	3350 5350 4400 5350
 $Comp
@@ -247,7 +225,7 @@ F 1 "10" V 4650 5350 50  0000 C C
 	0    -1   1    0   
 $EndComp
 Text Label 7300 1700 1    60   ~
-FUTURE2
+GSM_EN
 $Comp
 L CONN_1 P21
 U 1 1 49385578
@@ -258,7 +236,7 @@ F 1 "CONN_1" H 7300 855 30  0001 C C
 	0    -1   -1   0   
 $EndComp
 Text Label 7000 1700 1    60   ~
-FUTURE1
+FUTURE2
 $Comp
 L CONN_1 P20
 U 1 1 493854BD
@@ -268,26 +246,26 @@ F 1 "CONN_1" H 7000 855 30  0001 C C
 	1    7000 800 
 	0    -1   -1   0   
 $EndComp
-Text Label 4250 1700 1    60   ~
+Text Label 4250 1950 1    60   ~
 DEV_GND
 Text Label 3550 5350 0    60   ~
 DEV_VBUS
 $Comp
 L GND #PWR02
 U 1 1 493838CB
-P 4250 1900
-F 0 "#PWR02" H 4250 1900 30  0001 C C
-F 1 "GND" H 4250 1830 30  0001 C C
-	1    4250 1900
+P 4250 2150
+F 0 "#PWR02" H 4250 2150 30  0001 C C
+F 1 "GND" H 4250 2080 30  0001 C C
+	1    4250 2150
 	1    0    0    -1  
 $EndComp
 $Comp
 L CONN_1 P19
 U 1 1 4938388E
-P 4250 800
-F 0 "P19" H 4330 800 40  0000 L C
-F 1 "CONN_1" H 4250 855 30  0001 C C
-	1    4250 800 
+P 4250 1050
+F 0 "P19" H 4330 1050 40  0000 L C
+F 1 "CONN_1" H 4250 1105 30  0001 C C
+	1    4250 1050
 	0    -1   -1   0   
 $EndComp
 $Comp
@@ -338,9 +316,9 @@ $EndComp
 Text Label 4700 3700 2    60   ~
 VSYS
 Text Label 9500 1850 0    60   ~
-AUX
+nNOR_WP
 Text Label 5850 1700 1    60   ~
-SWITCH
+FUTURE1
 Text Label 7150 1700 1    60   ~
 X_I2C_SDA
 Text Label 9500 1650 0    60   ~

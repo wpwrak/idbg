@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CVpcb (20081019-unstable) date = 17/12/2008-13:21:18
+Cmp-Mod V01 Created by CVpcb (20081019-unstable) date = 18/12/2008-07:02:43
 
 BeginCmp
 TimeStamp = /49330C80;
@@ -38,13 +38,6 @@ EndCmp
 BeginCmp
 TimeStamp = /49330D47;
 Reference = P3;
-ValeurCmp = CONN_1;
-IdModule  = Pad_2mm;
-EndCmp
-
-BeginCmp
-TimeStamp = /49330F7A;
-Reference = P4;
 ValeurCmp = CONN_1;
 IdModule  = Pad_2mm;
 EndCmp
@@ -155,13 +148,6 @@ IdModule  = Pad_120x60;
 EndCmp
 
 BeginCmp
-TimeStamp = /493854BD;
-Reference = P20;
-ValeurCmp = CONN_1;
-IdModule  = Pad_2mm;
-EndCmp
-
-BeginCmp
 TimeStamp = /49385578;
 Reference = P21;
 ValeurCmp = CONN_1;
@@ -190,9 +176,9 @@ IdModule  = 0603;
 EndCmp
 
 BeginCmp
-TimeStamp = /4948FC85;
+TimeStamp = /4949B9A3;
 Reference = R4;
-ValeurCmp = 0;
+ValeurCmp = 100k;
 IdModule  = 0402;
 EndCmp
 
@@ -204,10 +190,24 @@ IdModule  = QFN28_5_315;
 EndCmp
 
 BeginCmp
-TimeStamp = /4948E4A1;
-Reference = U2;
-ValeurCmp = AOZ8205;
-IdModule  = SC-89-6;
+TimeStamp = /4949F4F1;
+Reference = VR1;
+ValeurCmp = 5V6;
+IdModule  = 0402;
+EndCmp
+
+BeginCmp
+TimeStamp = /4949F4EF;
+Reference = VR2;
+ValeurCmp = 5V6;
+IdModule  = 0402;
+EndCmp
+
+BeginCmp
+TimeStamp = /4949F4E9;
+Reference = VR3;
+ValeurCmp = 5V6;
+IdModule  = 0402;
 EndCmp
 
 EndListe

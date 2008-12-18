@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CVpcb (20081019-unstable) date = 18/12/2008-07:02:43
+Cmp-Mod V01 Created by CVpcb (20081019-unstable) date = 18/12/2008-23:04:05
 
 BeginCmp
 TimeStamp = /49330C80;
@@ -24,7 +24,7 @@ EndCmp
 BeginCmp
 TimeStamp = /49330AF6;
 Reference = P1;
-ValeurCmp = CONN_6;
+ValeurCmp = USB_B;
 IdModule  = ZX62R_B_5P;
 EndCmp
 
@@ -150,6 +150,13 @@ EndCmp
 BeginCmp
 TimeStamp = /49385578;
 Reference = P21;
+ValeurCmp = CONN_1;
+IdModule  = Pad_2mm;
+EndCmp
+
+BeginCmp
+TimeStamp = /494AD6C6;
+Reference = P22;
 ValeurCmp = CONN_1;
 IdModule  = Pad_2mm;
 EndCmp

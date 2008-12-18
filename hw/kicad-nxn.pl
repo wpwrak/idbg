@@ -82,9 +82,9 @@ for ($y = 0; $y != $ny; $y++) {
 	$px = $ox+($x-$nx/2)*$dx;
 	$py = $oy+($y-$ny/2)*$dy;
 	print "gsave\n";
-	if (0) {
-	    $px += $sx;
-	    print "-1 0 scale\n";	# reverse for toner transfer method
+	if (1) {
+	    print "-1 1 scale\n";	# reverse for toner transfer method
+	    $px -= $xm0+$xm1;
 	}
 	# Postscript units
 	$px = $px/25.4*72;

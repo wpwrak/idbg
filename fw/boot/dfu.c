@@ -15,6 +15,7 @@
 
 #include <stdint.h>
 
+#include "config.h"
 #include "regs.h"
 #include "uart.h"
 #include "usb.h"
@@ -24,6 +25,9 @@
 #ifndef NULL
 #define NULL 0
 #endif
+
+
+#define	PAYLOAD_END	(PAYLOAD_START+PAYLOAD_SIZE)
 
 
 const uint8_t device_descriptor[] = {
@@ -94,10 +98,6 @@ static struct dfu {
 
 static uint16_t next_block = 0;
 static uint16_t payload;
-
-
-#define	PAYLOAD_START	0x2000
-#define	PAYLOAD_END	0x3e00	/* last 512 bytes are reserved */
 
 
 static __xdata uint8_t buf[EP0_SIZE];

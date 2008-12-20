@@ -5,6 +5,20 @@
 #include "usb-regs.h"
 
 
+/* REG0CN */
+#define	REGMOD	0x10	/* Voltage Regulator Mode Select */
+#define	VBPOL	0x20	/* VBUS Interrupt Polarity Select */
+#define	VBSTAT	0x40	/* VBUS Signal Status */
+#define	REGDIS	0x80	/* Voltage Regulator Disable */
+
+/* RSTSRC */
+#define	PINRSF	0x01	/* HW Pin Reset Flag */
+/*	PORSF	0x02	-- Power-On/VDD Monitor Reset Flag */
+#define	MCFRSF	0x04	/* Missing Clock Detector Flag */
+/*	SWRSF	0x10	-- Software Reset Force and Flag */
+#define	FERROR	0x40	/* Flash Error Indicator */
+#define	USBRSF	0x80	/* USB Reset Flag */
+
 /* OSCICN */
 #define	IFCN0	0x01	/* Internal Oscillator Frequency Control */
 #define	IFCN1	0x02	/* 00: /8, 01: /4, 10: /2, 11: /1 */

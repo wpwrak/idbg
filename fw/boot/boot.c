@@ -15,6 +15,14 @@
 void dfu_init(void);
 
 
+static void payload(void)
+{
+	__asm
+	ljmp	PAYLOAD_START
+	__endasm;
+}
+
+
 static void delay(void)
 {
 	int x;
@@ -24,8 +32,14 @@ static void delay(void)
 }
 
 
-void main(void)
+static void boot_loader(void)
 {
+	/*
+	 * @@@ boot and payload:
+	 * stay low-power until VBUS is up. that way, we can run also with
+	 * GPIO power.
+	 */
+
 	/*
 	 * @@@ if we don't have VBUS, proceed as follows:
 	 * - stay at 3MHz (current < 2mA)
@@ -80,17 +94,6 @@ void main(void)
 #endif /* !LOW_SPEED */
 
 	/*
-	 * VDD monitor enable sequence, section 7.2
-	 *
-	 * - enable voltage monitor
-	 * - wait for monitor to stabilize
-	 * - enable VDD monitor reset
-	 */
-	VDM0CN = VDMEN;
-	while (!(VDM0CN & VDDSTAT));
-	RSTSRC = PORSF;
-
-	/*
 	 * @@@ if VBUS && AUX -> DFU
 	 * @@@ else -> boot payload
 	 */
@@ -100,4 +103,26 @@ void main(void)
 	dfu_init();
 	usb_init();
 	while (1);
+}
+
+
+void main(void)
+{
+	/* Reset only on USB reset for now */
+	RSTSRC = USBRSF;
+
+	/*
+	 * VDD monitor enable sequence, section 7.2
+	 *
+	 * - enable voltage monitor
+	 * - wait for monitor to stabilize
+	 * - enable VDD monitor reset
+	 */
+	VDM0CN = VDMEN;
+	while (!(VDM0CN & VDDSTAT));
+	RSTSRC = USBRSF | PORSF;
+
+	if (REG0CN & VBSTAT)
+		boot_loader();
+	payload();
 }

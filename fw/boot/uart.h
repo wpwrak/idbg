@@ -1,20 +1,28 @@
 #ifndef UART_H
 #define UART_H
 
-#if 0
+#include "config.h"
+
+
+#ifdef CONFIG_DEBUG
 #define debug printk
 #else
 #define debug(...)
 #endif
 
-#if 1
+#ifdef CONFIG_ERROR
 #define error printk
 #else
 #define error(...)
 #endif
 
-void putchar(char c);
+#ifdef CONFIG_PRINTK
 void printk(const char *fmt, ...);
+#else
+#define printk(...)
+#endif
+
+void putchar(char c);
 void uart_init(void);
 
 #endif /* UART_H */

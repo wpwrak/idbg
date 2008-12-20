@@ -18,6 +18,8 @@ void putchar(char c)
 }
 
 
+#if defined(CONFIG_DEBUG) || defined(CONFIG_ERROR)
+
 void printk(const char *fmt, ...)
 {
 	va_list ap;
@@ -30,6 +32,8 @@ void printk(const char *fmt, ...)
 	EA = saved;
 	va_end(ap);
 }
+
+#endif /* CONFIG_DEBUG || CONFIG_ERROR */
 
 
 void uart_init(void)

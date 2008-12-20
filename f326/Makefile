@@ -6,7 +6,7 @@ LDFLAGS=
 PREFIX=/usr
 
 NAME=f326
-OBJS=f326.o flash.o c2.o gpio.o
+OBJS=f326.o flash.o c2.o gpio.o rt.o
 
 .PHONY:		all install uninstall clean depend spotless
 

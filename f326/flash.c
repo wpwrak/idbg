@@ -20,6 +20,7 @@ static uint8_t _c2_addr_read(void)
     return x;
 }
 
+
 static void wait_busy(void)
 {
     while (_c2_addr_read() & InBusy);

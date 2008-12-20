@@ -117,3 +117,28 @@ void flash_init(void)
     c2_data_write(FLASH_INIT_MAGIC2, 1);
     usleep(20000);
 }
+
+
+/* @@@ doesn't really seem to work */
+
+uint8_t fp_reg_read(uint8_t addr)
+{
+    c2_addr_write(FPDAT);
+    fpdat_write(REG_READ);
+    check_status();
+    fpdat_write(addr);
+    fpdat_write(1);
+    return fpdat_read();
+}
+
+
+void fp_reg_write(uint8_t addr, uint8_t value)
+{
+    c2_addr_write(FPDAT);
+    fpdat_write(REG_WRITE);
+    check_status();
+    fpdat_write(addr);
+    fpdat_write(1);
+    fpdat_write(value);
+}
+

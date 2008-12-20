@@ -6,6 +6,7 @@
 
 #include "c2.h"
 #include "flash.h"
+#include "boundary.h"
 
 
 static void dump(const char *title, void *data, size_t size)
@@ -133,11 +134,18 @@ static void do_flash(const char *name)
 static void usage(const char *name)
 {
     fprintf(stderr,
-"usage: %s [-d|-e|file]\n\n"
+"usage: %s [-d|-e|file]\n"
+"       %s -b pin_setup\n\n"
 "  -d  dump Flash content\n"
-"  -e  erase whole Flash\n\n"
+"  -e  erase whole Flash\n"
+"  -b pin_setup\n"
+"    Perform a boundary scan. pin_setup sets all 14 pins in this order:\n"
+"    P0_0, P0_1, ..., P0_7, P2_0, ..., P2_5.\n"
+"    Pins can be set to 0, 1, or R (pull-up). Dots can be used to structure\n"
+"    the bit string. Prints what the pins read back (0 or 1) in the same\n"
+"    order, with a dot between P0 and P2.\n\n"
 "No argument resets the F326.\n"
-  , name);
+  , name, name);
     exit(1);
 }
 
@@ -147,9 +155,11 @@ int main(int argc, char **argv)
     c2_init();
     identify();
 
-    if (argc > 2)
+    if (argc == 3 && !strcmp(argv[1], "-b"))
+	boundary(argv[2]);
+    else if (argc > 2)
 	usage(*argv);
-    if (argc == 2) {
+    else if (argc == 2) {
 	if (!strcmp(argv[1], "-d"))	
 	    dump_flash(0x4000);
 	else if (!strcmp(argv[1], "-e"))	

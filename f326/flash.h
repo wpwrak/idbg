@@ -14,10 +14,12 @@
 #define FLASH_ERASE_MAGIC2	0xad
 #define FLASH_ERASE_MAGIC3	0xa5
 
+#define FLASH_DEVICE_ERASE	0x03
 #define	FLASH_BLOCK_READ	0x06
 #define FLASH_BLOCK_WRITE	0x07
 #define FLASH_PAGE_ERASE	0x08
-#define FLASH_DEVICE_ERASE	0x03
+#define	REG_READ		0x09
+#define	REG_WRITE		0x0a
 
 #define FLASH_STATUS_OK		0x0d
 
@@ -29,5 +31,10 @@ void flash_device_erase(void);
 void flash_block_write(uint16_t addr, const void *data, size_t size);
 void flash_block_read(uint16_t addr, void *data, size_t size);
 void flash_init(void);
+
+/* @@@ doesn't really seem to work */
+
+uint8_t fp_reg_read(uint8_t addr);
+void fp_reg_write(uint8_t addr, uint8_t value);
 
 #endif /* FLASH_H */

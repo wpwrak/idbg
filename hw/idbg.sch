@@ -6,32 +6,24 @@ $Descr A4 11700 8267
 Sheet 1 1
 Title "Internal Debug Board (for GTA01/GTA02)"
 Date "18 dec 2008"
-Rev "3"
+Rev "4"
 Comp "Werner Almesberger"
 Comment1 ""
 Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-$Comp
-L CONN_1 P22
-U 1 1 494AD6C6
-P 5900 3400
-F 0 "P22" H 5980 3400 40  0000 L C
-F 1 "CONN_1" H 5900 3455 30  0001 C C
-	1    5900 3400
-	-1   0    0    1   
-$EndComp
+Connection ~ 4500 4100
+Wire Wire Line
+	4500 3000 4500 4100
 Wire Wire Line
 	5850 2450 5850 2250
 Wire Wire Line
 	5850 2450 7000 2450
 Wire Wire Line
-	3450 3000 3450 4200
-Wire Wire Line
 	5850 2250 6050 2250
 Wire Wire Line
-	7000 5450 3800 5450
+	7000 5450 3500 5450
 Connection ~ 2450 3850
 Wire Wire Line
 	2450 4150 2450 3850
@@ -50,10 +42,10 @@ Wire Wire Line
 Wire Wire Line
 	7300 2450 7300 1350
 Wire Wire Line
-	1350 3950 3800 3950
+	1350 3950 3500 3950
 Connection ~ 5050 3550
 Wire Wire Line
-	5050 3550 5050 3350
+	5050 3350 5050 3550
 Wire Wire Line
 	7450 5250 7450 5800
 Wire Wire Line
@@ -80,14 +72,14 @@ Wire Wire Line
 	8750 5700 7600 5700
 Wire Wire Line
 	7600 5700 7600 5250
-Connection ~ 3800 4500
+Connection ~ 3500 4500
 Wire Wire Line
 	7000 5450 7000 5250
 Wire Wire Line
-	3800 3950 3800 5450
+	3500 3950 3500 5450
 Wire Wire Line
 	8350 5450 8350 5250
-Connection ~ 3450 3950
+Connection ~ 3150 3950
 Wire Wire Line
 	5850 5150 5850 4900
 Wire Wire Line
@@ -98,7 +90,7 @@ Wire Wire Line
 	5850 3750 1350 3750
 Connection ~ 1850 3450
 Wire Wire Line
-	1350 3450 2400 3450
+	2400 3450 1350 3450
 Wire Wire Line
 	1350 3650 1850 3650
 Wire Wire Line
@@ -106,9 +98,9 @@ Wire Wire Line
 Wire Wire Line
 	1850 3550 1350 3550
 Wire Wire Line
-	3450 4850 3450 4600
+	3150 4850 3150 4600
 Wire Wire Line
-	1350 3850 6050 3850
+	6050 3850 1350 3850
 Wire Wire Line
 	6050 4150 5850 4150
 Wire Wire Line
@@ -117,14 +109,14 @@ Wire Wire Line
 	5850 4000 5850 4500
 Connection ~ 5850 4150
 Wire Wire Line
-	6050 4300 5400 4300
+	5400 4300 6050 4300
 Wire Wire Line
-	5500 1350 5500 3550
+	5500 3550 5500 1350
 Wire Wire Line
-	6050 3550 4850 3550
+	4850 3550 6050 3550
 Connection ~ 5500 3550
 Wire Wire Line
-	4300 4100 4900 4100
+	3900 4100 4900 4100
 Wire Wire Line
 	7450 5800 8850 5800
 Wire Wire Line
@@ -146,7 +138,7 @@ Wire Wire Line
 Wire Wire Line
 	7600 1850 10450 1850
 Wire Wire Line
-	7150 2450 7150 1350
+	7150 1350 7150 2450
 Wire Wire Line
 	7900 2450 7900 2250
 Wire Wire Line
@@ -157,7 +149,7 @@ Wire Wire Line
 	5600 4200 5600 4300
 Connection ~ 5600 4300
 Wire Wire Line
-	4900 4500 3800 4500
+	4900 4500 3500 4500
 Wire Wire Line
 	7150 5250 7150 5950
 Wire Wire Line
@@ -176,7 +168,18 @@ Wire Wire Line
 	6550 2250 7150 2250
 Connection ~ 7150 2250
 Wire Wire Line
-	3450 2500 3450 1350
+	4500 2500 4500 1350
+Wire Wire Line
+	3150 4200 3150 3950
+$Comp
+L CONN_1 P22
+U 1 1 494AD6C6
+P 5900 3400
+F 0 "P22" H 5980 3400 40  0000 L C
+F 1 "CONN_1" H 5900 3455 30  0001 C C
+	1    5900 3400
+	-1   0    0    1   
+$EndComp
 $Comp
 L VR VR1
 U 1 1 4949F4F1
@@ -261,10 +264,10 @@ $EndComp
 $Comp
 L R R1
 U 1 1 49388334
-P 3450 2750
-F 0 "R1" V 3530 2750 50  0000 C C
-F 1 "10" V 3450 2750 50  0000 C C
-	1    3450 2750
+P 4500 2750
+F 0 "R1" V 4580 2750 50  0000 C C
+F 1 "10" V 4500 2750 50  0000 C C
+	1    4500 2750
 	-1   0    0    1   
 $EndComp
 Text Label 9500 4700 0    60   ~
@@ -280,7 +283,7 @@ F 1 "CONN_1" H 7300 1255 30  0001 C C
 $EndComp
 Text Label 4150 2100 1    60   ~
 DEV_GND
-Text Label 3450 2100 1    60   ~
+Text Label 4500 2100 1    60   ~
 DEV_VBUS
 $Comp
 L GND #PWR04
@@ -303,10 +306,10 @@ $EndComp
 $Comp
 L CONN_1 P18
 U 1 1 4938388D
-P 3450 1200
-F 0 "P18" H 3530 1200 40  0000 L C
-F 1 "CONN_1" H 3450 1255 30  0001 C C
-	1    3450 1200
+P 4500 1200
+F 0 "P18" H 4580 1200 40  0000 L C
+F 1 "CONN_1" H 4500 1255 30  0001 C C
+	1    4500 1200
 	0    -1   -1   0   
 $EndComp
 Text Label 6000 6150 0    60   ~
@@ -345,7 +348,7 @@ F 1 "PWR_FLAG" H 5600 4430 30  0000 C C
 	1    5600 4200
 	1    0    0    -1  
 $EndComp
-Text Label 4700 4100 2    60   ~
+Text Label 4300 4100 2    60   ~
 VSYS
 Text Label 9500 4500 0    60   ~
 nNOR_WP
@@ -405,10 +408,10 @@ $EndComp
 $Comp
 L CONN_1 P2
 U 1 1 49330E1A
-P 4150 4100
-F 0 "P2" H 4230 4100 40  0000 L C
-F 1 "CONN_1" H 4150 4155 30  0001 C C
-	1    4150 4100
+P 3750 4100
+F 0 "P2" H 3830 4100 40  0000 L C
+F 1 "CONN_1" H 3750 4155 30  0001 C C
+	1    3750 4100
 	-1   0    0    1   
 $EndComp
 $Comp
@@ -522,19 +525,19 @@ $EndComp
 $Comp
 L C C1
 U 1 1 49330C80
-P 3450 4400
-F 0 "C1" H 3500 4500 50  0000 L C
-F 1 "1uF" H 3500 4300 50  0000 L C
-	1    3450 4400
+P 3150 4400
+F 0 "C1" H 3200 4500 50  0000 L C
+F 1 "1uF" H 3200 4300 50  0000 L C
+	1    3150 4400
 	1    0    0    -1  
 $EndComp
 $Comp
 L GND #PWR010
 U 1 1 49330C5E
-P 3450 4850
-F 0 "#PWR010" H 3450 4850 30  0001 C C
-F 1 "GND" H 3450 4780 30  0001 C C
-	1    3450 4850
+P 3150 4850
+F 0 "#PWR010" H 3150 4850 30  0001 C C
+F 1 "GND" H 3150 4780 30  0001 C C
+	1    3150 4850
 	1    0    0    -1  
 $EndComp
 $Comp

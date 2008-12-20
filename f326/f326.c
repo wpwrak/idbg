@@ -59,6 +59,13 @@ static void flash_device(void *data, size_t size)
 }
 
 
+static void erase_flash(void)
+{
+    flash_init();
+    flash_device_erase();
+}
+
+
 static void dump_flash(size_t size)
 {
     int i, j;
@@ -123,17 +130,35 @@ static void do_flash(const char *name)
 }
 
 
+static void usage(const char *name)
+{
+    fprintf(stderr,
+"usage: %s [-d|-e|file]\n\n"
+"  -d  dump Flash content\n"
+"  -e  erase whole Flash\n\n"
+"No argument resets the F326.\n"
+  , name);
+    exit(1);
+}
+
+
 int main(int argc, char **argv)
 {
     c2_init();
     identify();
 
+    if (argc > 2)
+	usage(*argv);
     if (argc == 2) {
 	if (!strcmp(argv[1], "-d"))	
-		dump_flash(0x4000);
+	    dump_flash(0x4000);
+	else if (!strcmp(argv[1], "-e"))	
+	    erase_flash();
+	else if (*argv[1] == '-')
+	    usage(*argv);
 	else {
-		do_flash(argv[1]);
-		identify();
+	    do_flash(argv[1]);
+	    identify();
 	}
     }
     c2_reset();

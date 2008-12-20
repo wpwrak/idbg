@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# Set all I/Os to pull-up, then walk a zero across them. If more pins than the
+# one being zeroed flip, we have a short.
+#
+
+p=" rrrrrrrrrrrrrr"
+
+b=0
+while [ $b -le 14 ]; do
+    b=`expr $b + 1`
+    got=`f326 -b $p | sed '3p;d'`
+    want=`echo $p | tr r 1`
+    got=`echo $got | tr -d .`
+    if [ "$got" = "$want" ]; then
+	is="=="
+    else
+	is="!="
+    fi
+    echo "$got $is $want"
+    p=`echo "$p" | sed 's/0r/r0/;s/ r/0/'`
+done

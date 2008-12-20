@@ -4,7 +4,7 @@ Microcontroller		QFN-28	SiLabs		C8051F326	U1
 Dual Schottky diode, CC	VMD3	Rohm		RB715Z		D1
 				Panasonic	MAS3795E
 Varistor 5.6V		0402	Panasonic	EZJP0V080GA	VR1, VR2, VR3
-Resistor 0R		0603	generic				R1
+Resistor 100R		0603	generic				R1
 Resistor 330R		0603	generic				R2, R3
 Resistor 100k		0402	generic				R4
 Capacitor 1uF, 6.3V	0402	generic				C1

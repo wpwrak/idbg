@@ -18,7 +18,7 @@ void putchar(char c)
 }
 
 
-#if defined(CONFIG_DEBUG) || defined(CONFIG_ERROR)
+#ifdef CONFIG_PRINTK
 
 void printk(const char *fmt, ...)
 {
@@ -33,7 +33,7 @@ void printk(const char *fmt, ...)
 	va_end(ap);
 }
 
-#endif /* CONFIG_DEBUG || CONFIG_ERROR */
+#endif /* CONFIG_PRINTK */
 
 
 void uart_init(void)

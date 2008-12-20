@@ -6,12 +6,14 @@
 
 #ifdef CONFIG_DEBUG
 #define debug printk
+#define CONFIG_PRINTK
 #else
 #define debug(...)
 #endif
 
 #ifdef CONFIG_ERROR
 #define error printk
+#define CONFIG_PRINTK
 #else
 #define error(...)
 #endif

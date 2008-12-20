@@ -1,11 +1,25 @@
 CC=sdcc
-CFLAGS=-I../common \
+CFLAGS=-I. -I../common \
        -DPAYLOAD_START=$(PAYLOAD_START) -DPAYLOAD_SIZE=$(PAYLOAD_SIZE)
 LDFLAGS=--xram-size 1024
 
+
+CC_normal	:= $(CC)
+CC_quiet	= @echo "  CC       " $@ && $(CC_normal)
+GEN_quiet	= @echo "  GENERATE " $@ &&
+
+ifeq ($(V),1)
+    CC		= $(CC_normal)
+    GEN		=
+else
+    CC		= $(CC_quiet)
+    GEN		= $(GEN_quiet)
+endif
+
+
 .SUFFIXES:	.rel .ihx .bin
 
-.PHONY:		test clean upload spotless version
+.PHONY:		clean spotless upload version
 
 all:		$(MAIN).bin
 
@@ -25,10 +39,10 @@ version:
 version.rel:	version
 
 $(MAIN).ihx:	$(OBJS:%=%.rel)
-		$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS:%=%.rel)
+		$(GEN) $(CC_normal) $(CFLAGS) $(LDFLAGS) $(OBJS:%=%.rel)
 
 .ihx.bin:
-		objcopy -I ihex $< -O binary $@
+		$(GEN) objcopy -I ihex $< -O binary $@
 		@echo "build #`cat .version`, `ls -l $@`"
 
 .rel.ihx:

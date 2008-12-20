@@ -15,7 +15,6 @@
 
 #include <stdint.h>
 
-#include "config.h"
 #include "regs.h"
 #include "uart.h"
 #include "usb.h"

@@ -1,5 +1,5 @@
 MAIN=idbg
-OBJS=$(MAIN) uart usb descr version
+OBJS=$(MAIN) uart usb descr version ep0idbg jtag i2c
 
 include ../common/Makefile.system
 include ../common/Makefile.common

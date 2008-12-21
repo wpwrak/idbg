@@ -30,7 +30,7 @@
 #define NO_ADDRESS	0xff	/* null value for function address */
 
 
-struct ep_descr ep0;
+__xdata struct ep_descr ep0;
 
 bit (*user_setup)(struct setup_request *setup) __reentrant;
 bit (*user_get_descriptor)(uint8_t type, uint8_t index,

@@ -98,7 +98,7 @@ struct ep_descr {
 	uint8_t *end;
 	void (*callback)(void *user) __reentrant;
 	void *user;
-} ep0;
+};
 
 struct setup_request {
 	uint8_t bmRequestType;
@@ -111,7 +111,7 @@ struct setup_request {
 
 extern const uint8_t device_descriptor[];
 extern const uint8_t config_descriptor[];
-extern struct ep_descr ep0;
+extern __xdata struct ep_descr ep0;
 
 extern bit (*user_setup)(struct setup_request *setup) __reentrant;
 extern bit (*user_get_descriptor)(uint8_t type, uint8_t index,

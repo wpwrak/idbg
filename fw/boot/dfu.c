@@ -82,12 +82,7 @@ static const uint8_t functional_descriptor[] = {
 };
 
 
-static struct dfu {
-	uint8_t status;		/* bStatus */
-	uint8_t toL, toM, toH;	/* bwPollTimeout */
-	uint8_t state;		/* bState */
-	uint8_t iString;
-} dfu = {
+struct dfu dfu = {
 	OK,
 	LE(1000), 0,
 	dfuIDLE,

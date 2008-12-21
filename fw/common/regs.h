@@ -29,6 +29,11 @@
 #define	MULINIT	0x40	/* Clock Multiplier Initialize */
 #define	MULEN	0x80	/* Clock Multiplier Enable */
 
+/* GPIOCN */
+#define	SYSCLK	0x01	/* nSYSCLK Enable */
+#define	INPUTEN	0x40	/* Global Digital Input Enable */
+#define	WEAKPUD	0x80	/* Port I/O Weak Pullup Disable */
+
 /* VDM0CN */
 #define VDMEN	0x80	/* VDD Monitor Enable */
 #define	VDDSTAT	0x40	/* VDD Status */

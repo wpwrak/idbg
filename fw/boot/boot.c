@@ -8,6 +8,7 @@
 
 #include "version.h"
 #include "regs.h"
+#include "io.h"
 #include "uart.h"
 #include "usb.h"
 #include "dfu.h"
@@ -15,10 +16,20 @@
 
 void run_payload(void)
 {
+	/* No interrupts while jumping between worlds */
 	EA = 0;
-	/* restart USB */
+
+	/* Restart USB */
 	USB0XCN = 0;
+
+	/* Re-enable pull-ups */
+	GPIOCN &= ~WEAKPUD;
+
+	/* Don't waste power in pull-down */
+	I2C_SDA_PULL = 1;
+
 	debug("launching payload\n");
+
 	__asm
 	ljmp	PAYLOAD_START
 	__endasm;
@@ -79,18 +90,6 @@ static void delay(void)
 static void boot_loader(void)
 {
 	/*
-	 * @@@ boot and payload:
-	 * stay low-power until VBUS is up. that way, we can run also with
-	 * GPIO power.
-	 */
-
-	/*
-	 * @@@ if we don't have VBUS, proceed as follows:
-	 * - stay at 3MHz (current < 2mA)
-	 * - jump directly to the payload
-	 */
-
-	/*
 	 * If we have VBUS, proceed as follows:
 	 * - bring up USB
 	 * - try to contact the PMU (in a loop)
@@ -101,6 +100,9 @@ static void boot_loader(void)
 	 * In DFU mode, the following transitions are possible:
 	 * - VBUS drops -> reset
 	 * - USB bus reset -> reset
+	 *
+	 * @@@ this may be too complex - probably don't really need to talk to
+	 * the PMU.
 	 */
 
 	/*
@@ -135,20 +137,33 @@ static void boot_loader(void)
 	CLKSEL = 0;	/* USBCLK = 4*int, SYSCLK = int */
 	CLKSEL = 0x02;	/* F326_USB_Main.c does this (sets 24MHz). Why ? */
 
+	uart_init(24);
+
 #endif /* !LOW_SPEED */
 
+	printk("%s #%u\n", build_date, build_number);
+
 	/*
-	 * @@@ if VBUS && AUX -> DFU
-	 * @@@ else -> boot payload
+	 * Very weakly pull SDA down and disable all pull-ups.
+	 *
+	 * We use SDA as a system power presence detector. When I2C is idle,
+	 * SDA is kept high. This is accomplished with pull-ups in the system.
+	 * We can therefore detect if IO_3V3 is any good by checking whether
+	 * SDA is high.
+	 *
+	 * This should work even without out own pull-down. However, when the
+	 * IDBG board is operating standalone (or, generally, if SDA isn't
+	 * connected), SDA would float. We therefore have to pull it down a
+	 * little.
 	 */
 
-#ifndef LOW_SPEED
-	uart_init(24);
-#endif
-	printk("%s #%u\n", build_date, build_number);
+	GPIOCN |= WEAKPUD;
+	I2C_SDA_PULL = 0;
+	delay();
+
 	dfu_init();
 	usb_init();
-	while (1)
+	while (!I2C_SDA || dfu.state != dfuIDLE)
 		usb_poll();
 }
 
@@ -162,9 +177,16 @@ void main(void)
 	 * - wait for monitor to stabilize
 	 * - enable VDD monitor reset
 	 */
+
 	VDM0CN = VDMEN;
 	while (!(VDM0CN & VDDSTAT));
 	RSTSRC = PORSF;
+
+	/*
+	 * @@@ if we don't have VBUS, proceed as follows:
+	 * - stay at 3MHz (current < 2mA, so we're fine with GPIO power)
+	 * - jump directly to the payload
+	 */
 
 	OSCICN |= IFCN0;
 	uart_init(3);

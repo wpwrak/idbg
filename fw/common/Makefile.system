@@ -1,2 +1,7 @@
+#
+# For now, we keep an 8k/7.5k division such that there's plenty of space for
+# debugging the boot loader. Later, we should move to something like 4k/11.5k.
+#
+
 PAYLOAD_START=0x2000
 PAYLOAD_SIZE=0x3e00	# last 512 bytes are reserved

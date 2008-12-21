@@ -23,5 +23,6 @@ EIE1 = 2;
 EA = 1;
 
 	usb_init();
-	while (1);
+	while (1)
+		usb_poll();
 }

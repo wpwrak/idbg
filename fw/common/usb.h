@@ -129,6 +129,6 @@ void usb_io(struct ep_descr *ep, enum ep_state state, uint8_t *buf,
 
 
 void usb_init(void);
-
+void usb_poll(void);
 
 #endif /* !USB_H */

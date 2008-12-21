@@ -8,16 +8,16 @@
 
 
 enum jtag_gpios {
-	JTAG_TRST,
+	JTAG_nTRST,
 	JTAG_TMS,
 	JTAG_TDO,
 	JTAG_TDI,
 	JTAG_TCK,
-	JTAG_RST,
+	JTAG_nSRST,
 };
 
 
-extern uint8_t jtag_data[JTAG_MAX_BITS/8];
+extern __xdata uint8_t jtag_data[JTAG_MAX_BITS/8];
 
 uint8_t jtag_gpio_get(void);
 void jtag_gpio_set(uint8_t set, uint8_t mask);

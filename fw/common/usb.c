@@ -340,38 +340,36 @@ static void handle_ep0(void)
 }
 
 
-static void poll(void)
+void usb_poll(void)
 {
 	uint8_t flags;
 
-	while (1) {
-		flags = usb_read(CMINT);
-		if (flags) {
-			debug("CMINT 0x%02x\n", flags);
-			if (flags & RSTINT) {
-				ep0.state = EP_IDLE;
-				usb_write(POWER, 0);
-				if (user_reset)
-					user_reset();
-				    /* @@@ 1 for suspend signaling */
-			}
+	flags = usb_read(CMINT);
+	if (flags) {
+		debug("CMINT 0x%02x\n", flags);
+		if (flags & RSTINT) {
+			ep0.state = EP_IDLE;
+			usb_write(POWER, 0);
+			if (user_reset)
+				user_reset();
+			    /* @@@ 1 for suspend signaling */
 		}
+	}
 
-		flags = usb_read(IN1INT);
-		if (flags) {
-			debug("IN1INT 0x%02x\n", flags);
-			if (flags & EP0)
-				handle_ep0();
-			if (flags & IN1)
-				/* handle IN */;
-		}
+	flags = usb_read(IN1INT);
+	if (flags) {
+		debug("IN1INT 0x%02x\n", flags);
+		if (flags & EP0)
+			handle_ep0();
+		if (flags & IN1)
+			/* handle IN */;
+	}
 
-		flags = usb_read(OUT1INT);
-		if (flags) {
-			debug("OUT1INT 0x%02x\n", flags);
-			/* handle OUT */
-		}
-    }
+	flags = usb_read(OUT1INT);
+	if (flags) {
+		debug("OUT1INT 0x%02x\n", flags);
+		/* handle OUT */
+	}
 }
 
 
@@ -387,5 +385,4 @@ void usb_init(void)
 #endif
 	//usb_write(POWER, 0x01);	/* we don't implement suspend yet */
 	usb_write(POWER, 0x00);
-	poll();
 }

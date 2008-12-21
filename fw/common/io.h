@@ -1,10 +1,5 @@
-#ifndef CONFIG_H
-#define	CONFIG_H
-
-//#define	CONFIG_DEBUG
-//#define	CONFIG_ERROR
-//#define	CONFIG_PRINTK
-
+#ifndef IO_H
+#define	IO_H
 
 /* Serial console */
 
@@ -32,8 +27,4 @@
 #define	nNOR_WP		P2_2	/* GTA02 only */
 #define	FUTURE		P0_0
 
-
-#define	PAYLOAD_START	0x2000
-#define	PAYLOAD_END	0x3e00	/* last 512 bytes are reserved */
-
-#endif /* !CONFIG_H */
+#endif /* !IO_H */

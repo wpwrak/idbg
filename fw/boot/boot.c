@@ -148,7 +148,8 @@ static void boot_loader(void)
 	printk("%s #%u\n", build_date, build_number);
 	dfu_init();
 	usb_init();
-	while (1);
+	while (1)
+		usb_poll();
 }
 
 

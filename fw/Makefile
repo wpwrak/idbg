@@ -1,4 +1,4 @@
-DIRS=boot idbg
+DIRS=common boot idbg
 
 
 .PHONY:		all depend clean spotless

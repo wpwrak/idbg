@@ -10,13 +10,12 @@
 #include "regs.h"
 #include "uart.h"
 #include "usb.h"
-
-
-void dfu_init(void);
+#include "dfu.h"
 
 
 void run_payload(void)
 {
+	EA = 0;
 	/* restart USB */
 	USB0XCN = 0;
 	debug("launching payload\n");
@@ -24,6 +23,48 @@ void run_payload(void)
 	ljmp	PAYLOAD_START
 	__endasm;
 }
+
+
+/* ----- Interrupts -------------------------------------------------------- */
+
+
+/*
+ * The boot loader doesn't use interrupts, so we forward all interrupts to the
+ * payload.
+ *
+ * What we'd really like to do here is to say something like
+ *
+ * void whatever_isr(void) __interrupt(n) __at(PAYLOAD+n*8+1);
+ *
+ * However, sdcc doesn't support such things yet. So we declare the ISR such
+ * that the vector entry gets created, and then we tell the assembler where to
+ * find it.
+ *
+ * Since __asm/__endasm isn't allowed outside a function body, we generate a
+ * dummy function for each assignment. The function is "naked", so that no
+ * actual code is generated for it.
+ */
+
+#define	ISR(n) \
+	void isr_nr_##n(void) __interrupt(n); \
+	void isr_dummy_##n(void) __naked \
+	{ \
+		__asm \
+		_isr_nr_##n = PAYLOAD_START+n*8+3 \
+		__endasm; \
+	}
+
+
+ISR(0)
+ISR(1)
+ISR(2)
+ISR(3)
+ISR(4)
+ISR(8)
+ISR(15)
+
+
+/* ----- The actual boot loader -------------------------------------------- */
 
 
 static void delay(void)

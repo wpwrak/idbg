@@ -1,6 +1,13 @@
+#include "regs.h"
 #include "uart.h"
 #include "usb.h"
 #include "version.h"
+
+
+static void usb_isr(void) __interrupt(8)
+{
+	putchar('&');
+}
 
 
 void main(void)
@@ -11,6 +18,9 @@ void main(void)
 
 	printk("Hello, payload\n");
 	printk("%s #%u\n", build_date, build_number);
+
+EIE1 = 2;
+EA = 1;
 
 	usb_init();
 	while (1);

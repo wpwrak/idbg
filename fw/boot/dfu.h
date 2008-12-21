@@ -53,4 +53,7 @@ enum dfu_state {
 #define	DFU_TO_DEV(req)		(0x21 | (req) << 8)
 #define	DFU_FROM_DEV(req)	(0xa1 | (req) << 8)
 
+
+void dfu_init(void);
+
 #endif /* !DFU_H */

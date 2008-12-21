@@ -36,7 +36,7 @@ void printk(const char *fmt, ...)
 #endif /* CONFIG_PRINTK */
 
 
-void uart_init(void)
+void uart_init(uint8_t brg_mhz)
 {
 	/*
 	 * UART: Enable only transmitter, no interrupts.
@@ -46,12 +46,36 @@ void uart_init(void)
 
 	/*
 	 * Configure the UART to 115200bps, see table 13.1
+	 *
+	 * We can's support 1.5MHz (that is, without using the USB clock, but
+	 * why would one want to run the core at 1.5MHz when USB is around ?)
+	 *
+	 * The closes settings would be:
+	 *
+	 * SBRL0 = 0xfff9; -- 107142.9 bps, error = -7%
+	 * SBRL0 = 0xfffa; --  125000 bps, error = +8.5%
+	 *
+	 * Depending on signal quality, we would need something like +/-5%.
 	 */
-#ifdef LOW_SPEED
-	SBRL0 = 0xffcc;
-#else
-	SBRL0 = 0xff98;
-#endif
+
+	switch (brg_mhz) {
+	case 3:
+		SBRL0 = 0xfff3;
+		break;
+	case 6:
+		SBRL0 = 0xffe6;
+		break;
+	case 12:
+		SBRL0 = 0xffcc;
+		break;
+	case 24:
+		SBRL0 = 0xff98;
+		break;
+	case 48:
+		SBRL0 = 0xff30;
+		break;
+	}
+
 	SBCON0 = SB0RUN | SB0PS0 | SB0PS1;
 
 	/*

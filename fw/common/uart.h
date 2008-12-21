@@ -1,6 +1,8 @@
 #ifndef UART_H
 #define UART_H
 
+#include <stdint.h>
+
 #include "config.h"
 
 
@@ -25,6 +27,6 @@ void printk(const char *fmt, ...);
 #endif
 
 void putchar(char c);
-void uart_init(void);
+void uart_init(uint8_t brg_mhz);
 
 #endif /* UART_H */

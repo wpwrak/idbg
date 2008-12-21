@@ -98,7 +98,9 @@ static void boot_loader(void)
 	 * @@@ else -> boot payload
 	 */
 
-	uart_init();
+#ifndef LOW_SPEED
+	uart_init(24);
+#endif
 	printk("%s #%u\n", build_date, build_number);
 	dfu_init();
 	usb_init();
@@ -108,9 +110,6 @@ static void boot_loader(void)
 
 void main(void)
 {
-	/* Reset only on USB reset for now */
-	RSTSRC = USBRSF;
-
 	/*
 	 * VDD monitor enable sequence, section 7.2
 	 *
@@ -120,9 +119,12 @@ void main(void)
 	 */
 	VDM0CN = VDMEN;
 	while (!(VDM0CN & VDDSTAT));
-	RSTSRC = USBRSF | PORSF;
+	RSTSRC = PORSF;
 
+	OSCICN |= IFCN0;
+	uart_init(3);
 	if (REG0CN & VBSTAT)
 		boot_loader();
+	printk("launching payload\n");
 	payload();
 }

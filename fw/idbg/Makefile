@@ -1,5 +1,5 @@
 MAIN=idbg
-OBJS=$(MAIN) uart usb descr
+OBJS=$(MAIN) uart usb descr version
 
 include ../common/Makefile.system
 include ../common/Makefile.common

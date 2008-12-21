@@ -97,6 +97,7 @@ static struct dfu {
 
 static uint16_t next_block = 0;
 static uint16_t payload;
+static bit did_download;
 
 
 static __xdata uint8_t buf[EP0_SIZE];
@@ -190,9 +191,13 @@ static bit my_setup(struct setup_request *setup) __reentrant
 
 	switch (setup->bmRequestType | setup->bRequest << 8) {
 	case DFU_TO_DEV(DFU_DETACH):
-		error("DFU_DETACH\n");
-		/* protocol 1 only */
-		return 0;
+		debug("DFU_DETACH\n");
+		/*
+		 * The DFU spec says thay this is sent in protocol 1 only.
+		 * However, dfu-util also sends it to get out of DFU mode,
+		 * so we just don't make a fuss and ignore it.
+		 */
+		return 1;
 	case DFU_TO_DEV(DFU_DNLOAD):
 		debug("DFU_DNLOAD\n");
 		if (dfu.state == dfuIDLE) {
@@ -217,6 +222,7 @@ static bit my_setup(struct setup_request *setup) __reentrant
 		if (!setup->wLength) {
 			debug("DONE\n");
 			dfu.state = dfuIDLE;
+			did_download = 1;
 			return 1;
 		}
 		ok = block_receive(setup->wLength);
@@ -287,8 +293,19 @@ static bit my_descr(uint8_t type, uint8_t index, const uint8_t **reply,
 }
 
 
+static void my_reset(void) __reentrant
+{
+	/* @@@ not nice -- think about where this should go */
+	extern void run_payload(void);
+
+	if (did_download)
+		run_payload();
+}
+
+
 void dfu_init(void)
 {
 	user_setup = my_setup;
 	user_get_descriptor = my_descr;
+	user_reset = my_reset;
 }

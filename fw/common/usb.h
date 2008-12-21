@@ -112,9 +112,11 @@ struct setup_request {
 extern const uint8_t device_descriptor[];
 extern const uint8_t config_descriptor[];
 extern struct ep_descr ep0;
+
 extern bit (*user_setup)(struct setup_request *setup) __reentrant;
 extern bit (*user_get_descriptor)(uint8_t type, uint8_t index,
     const uint8_t * const *reply, uint8_t *size) __reentrant;
+extern void (*user_reset)(void) __reentrant;
 
 
 #define usb_send(ep, buf, size, callback, user) \

@@ -14,7 +14,7 @@ const uint8_t device_descriptor[18] = {
 	0x00,			/* bDeviceProtocol */
 	EP0_SIZE,		/* bMaxPacketSize */
 	LE(0x1234),		/* idVendor */
-	LE(0x0001),		/* idProduct */
+	LE(0x0002),		/* idProduct */
 	LE(0x0001),		/* bcdDevice */
 	0,			/* iManufacturer */
 	0,			/* iProduct */

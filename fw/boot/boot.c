@@ -15,8 +15,11 @@
 void dfu_init(void);
 
 
-static void payload(void)
+void run_payload(void)
 {
+	/* restart USB */
+	USB0XCN = 0;
+	debug("launching payload\n");
 	__asm
 	ljmp	PAYLOAD_START
 	__endasm;
@@ -125,6 +128,5 @@ void main(void)
 	uart_init(3);
 	if (REG0CN & VBSTAT)
 		boot_loader();
-	printk("launching payload\n");
-	payload();
+	run_payload();
 }

@@ -35,6 +35,7 @@ struct ep_descr ep0;
 bit (*user_setup)(struct setup_request *setup) __reentrant;
 bit (*user_get_descriptor)(uint8_t type, uint8_t index,
     const uint8_t * const *reply, uint8_t *size) __reentrant;
+void (*user_reset)(void) __reentrant;
 
 
 static uint8_t addr = NO_ADDRESS;
@@ -350,6 +351,8 @@ static void poll(void)
 			if (flags & RSTINT) {
 				ep0.state = EP_IDLE;
 				usb_write(POWER, 0);
+				if (user_reset)
+					user_reset();
 				    /* @@@ 1 for suspend signaling */
 			}
 		}

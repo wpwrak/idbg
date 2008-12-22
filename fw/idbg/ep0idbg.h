@@ -24,9 +24,9 @@
  *
  * host->	IDBG_GPIO_UPDATE	0		mask	0
  * host->	IDBG_GPIO_DATA_SET	value		mask	0
- * ->host	IDBG_GPIO_DATA_GET	0		0	1
+ * ->host	IDBG_GPIO_DATA_GET	0		0	2
  * host->	IDBG_GPIO_MODE_SET	value		mask	0
- * ->host	IDBG_GPIO_MODE_GET	0		0	1
+ * ->host	IDBG_GPIO_MODE_GET	0		0	2
  */
 
 

@@ -244,7 +244,7 @@ int main(int argc, const char **argv)
 	}
 
 	parse_set(argv+1, argc-1);
-	if (mask) {
+	if (mask[0] || mask[1]) {
 		res = usb_control_msg(dev, TO_DEV, IDBG_GPIO_DATA_SET,
 		    data[0] | data[1] << 8, mask[0] | mask[1] << 8,
 		    NULL, 0, 1000);

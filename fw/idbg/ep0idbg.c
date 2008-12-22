@@ -51,6 +51,10 @@ static bit my_setup(struct setup_request *setup) __reentrant
 			return 0;
 		usb_send(&ep0, &id, setup->wLength, NULL, NULL);
 		return 1;
+	case IDBG_TO_DEV(IDBG_RESET):
+		debug("IDBG_RESET\n");
+		RSTSRC = SWRSF;
+		while (1);
 
 	case IDBG_TO_DEV(IDBG_JTAG_ATTACH):
 		debug("IDBG_JTAG_ATTACH\n");

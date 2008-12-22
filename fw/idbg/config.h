@@ -3,6 +3,6 @@
 
 //#define	CONFIG_DEBUG
 //#define	CONFIG_ERROR
-#define	CONFIG_PRINTK
+//#define	CONFIG_PRINTK
 
 #endif /* !CONFIG_H */

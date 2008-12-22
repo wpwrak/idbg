@@ -1,6 +1,7 @@
 #include "regs.h"
 #include "uart.h"
 #include "usb.h"
+#include "ep0idbg.h"
 #include "version.h"
 
 
@@ -19,9 +20,17 @@ void main(void)
 	printk("Hello, payload\n");
 	printk("%s #%u\n", build_date, build_number);
 
-EIE1 = 2;
-EA = 1;
+//EIE1 = 2;
+//EA = 1;
 
+/*
+ * @@@ known issue: USB enumerates fine, but we have to explicitly reset the
+ * bus before we can communicate, which is odd. Disconnect (i.e., turning off
+ * the pull-up) should be detected within 2-2.5us, so the problem seems to be
+ * something else.
+ */
+
+	ep0idbg_init();
 	usb_init();
 	while (1)
 		usb_poll();

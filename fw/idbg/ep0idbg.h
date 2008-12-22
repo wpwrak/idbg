@@ -10,6 +10,7 @@
  * Direction	bRequest		wValue		wIndex	wLength
  *
  * ->host	IDBG_ID			0		0	2
+ * host->	IDBG_RESET		0		0	0
  *
  * host->	IDBG_JTAG_ATTACH	0		0	0
  * host->	IDBG_JTAG_DETACH	0		0	0
@@ -50,6 +51,7 @@
 
 enum idbg_requests {
 	IDBG_ID			= 0x00,
+	IDBG_RESET,
 	IDBG_JTAG_ATTACH	= 0x10,
 	IDBG_JTAG_DETACH,
 	IDBG_JTAG_GPIO_SET,
@@ -64,5 +66,8 @@ enum idbg_requests {
 	IDBG_GPIO_MODE_SET,
 	IDBG_GPIO_MODE_GET,
 };
+
+
+void ep0idbg_init(void);
 
 #endif /* !EP0IDBG_H */

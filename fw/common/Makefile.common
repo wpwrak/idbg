@@ -25,7 +25,7 @@ endif
 
 all:		$(MAIN).bin
 
-version:
+version version.h:
 		@if [ -f .version ]; then \
 		    v=`cat .version`; \
 		    expr $$v + 1 >.version; \
@@ -56,7 +56,7 @@ $(MAIN).ihx:	$(OBJS:%=%.rel)
 
 depend:
 		>.depend
-		touch version.h
+		touch version.h version.c
 		for n in $(OBJS:%=%.c); do \
 		    $(CPP) $(CFLAGS) -MM -MG \
 		      `[ -f $$n ] || echo ../common/`$$n >>.depend || \

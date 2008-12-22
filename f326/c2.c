@@ -5,8 +5,10 @@
 #include "c2.h"
 
 
-//#define C2CK	4, 13	/* E13 = SPI_CLK0 */
-//#define C2D	4, 12	/* E12 = SPI_MOSI0 */
+/*
+ * SPI GPIOs are the same on 2410 and 2442, so this should work on GTA01 and
+ * on GTA02.
+ */
 
 #define C2CK	4, 11	/* E13 = SPI_MISO0 */
 #define C2D	4, 13	/* E12 = SPI_CLK0 */

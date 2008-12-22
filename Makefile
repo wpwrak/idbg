@@ -1,8 +1,11 @@
 ACCOUNT=werner@almesberger.net
 DIR=/home/httpd/almesberger/misc/idbg.git/
 
-.PHONY:		push
+.PHONY:		all push
 
+all:
+		@echo "make what ?" 2>&1
+		@exit 1
 
 push:
 		git-update-server-info

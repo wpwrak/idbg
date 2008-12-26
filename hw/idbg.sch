@@ -284,7 +284,7 @@ $EndComp
 Text Label 4150 2100 1    60   ~
 DEV_GND
 Text Label 4500 2100 1    60   ~
-DEV_VBUS
+DEV_VSYS
 $Comp
 L GND #PWR04
 U 1 1 493838CB

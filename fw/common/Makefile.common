@@ -1,3 +1,16 @@
+#
+# common/Makefile.common - Common rules and definitions
+#
+# Written 2008 by Werner Almesberger
+# Copyright 2008 Werner Almesberger
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+
+
 CC=sdcc
 CFLAGS=-I. -I../common \
        -DPAYLOAD_START=$(PAYLOAD_START) -DPAYLOAD_SIZE=$(PAYLOAD_SIZE)
@@ -33,7 +46,8 @@ version version.h:
 		    echo 0 >.version; \
 		fi
 		@[ -s .version ] || echo 0 >.version
-		@echo '#include "version.h"' >version.c
+		@echo '/* MACHINE-GENERATED. DO NOT EDIT ! */' >version.c
+		@echo '#include "version.h"' >>version.c
 		@echo "const char *build_date = \"`date`\";" >>version.c
 		@echo "const uint16_t build_number = `cat .version`;" \
 		  >>version.c

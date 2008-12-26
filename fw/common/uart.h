@@ -1,3 +1,16 @@
+/*
+ * common/uart.h - UART initialization and debug output
+ *
+ * Written 2008 by Werner Almesberger
+ * Copyright 2008 Werner Almesberger
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ */
+
+
 #ifndef UART_H
 #define UART_H
 
@@ -29,4 +42,4 @@ void printk(const char *fmt, ...);
 void putchar(char c);
 void uart_init(uint8_t brg_mhz);
 
-#endif /* UART_H */
+#endif /* !UART_H */

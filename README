@@ -1,0 +1,125 @@
+Internal Debug Board
+====================
+
+Copyright 2008 Werner Almesberger
+
+The files in this package are distributed under the terms of the
+GNU General Public License (GPL), either version 2, or (at your
+option) any later version.
+
+This license is included in the file COPYING.GPLv2.
+
+
+The Internal Debug Board (IDBG) provides the core functionality of the
+Openmoko Debug Board in a package small enough that it can be placed
+inside the Neo's case (1973 or Freerunner), thus avoiding fragile FPC
+connections and making the solution as transportable as the phone
+itself.
+
+
+Overview
+--------
+
+IDBG is based on a SiLabs C8051F326 microcontroller. This chip contains
+a 8051 core, a voltage regulator, and a full-speed USB device. The only
+additional components are a USB receptacle, capacitors to stabilize the
+supply voltage, varistors for ESD protection, and an optional dual diode
+to separate power sources.
+
+The IDBG board is glued on top of the GPS shield and its Micro USB
+receptacle is accessed through a hole roughly opposite the AUX button.
+
+
+Directory organization
+----------------------
+
+fw/		Firmware sources
+  boot/		DFU-capable boot loader
+  common/	Code shared between boot loader and IDBG
+  idbg/		IDBG firmware
+hw/		Schematics, layout, BOM, and mechanical drawing
+f326/		Flash programmer using the C2 protocol
+tools/		User-space utilities to perform IDBG operations
+  idbg-gpio/	Set and read I/O pins
+
+
+Build process
+-------------
+
+See also http://www.almesberger.net/misc/idbg/
+
+- make the PCB
+- cut PCB such that IDBG and IPL board are together
+- solder the components in this order:
+  - U1 (MCU)
+  - P1 (USB receptacle)
+  - VR1, VR2, VR3 (varistors)
+  - C1 (VBUS capacitor)
+  - D1 (dual diode, optional)
+  - C2 (VDD capacitor)
+  - R4 (SDA pull-down)
+  - R1, R2, R3 (current limiters on IPL board) (**)
+  - Connector on IPL board (*)
+- recommended: use a current-limiting lab supply to verify current on
+  DEV_VSYS->DEV_GND and VBUS->GND (should be <10mA). Also ensure that
+  no current flows between VBUS and VSYS. (**)
+- connect a debug v3 board with 0.1" header on J11 (*)
+- put the IDBG board on the row with contacts 1 through 9. IDBG GND
+  connects to contact 9, contact 1 is left open.
+- enable power on the Neo with (**)
+  gpio f3=1
+- compile f326 and copy it to the Neo
+- identify the device:
+  ./f326
+  f326 should print a line with 0x0d and a line with 0x01.
+- copy the script hw/find-shorts to the Neo
+- run the script to perform a boundary scan to detect shorted I/O pins
+- recommended: run
+  f326 -b rrrrrrrr.rrrrrr
+  in a loop while touching I/O pads with a wire that connects through
+  1kOhm to GND to test that the traces are good and that the pins are
+  properly soldered
+- build the firmware in fw/ and copy the boot loader fw/boot/boot.bin
+  to the Neo
+- connect USB power to IDBG
+- put the boot loader into Flash with
+  f326 boot.bin
+  (This can sometimes fail. Just try again.)
+- IDBG should now respond to DFU. Use dfu-util to load the firmware:
+  dfu-util -D fw/idbg/idbg.bin
+- cut the IPL board off IDBG
+- take the Neo's PCB and glue IDBG on the GPS shield
+- make a hole for the Micro USB receptacle in the middle part of the
+  Neo's case 
+- insert the Neo PCB in the case and make sure it fit properly and that
+  also the top cover closes
+- remove the PCB again
+- optional: connect the VSYS pad to the Neo's VSYS
+- solder a wire to the GPS can and connect it to IDBG GND
+- solder wires to the IDBG I/O pads
+- recommended: mark the wires with a "morse" code, see hw/wiring.fig
+- recommended: bundle the wires in groups with heat-shrink tubing
+- insert the PCB in the case such that the wires pass around the PCB's
+  edge to the top
+- solder the wires to the corresponding test points around the debug
+  board FPC connector
+- remove the plastic structure in the top cover that would press on the
+  wires
+- close the case
+- done !
+
+* The use of a debugv3 board is optional. Alternative ways to do the
+  initial Flash programming include soldering the IDBG board directly
+  to the Neo:
+
+  - connect DEV_GND ("G") to ground
+  - DEV_VSYS ("V") goes to EINT3
+  - C2CK ("C") to SPI_MISO0
+  - C2D ("D") to SPI_CLK0
+
+** If D1 is not placed, the following changes have to be made:
+
+  - do not place R1 either
+  - bridge D1 such that VBUS connects directly to the diode's cathode
+  - power cannot be supplied from the debug board, so connect USB for
+    power

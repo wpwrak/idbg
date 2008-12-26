@@ -1,8 +1,21 @@
 /*
+ * boot/boot.c - Boot loader setup and main loop
+ *
+ * Written 2008 by Werner Almesberger
+ * Copyright 2008 Werner Almesberger
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ */
+
+/*
  * This code follows the register read/write sequences from the examples in
  * SiLabs/MCU/Examples/C8051F326_7/USB_Interrupt/Firmware/F326_USB_Main.c and 
  * SiLabs/MCU/Examples/C8051F326_7/USB_Interrupt/Firmware/F326_USB_ISR.c
  */
+
 
 #include <stdint.h>
 

@@ -1,4 +1,16 @@
 /*
+ * boot/dfu.c - DFU protocol engine
+ *
+ * Written 2008 by Werner Almesberger
+ * Copyright 2008 Werner Almesberger
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ */
+
+/*
  * http://www.usb.org/developers/devclass_docs/DFU_1.1.pdf
  */
 

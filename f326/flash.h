@@ -1,3 +1,16 @@
+/*
+ * f326/flash.h - Flash programming and reading
+ *
+ * Written 2008 by Werner Almesberger
+ * Copyright 2008 Werner Almesberger
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ */
+
+
 #ifndef FLASH_H
 #define FLASH_H
 
@@ -37,4 +50,4 @@ void flash_init(void);
 uint8_t fp_reg_read(uint8_t addr);
 void fp_reg_write(uint8_t addr, uint8_t value);
 
-#endif /* FLASH_H */
+#endif /* !FLASH_H */

@@ -17,6 +17,8 @@
 
 #include <stdint.h>
 
+#include "config.h"
+
 
 /* all fake ... */
 #define	USB_VENDOR	0x1234
@@ -97,6 +99,8 @@
 #define	EP0_SIZE	64
 #endif
 
+#define	EP1_SIZE	64	/* simplify */
+
 
 enum ep_state {
 	EP_IDLE,
@@ -125,6 +129,9 @@ struct setup_request {
 extern const uint8_t device_descriptor[];
 extern const uint8_t config_descriptor[];
 extern __xdata struct ep_descr ep0;
+#ifdef CONFIG_EP1
+extern __xdata struct ep_descr ep1in, ep1out;
+#endif
 
 extern bit (*user_setup)(struct setup_request *setup) __reentrant;
 extern bit (*user_get_descriptor)(uint8_t type, uint8_t index,

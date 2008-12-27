@@ -56,22 +56,37 @@
 #define	CRE		0x80	/* Clock Recovery Enable */
 
 #define	E0CSR		0x11	/* EP0 Control/Status */
-#define	OPRDY		0x01	/* OUT Packet Ready */
-#define	INPRDY		0x02	/* IN Packet Ready */
-#define	STSTL		0x04	/* Sent Stall */
+#define	OPRDY_0		0x01	/* OUT Packet Ready */
+#define	INPRDY_0	0x02	/* IN Packet Ready */
+#define	STSTL_0		0x04	/* Sent Stall */
 #define	DATAEND		0x08	/* Data End */
 #define	SUEND		0x10	/* Setup End */
-#define	SDSTL		0x20	/* Send Stall */
+#define	SDSTL_0		0x20	/* Send Stall */
 #define	SOPRDY		0x40	/* Serviced OPRDY */
 #define	SSUEND		0x80	/* Serviced Setup End */
 
 #define	EINCSRL		0x11	/* EP IN Control/Status Low Byte */
+#define	INPRDY_IN	0x01	/* IN Packet Ready */
+#define	FIFONE		0x02	/* FIFO Not Empty */
+#define	UNDRUN		0x04	/* Data Underrun */
+#define	FLUSH_IN	0x08	/* FIFO Flush */
+#define	SDSTL_IN	0x10	/* Send Stall */
+#define	STSTL_IN	0x20	/* Sent Stall */
+#define	CLRDT_IN	0x40	/* Clear Data Toggle */
 
-#define	EINCSRH		0x11	/* EP OUT Control/Status High Byte */
+#define	EINCSRH		0x12	/* EP OUT Control/Status High Byte */
 
 #define	EOUTCSRL	0x14	/* EP OUT Control/Status Low Byte */
+#define	OPRDY_OUT	0x01	/* OUT  Packet Ready */
+#define	FIFOFUL		0x02	/* OUT FIFO Full */
+#define	OVRUN		0x04	/* Data Overrun */
+#define	DATERR		0x08	/* Data Error */
+#define	FLUSH_OUT	0x10	/* FIFO Flush */
+#define	SDSTL_OUT	0x20	/* Send Stall */
+#define	STSTL_OUT	0x40	/* Sent Stall */
+#define	CLRDT_OUT	0x80	/* Clear Data Toggle */
 
-#define	EOUTCSRH	0x14	/* EP OUT Control/Status High Byte */
+#define	EOUTCSRH	0x15	/* EP OUT Control/Status High Byte */
 
 #define	E0CNT		0x16	/* Number of Received Bytes in EP0 FIFO */
 

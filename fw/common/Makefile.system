@@ -17,4 +17,4 @@
 
 
 PAYLOAD_START=0x2000
-PAYLOAD_SIZE=0x3e00	# last 512 bytes are reserved
+PAYLOAD_SIZE=0x1e00	# last 512 bytes are reserved

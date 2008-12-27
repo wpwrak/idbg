@@ -13,13 +13,18 @@
 /*
  * Known issues:
  * - no suspend/resume
- * - doesn't handle packet fragmentation yet (so low-speed doesn't work)
+ * - EP0-sized packets cause an (otherwise harmless) SUEND at the end of the
+ *   packet
+ * - #ifdef hell
  */
 
 /*
  * This code follows the register read/write sequences from the examples in
  * SiLabs/MCU/Examples/C8051F326_7/USB_Interrupt/Firmware/F326_USB_Main.c and
  * SiLabs/MCU/Examples/C8051F326_7/USB_Interrupt/Firmware/F326_USB_ISR.c
+ *
+ * More resources:
+ * http://www.beyondlogic.org/usbnutshell/usb1.htm
  */
 
 
@@ -43,6 +48,9 @@
 
 
 __xdata struct ep_descr ep0;
+#ifdef CONFIG_EP1
+__xdata struct ep_descr ep1in, ep1out;
+#endif
 
 bit (*user_setup)(struct setup_request *setup) __reentrant;
 bit (*user_get_descriptor)(uint8_t type, uint8_t index,
@@ -259,7 +267,7 @@ static void handle_setup(void)
 	}
 stall:
 	printk("STALL\n");
-	usb_write(E0CSR, SDSTL);
+	usb_write(E0CSR, SDSTL_0);
 	ep0.state = EP_STALL;
 }
 
@@ -270,7 +278,7 @@ static void ep0_data(void)
 
 	fifo = usb_read(E0CNT);
 	if (fifo > ep0.end-ep0.buf) {
-		usb_write(E0CSR, SDSTL);
+		usb_write(E0CSR, SDSTL_0);
 		return;
 	}
 	while (fifo--)
@@ -300,7 +308,7 @@ static void handle_ep0(void)
 	csr = usb_read(E0CSR);
 
 	/* clear sent stall indication */
-	if (csr & STSTL)
+	if (csr & STSTL_0)
 		usb_write(E0CSR, 0);
 
 	/* if transaction was interrupted, clean up */
@@ -310,7 +318,7 @@ static void handle_ep0(void)
 		ep0.state = EP_IDLE;
 	}
 
-	if (csr & OPRDY) {
+	if (csr & OPRDY_0) {
 		switch (ep0.state) {
 		case EP_IDLE:
 			handle_setup();
@@ -328,9 +336,9 @@ static void handle_ep0(void)
 		return;
 
 	csr = usb_read(E0CSR);
-	if (csr & INPRDY)
+	if (csr & INPRDY_0)
 		return;
-	if (csr & (SUEND | OPRDY))
+	if (csr & (SUEND | OPRDY_0))
 		return;
 
 	size = ep0.end-ep0.buf;
@@ -339,7 +347,7 @@ static void handle_ep0(void)
 	for (left = size; left; left--)
 		usb_write(FIFO0, *ep0.buf++);
 
-	csr |= INPRDY;
+	csr |= INPRDY_0;
 	if (size < EP0_SIZE) {
 		ep0.state = EP_IDLE;
 		csr |= DATAEND;
@@ -352,6 +360,46 @@ static void handle_ep0(void)
 }
 
 
+#ifdef CONFIG_EP1
+
+static void handle_ep1in(void)
+{
+	uint8_t csrl, left;
+	uint16_t size;
+
+	csrl = usb_read(EINCSRL);
+	if (csrl & UNDRUN)
+		csrl &= ~UNDRUN;
+	if (csrl & STSTL_IN)
+		csrl &= ~STSTL_IN;
+
+	if (ep1in.state == EP_TX) {
+		usb_write(EINCSRL, csrl);
+		return;
+	}
+
+	size = ep1in.end-ep1in.buf;
+	if (size > EP1_SIZE)
+		size = EP1_SIZE;
+	for (left = size; left; left--)
+		usb_write(FIFO0, *ep1in.buf++);
+	if (size < EP1_SIZE)
+		ep1in.state = EP_IDLE;
+
+	usb_write(EINCSRL, csrl);
+
+	if (ep1in.state == EP_IDLE && ep1in.callback)
+		ep1in.callback(ep1in.user);
+}
+
+
+static void handle_ep1out(void)
+{
+}
+
+#endif /* CONFIG_EP1 */
+
+
 void usb_poll(void)
 {
 	uint8_t flags;
@@ -361,6 +409,10 @@ void usb_poll(void)
 		debug("CMINT 0x%02x\n", flags);
 		if (flags & RSTINT) {
 			ep0.state = EP_IDLE;
+#ifdef CONFIG_EP1
+			ep1in.state = EP_IDLE;
+			ep1out.state = EP_IDLE;
+#endif
 			usb_write(POWER, 0);
 			if (user_reset)
 				user_reset();
@@ -371,17 +423,26 @@ void usb_poll(void)
 	flags = usb_read(IN1INT);
 	if (flags) {
 		debug("IN1INT 0x%02x\n", flags);
-		if (flags & EP0)
+		if (flags & EP0) {
+			usb_write(INDEX, 0);
 			handle_ep0();
-		if (flags & IN1)
-			/* handle IN */;
+		}
+#ifdef CONFIG_EP1
+		if (flags & IN1) {
+			usb_write(INDEX, 0);
+			handle_ep1in();
+		}
+#endif
 	}
 
+#ifdef CONFIG_EP1
 	flags = usb_read(OUT1INT);
 	if (flags) {
 		debug("OUT1INT 0x%02x\n", flags);
-		/* handle OUT */
+		usb_write(INDEX, 0);
+		handle_ep1out();
 	}
+#endif
 }
 
 

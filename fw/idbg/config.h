@@ -14,8 +14,10 @@
 #ifndef CONFIG_H
 #define	CONFIG_H
 
-//#define	CONFIG_DEBUG
-//#define	CONFIG_ERROR
-//#define	CONFIG_PRINTK
+#define	CONFIG_DEBUG
+#define	CONFIG_ERROR
+#define	CONFIG_PRINTK
+
+#define	CONFIG_EP1
 
 #endif /* !CONFIG_H */

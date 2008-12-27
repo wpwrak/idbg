@@ -45,7 +45,7 @@ const uint8_t device_descriptor[18] = {
 const uint8_t config_descriptor[] = {
 	9,			/* bLength */
 	USB_DT_CONFIG,		/* bDescriptorType */
-	LE(9+9),		/* wTotalLength */
+	LE(9+9+7+7),		/* wTotalLength */
 	1,			/* bNumInterfaces */
 	1,			/* bConfigurationValue (> 0 !) */
 	0,			/* iConfiguration */
@@ -59,9 +59,28 @@ const uint8_t config_descriptor[] = {
 	USB_DT_INTERFACE,	/* bDescriptorType */
 	0,			/* bInterfaceNumber */
 	0,			/* bAlternateSetting */
-	0,			/* bNumEndpoints */
+	2,			/* bNumEndpoints */
 	USB_CLASS_VENDOR_SPEC,	/* bInterfaceClass */
 	0,			/* bInterfaceSubClass */
 	0,			/* bInterfaceProtocol */
 	0,			/* iInterface */
+
+	/* EP OUT */
+
+	7,			/* bLength */
+	USB_DT_ENDPOINT,	/* bDescriptorType */
+	0x01,			/* bEndPointAddress */
+	0x02,			/* bmAttributes (bulk) */
+	LE(EP1_SIZE),		/* wMaxPacketSize */
+	0,			/* bInterval */
+
+	/* EP IN */
+
+	7,			/* bLength */
+	USB_DT_ENDPOINT,	/* bDescriptorType */
+	0x81,			/* bEndPointAddress */
+	0x02,			/* bmAttributes (bulk) */
+	LE(EP1_SIZE),		/* wMaxPacketSize */
+	0,			/* bInterval */
+
 };

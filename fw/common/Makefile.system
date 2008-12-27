@@ -13,8 +13,12 @@
 #
 # For now, we keep an 8k/7.5k division such that there's plenty of space for
 # debugging the boot loader. Later, we should move to something like 4k/11.5k.
+# @@@ do this now
+#
+# The last 512 bytes are reserved and the 512 bytes before them cannot be
+# erased, so they cannot be used for the payload either :-(
 #
 
 
-PAYLOAD_START=0x2000
-PAYLOAD_SIZE=0x1e00	# last 512 bytes are reserved
+PAYLOAD_START=0x1000
+PAYLOAD_SIZE=0x2d00

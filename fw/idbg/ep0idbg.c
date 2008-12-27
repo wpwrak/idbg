@@ -118,6 +118,7 @@ static bit my_setup(struct setup_request *setup) __reentrant
 	case IDBG_TO_DEV(IDBG_GPIO_UPDATE):
 		debug("IDBG_GPIO_UPDATE\n");
 usb_send(&ep1in, "Hello, world !\n", 15, NULL, NULL);
+printk("EP1 sent\n");
 		UPDATE_MASKED(p0_shadow, P0, setup->wIndex);
 		UPDATE_MASKED(p2_shadow, P2, setup->wIndex >> 8);
 		return 1;

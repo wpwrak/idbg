@@ -31,7 +31,8 @@ void putchar(char c)
 }
 
 
-#ifdef CONFIG_PRINTK
+/* for now, we always use printf_tiny, which doesn't have a vprintf* version */
+#ifdef noCONFIG_PRINTK
 
 void printk(const char *fmt, ...)
 {

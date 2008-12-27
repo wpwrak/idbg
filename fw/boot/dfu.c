@@ -122,7 +122,7 @@ static void flash_erase_page(uint16_t addr)
 }
 
 
-static void flash_write_page(uint16_t addr, uint8_t value)
+static void flash_write_byte(uint16_t addr, uint8_t value)
 {
 	FLKEY = 0xa5;
 	FLKEY = 0xf1;
@@ -141,7 +141,7 @@ static void block_write(void *user)
 	for (p = buf; p != buf+*size; p++) {
 		if (!(payload & 511))
 			flash_erase_page(payload);
-		flash_write_page(payload, *p);
+		flash_write_byte(payload, *p);
 		payload++;
 	}
 }
@@ -281,8 +281,20 @@ static bit my_setup(struct setup_request *setup) __reentrant
 		dfu.status = OK;
 		return 1;
 	default:
+#ifdef CONFIG_PRINTK
 		printk("DFU rt %x, rq%x ?\n",
 		    setup->bmRequestType, setup->bRequest);
+#else
+		/*
+		 * sdcc 2.7.0 ends up OR'in setup->bmRequestType with
+		 * setup->bRequest unshifted if we don't use at least one of
+		 * them here.
+		 */
+		{
+			static volatile uint8_t foo;
+			foo = setup->bRequest;
+		}
+#endif
 		return 0;
 	}
 }

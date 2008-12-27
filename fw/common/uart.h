@@ -15,6 +15,7 @@
 #define UART_H
 
 #include <stdint.h>
+#include <stdio.h>
 
 #include "config.h"
 
@@ -34,7 +35,7 @@
 #endif
 
 #ifdef CONFIG_PRINTK
-void printk(const char *fmt, ...);
+#define printk printf_fast
 #else
 #define printk(...)
 #endif

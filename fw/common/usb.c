@@ -368,6 +368,7 @@ static void handle_ep1in(void)
 	uint16_t size;
 
 	csrl = usb_read(EINCSRL);
+printk("EINCSRL 0x%02x\n", csrl);
 	if (csrl & UNDRUN)
 		csrl &= ~UNDRUN;
 	if (csrl & STSTL_IN)

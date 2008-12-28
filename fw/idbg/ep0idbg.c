@@ -50,7 +50,7 @@ static void do_i2c_write(void *user)
 }
 
 
-static bit my_setup(struct setup_request *setup) __reentrant
+static __bit my_setup(struct setup_request *setup) __reentrant
 {
 	switch (setup->bmRequestType | setup->bRequest << 8) {
 	case IDBG_FROM_DEV(IDBG_ID):

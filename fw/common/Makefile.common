@@ -12,7 +12,7 @@
 
 
 CC=sdcc
-CFLAGS=-I. -I../common \
+CFLAGS=--std-c99 -I. -I../common \
        -DPAYLOAD_START=$(PAYLOAD_START) -DPAYLOAD_SIZE=$(PAYLOAD_SIZE)
 LDFLAGS=--xram-size 1024
 
@@ -82,13 +82,13 @@ include .depend
 endif
 
 clean:
-		rm -f $(OBJS:%=%.rel) .depend
+		rm -f $(OBJS:%=%.rel)
 		rm -f $(OBJS:%=%.asm) $(OBJS:%=%.lst)
 		rm -f $(OBJS:%=%.rst) $(OBJS:%=%.sym)
 		rm -f $(MAIN).ihx $(MAIN).lnk $(MAIN).map $(MAIN).mem
 
 spotless:	clean
-		rm -f $(MAIN).bin
+		rm -f $(MAIN).bin .depend
 
 upload:
 		ssh lab neo 'cat \>$(MAIN).bin' <$(MAIN).bin

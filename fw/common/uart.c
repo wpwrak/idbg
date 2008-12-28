@@ -37,7 +37,7 @@ void putchar(char c)
 void printk(const char *fmt, ...)
 {
 	va_list ap;
-	bit saved;
+	__bit saved;
 
 	va_start(ap, fmt);
 	saved = EA;

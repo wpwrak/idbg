@@ -52,8 +52,8 @@ __xdata struct ep_descr ep0;
 __xdata struct ep_descr ep1in, ep1out;
 #endif
 
-bit (*user_setup)(struct setup_request *setup) __reentrant;
-bit (*user_get_descriptor)(uint8_t type, uint8_t index,
+__bit (*user_setup)(struct setup_request *setup) __reentrant;
+__bit (*user_get_descriptor)(uint8_t type, uint8_t index,
     const uint8_t * const *reply, uint8_t *size) __reentrant;
 void (*user_reset)(void) __reentrant;
 
@@ -111,7 +111,7 @@ static uint16_t usb_read_word(uint8_t reg)
 }
 
 
-static bit get_descriptor(uint8_t type, uint8_t index, uint16_t length)
+static __bit get_descriptor(uint8_t type, uint8_t index, uint16_t length)
 {
 	const uint8_t *reply;
 	uint8_t size;
@@ -150,7 +150,7 @@ static bit get_descriptor(uint8_t type, uint8_t index, uint16_t length)
 static void handle_setup(void)
 {
 	struct setup_request setup;
-	bit ok = 0;
+	__bit ok = 0;
 
 	BUG_ON(usb_read(E0CNT) < 8);
 
@@ -262,7 +262,6 @@ static void handle_setup(void)
 			usb_write(E0CSR, SOPRDY);
 		else
 			usb_write(E0CSR, SOPRDY | DATAEND);
-		debug("OK");
 		return;
 	}
 stall:

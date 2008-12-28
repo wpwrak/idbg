@@ -133,8 +133,8 @@ extern __xdata struct ep_descr ep0;
 extern __xdata struct ep_descr ep1in, ep1out;
 #endif
 
-extern bit (*user_setup)(struct setup_request *setup) __reentrant;
-extern bit (*user_get_descriptor)(uint8_t type, uint8_t index,
+extern __bit (*user_setup)(struct setup_request *setup) __reentrant;
+extern __bit (*user_get_descriptor)(uint8_t type, uint8_t index,
     const uint8_t * const *reply, uint8_t *size) __reentrant;
 extern void (*user_reset)(void) __reentrant;
 

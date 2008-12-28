@@ -104,7 +104,7 @@ struct dfu dfu = {
 
 static uint16_t next_block = 0;
 static uint16_t payload;
-static bit did_download;
+static __bit did_download;
 
 
 static __xdata uint8_t buf[EP0_SIZE];
@@ -147,7 +147,7 @@ static void block_write(void *user)
 }
 
 
-static bit block_receive(uint16_t length)
+static __bit block_receive(uint16_t length)
 {
 	static uint16_t size;
 
@@ -167,7 +167,7 @@ static bit block_receive(uint16_t length)
 }
 
 
-static bit block_transmit(uint16_t length)
+static __bit block_transmit(uint16_t length)
 {
 	uint16_t left;
 
@@ -192,9 +192,9 @@ static bit block_transmit(uint16_t length)
 }
 
 
-static bit my_setup(struct setup_request *setup) __reentrant
+static __bit my_setup(struct setup_request *setup) __reentrant
 {
-	bit ok;
+	__bit ok;
 
 	switch (setup->bmRequestType | setup->bRequest << 8) {
 	case DFU_TO_DEV(DFU_DETACH):
@@ -300,7 +300,7 @@ static bit my_setup(struct setup_request *setup) __reentrant
 }
 
 
-static bit my_descr(uint8_t type, uint8_t index, const uint8_t **reply,
+static __bit my_descr(uint8_t type, uint8_t index, const uint8_t **reply,
     uint8_t *size) __reentrant
 {
 	index; /* suppress warning */

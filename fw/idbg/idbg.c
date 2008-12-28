@@ -23,6 +23,21 @@ static void usb_isr(void) __interrupt(8)
 	putchar('&');
 }
 
+static __xdata uint8_t buf[64];
+
+
+static void ep1_out(void *user)
+{
+	uint8_t got, i;
+
+	user; /* silence sdcc */
+	got = sizeof(buf)-usb_left(&ep1out);
+	printk("ep1_out: %d\n", got);
+	for (i = 0; i != got; i++)
+		putchar(buf[i]);
+	usb_recv(&ep1out, buf, sizeof(buf), ep1_out, NULL);
+}
+
 
 void main(void)
 {
@@ -45,6 +60,7 @@ void main(void)
 
 	ep0idbg_init();
 	usb_init();
+	usb_recv(&ep1out, buf, sizeof(buf), ep1_out, NULL);
 	while (1)
 		usb_poll();
 }

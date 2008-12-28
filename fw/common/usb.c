@@ -308,8 +308,14 @@ static void handle_ep0(void)
 	csr = usb_read(E0CSR);
 
 	/* clear sent stall indication */
-	if (csr & STSTL_0)
+	if (csr & STSTL_0) {
 		usb_write(E0CSR, 0);
+		/*
+		 * @@@ Should return to IDLE, but this causes confusion with
+		 * OPRDY_0. Need to investigate.
+		 * ep0.state = EP_IDLE;
+		 */
+	}
 
 	/* if transaction was interrupted, clean up */
 	if (csr & SUEND) {
@@ -327,7 +333,7 @@ static void handle_ep0(void)
 			ep0_data();
 			break;
 		default:
-			printk("???\n");
+			printk("??? %d\n", ep0.state);
 			break;
 		}
 	}
@@ -348,7 +354,7 @@ static void handle_ep0(void)
 		usb_write(FIFO0, *ep0.buf++);
 
 	csr |= INPRDY_0;
-	if (size < EP0_SIZE) {
+	if (size != EP0_SIZE) {
 		ep0.state = EP_IDLE;
 		csr |= DATAEND;
 	}
@@ -364,28 +370,40 @@ static void handle_ep0(void)
 
 static void handle_ep1in(void)
 {
-	uint8_t csrl, left;
-	uint16_t size;
+	uint8_t csrl;
 
 	csrl = usb_read(EINCSRL);
-printk("EINCSRL 0x%02x\n", csrl);
+	debug("handle_ep1in: EINCSRL 0x%02x\n", csrl);
 	if (csrl & UNDRUN)
 		csrl &= ~UNDRUN;
 	if (csrl & STSTL_IN)
 		csrl &= ~STSTL_IN;
 
-	if (ep1in.state == EP_TX) {
-		usb_write(EINCSRL, csrl);
+	usb_write(EINCSRL, csrl);
+}
+
+
+static void fill_ep1in(void)
+{
+	uint8_t csrl, left;
+	uint16_t size;
+
+	if (ep1in.state != EP_TX)
 		return;
-	}
+
+	csrl = usb_read(EINCSRL);
+	debug("fill_ep1in: EINCSRL 0x%02x\n", csrl);
+	if (csrl & FIFONE)
+		return;
 
 	size = ep1in.end-ep1in.buf;
 	if (size > EP1_SIZE)
 		size = EP1_SIZE;
 	for (left = size; left; left--)
-		usb_write(FIFO0, *ep1in.buf++);
-	if (size < EP1_SIZE)
+		usb_write(FIFO1, *ep1in.buf++);
+	if (size != EP1_SIZE)
 		ep1in.state = EP_IDLE;
+	csrl |= INPRDY_IN;
 
 	usb_write(EINCSRL, csrl);
 
@@ -396,6 +414,41 @@ printk("EINCSRL 0x%02x\n", csrl);
 
 static void handle_ep1out(void)
 {
+	uint8_t csrl, fifo;
+
+	csrl = usb_read(EOUTCSRL);
+	debug("EOUTCSRL 0x%02x\n", csrl);
+	if (csrl & OVRUN)
+		csrl &= ~OVRUN;
+	if (csrl & STSTL_OUT) {
+		csrl &= ~STSTL_OUT;
+		csrl |= CLRDT_OUT;
+	}
+
+	usb_write(EINCSRL, csrl);
+
+	if (!(csrl & OPRDY_OUT))
+		return;
+
+	if (ep1out.state != EP_RX) {
+		usb_write(EOUTCSRL, FLUSH_OUT);
+		return;
+	}
+
+	fifo = usb_read(EOUTCNTL);
+	if (fifo > ep1out.end-ep1out.buf) {
+		usb_write(EOUTCSRL, SDSTL_OUT | FLUSH_OUT);
+		return;
+	}
+	while (fifo--)
+		*ep1out.buf++ = usb_read(FIFO1);
+
+	ep1out.state = EP_IDLE;
+	if (ep1out.callback)
+		ep1out.callback(ep1out.user);
+
+	csrl &= ~OPRDY_OUT;
+	usb_write(EOUTCSRL, csrl);
 }
 
 #endif /* CONFIG_EP1 */
@@ -410,9 +463,13 @@ void usb_poll(void)
 		debug("CMINT 0x%02x\n", flags);
 		if (flags & RSTINT) {
 			ep0.state = EP_IDLE;
+			/*
+			 * EP state serves as "buffer is valid" indicator for
+			 * EP1OUT, so don't reset it. @@@ call back EP1IN or
+			 * the whole completion callback logic falls apart.
+			 */
 #ifdef CONFIG_EP1
 			ep1in.state = EP_IDLE;
-			ep1out.state = EP_IDLE;
 #endif
 			usb_write(POWER, 0);
 			if (user_reset)
@@ -430,17 +487,21 @@ void usb_poll(void)
 		}
 #ifdef CONFIG_EP1
 		if (flags & IN1) {
-			usb_write(INDEX, 0);
+			usb_write(INDEX, 1);
 			handle_ep1in();
 		}
 #endif
 	}
+#ifdef CONFIG_EP1
+	usb_write(INDEX, 1);
+	fill_ep1in();
+#endif
 
 #ifdef CONFIG_EP1
 	flags = usb_read(OUT1INT);
 	if (flags) {
 		debug("OUT1INT 0x%02x\n", flags);
-		usb_write(INDEX, 0);
+		usb_write(INDEX, 1);
 		handle_ep1out();
 	}
 #endif

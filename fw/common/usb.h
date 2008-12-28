@@ -139,6 +139,7 @@ extern bit (*user_get_descriptor)(uint8_t type, uint8_t index,
 extern void (*user_reset)(void) __reentrant;
 
 
+#define	usb_left(ep) ((ep)->end-(ep)->buf)
 #define usb_send(ep, buf, size, callback, user) \
 	usb_io(ep, EP_TX, buf, size, callback, user)
 #define usb_recv(ep, buf, size, callback, user) \

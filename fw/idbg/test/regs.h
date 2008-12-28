@@ -1,5 +1,3 @@
-uint8_t SCON0;
+uint8_t RI0, TI0, REN0;
 uint8_t SBUF0;
-
-#define	RI0	1
-#define	TI0	2
+int EA;

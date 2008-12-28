@@ -3,6 +3,9 @@
 #include <string.h>
 
 
+#define __interrupt(x)
+
+
 #include "../serial.c"
 
 
@@ -51,9 +54,9 @@ static void usb_arrive(void *buf)
 static void rx(char c)
 {
 	SBUF0 = c;
-	SCON0 |= RI0;
+	RI0 = 1;
 	serial_poll();
-	SCON0 &= ~RI0;
+	RI0 = 0;
 }
 
 
@@ -70,7 +73,7 @@ static void tx(void)
 
 static void tx_done(void)
 {
-	SCON0 |= TI0;
+	TI0 = 1;
 }
 
 

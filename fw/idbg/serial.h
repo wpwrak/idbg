@@ -17,6 +17,12 @@
 #include "usb.h"
 
 
+/*
+ * @@@ This is slighly backwards. We shouldn't follow the buffer size the USB
+ * side uses but the USB side (descr.c) should use the buffer size we choose
+ * here.
+ */
+
 #define TX_BUF_SIZE	EP1_SIZE
 #define RX_BUF_SIZE	EP1_SIZE
 

@@ -25,7 +25,7 @@
 
 
 static __xdata struct urb {
-	uint8_t buf[EP1_SIZE];
+	uint8_t buf[TX_BUF_SIZE];
 	uint8_t *pos;
 	uint8_t *end;
 } urbs[2];
@@ -34,12 +34,9 @@ static struct urb *uart_q[2] = { NULL, NULL };
 static struct urb *usb_q[2] = { urbs, urbs+1 };
 static __bit txing = 0; /* UART is txing */
 
-static __xdata uint8_t rx_buf[2][EP1_SIZE];
+static __xdata uint8_t rx_buf[2][RX_BUF_SIZE];
 static __bit rx_curr = 0, rx_busy = 0;
-static uint8_t rx_pos = 0;
-
-
-static void send_rx(void);
+static volatile uint8_t rx_pos = 0;
 
 
 static void got_tx(void *user)
@@ -51,7 +48,7 @@ static void got_tx(void *user)
 	 * Weird. SDCC 2.7.0 doesn't seem to know that "array" is equivalent to
 	 * &array[0] and gets confused. @@@
 	 */
-	urb->end = &urb->buf[0]+EP1_SIZE-usb_left(&ep1out);
+	urb->end = &urb->buf[0]+TX_BUF_SIZE-usb_left(&ep1out);
 	usb_q[0] = usb_q[1];
 	usb_q[1] = NULL;
 	if (uart_q[0]) {
@@ -61,7 +58,7 @@ static void got_tx(void *user)
 	}
 	urb = usb_q[0];
 	if (urb)
-		usb_recv(&ep1out, urb->buf, EP1_SIZE, got_tx, urb);
+		usb_recv(&ep1out, urb->buf, TX_BUF_SIZE, got_tx, urb);
 }
 
 
@@ -84,7 +81,7 @@ static void do_tx(void)
 		usb_q[1] = urb;
 	} else {
 		usb_q[0] = urb;
-		usb_recv(&ep1out, urb->buf, EP1_SIZE, got_tx, urb);
+		usb_recv(&ep1out, urb->buf, TX_BUF_SIZE, got_tx, urb);
 	}
 }
 
@@ -93,8 +90,6 @@ static void rx_done(void *user)
 {
 	user; /* silence sdcc */
 	rx_busy = 0;
-	if (rx_pos)
-		send_rx();
 }
 
 
@@ -109,31 +104,41 @@ static void send_rx(void)
 
 static void do_rx(void)
 {
-	if (rx_pos == EP1_SIZE) {
+	EA = 0;
+	EA = 0;
+	if (rx_pos && !rx_busy)
+		send_rx();
+	EA = 1;
+}
+
+
+void uart_isr(void) __interrupt(4)
+{
+	if (!RI0)
+		return;
+	RI0 = 0;
+	if (rx_pos == RX_BUF_SIZE) {
 		debug("do_rx overrun\n");
 		return;
 	}
 	rx_buf[rx_curr][rx_pos] = SBUF0;
 	rx_pos++;
-	if (!rx_busy)
-		send_rx();
 }
 
 
 void serial_poll(void)
 {
-	uint8_t flags;
-
-	flags = SCON0;
-	SCON0 = 0;
-	if (flags & RI0)
-		do_rx();
-	if ((flags & TI0) || !txing)
+	do_rx();
+	if (TI0 || !txing) {
+		TI0 = 0;
 		do_tx();
+	}
 }
 
 
 void serial_init(void)
 {
-	usb_recv(&ep1out, urbs->buf, EP1_SIZE, got_tx, urbs);
+	usb_recv(&ep1out, urbs->buf, TX_BUF_SIZE, got_tx, urbs);
+	REN0 = 1;
+	ES0 = 1;
 }

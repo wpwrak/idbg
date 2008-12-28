@@ -1,0 +1,300 @@
+Index: openocd/configure.in
+===================================================================
+--- openocd/configure.in	(revision 1279)
++++ openocd/configure.in	(working copy)
+@@ -247,7 +247,11 @@
+   AS_HELP_STRING([--enable-rlink], [Enable building support for the Raisonance RLink JTAG Programmer]),
+   [build_rlink=$enableval], [build_rlink=no])
+ 
++AC_ARG_ENABLE(idbg,
++  AS_HELP_STRING([--enable-idbg], [Enable building support for the IDBG JTAG Programmer]),
++  [build_idbg=$enableval], [build_idbg=no])
+ 
++
+ case $host in 
+   *-cygwin*) 
+     is_win32=yes
+@@ -418,6 +422,13 @@
+   AC_DEFINE(BUILD_RLINK, 0, [0 if you don't want the RLink JTAG driver.])
+ fi
+ 
++if test $build_idbg = yes; then
++  build_bitbang=yes
++  AC_DEFINE(BUILD_IDBG, 1, [1 if you want the IDBG JTAG driver.])
++else
++  AC_DEFINE(BUILD_IDBG, 0, [0 if you don't want the IDBG JTAG driver.])
++fi
++
+ #-- Deal with MingW/Cygwin FTD2XX issues
+ 
+ if test $is_win32 = yes; then
+@@ -632,6 +643,7 @@
+ AM_CONDITIONAL(OOCD_TRACE, test $build_oocd_trace = yes)
+ AM_CONDITIONAL(JLINK, test $build_jlink = yes)
+ AM_CONDITIONAL(RLINK, test $build_rlink = yes)
++AM_CONDITIONAL(IDBG, test $build_idbg = yes)
+ AM_CONDITIONAL(IS_CYGWIN, test $is_cygwin = yes)
+ AM_CONDITIONAL(IS_MINGW, test $is_mingw = yes)
+ AM_CONDITIONAL(IS_WIN32, test $is_win32 = yes)
+Index: openocd/src/jtag/idbg.c
+===================================================================
+--- openocd/src/jtag/idbg.c	(revision 0)
++++ openocd/src/jtag/idbg.c	(revision 0)
+@@ -0,0 +1,194 @@
++/*
++ * idbg.c - IDBG JTAG interface
++ *
++ * Written 2008 by Werner Almesberger
++ * Copyright 2008 Werner Almesberger
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ */
++
++/*
++ * This is the most primitive way to use IDBG. We basically implement a
++ * USB-attached wiggler. Performance cannot be anything but horrible, but this
++ * is a great way to get started.
++ */
++
++
++#include <usb.h>
++
++#include "jtag.h"
++#include "bitbang.h"
++
++
++#define TO_DEV		0x40
++#define	FROM_DEV	0xc0
++
++#define IDBG_TO_DEV(req)        (0x40 | (req) << 8)
++#define IDBG_FROM_DEV(req)      (0xc0 | (req) << 8)
++
++
++enum idbg_requests {
++	IDBG_ID			= 0x00,
++	IDBG_RESET,
++	IDBG_JTAG_ATTACH	= 0x10,
++	IDBG_JTAG_DETACH,
++	IDBG_JTAG_GPIO_SET,
++	IDBG_JTAG_GPIO_GET,
++	IDBG_JTAG_SEND,
++	IDBG_JTAG_FETCH,
++};
++
++enum jtag_gpios {
++	JTAG_nTRST,	/* 0x01 */
++	JTAG_TMS,	/* 0x02 */
++	JTAG_TDO,	/* 0x04 */
++	JTAG_TDI,	/* 0x08 */
++	JTAG_TCK,	/* 0x10 */
++	JTAG_nSRST,	/* 0x20 */
++};
++
++
++static usb_dev_handle *usb;
++
++
++static usb_dev_handle *open_usb(void)
++{
++	const struct usb_bus *bus;
++	struct usb_device *dev;
++
++	usb_init();
++	usb_find_busses();
++	usb_find_devices();
++
++	for (bus = usb_get_busses(); bus; bus = bus->next)
++		for (dev = bus->devices; dev; dev = dev->next) {
++			if (dev->descriptor.idVendor != 0x1234)
++				continue;
++			if (dev->descriptor.idProduct != 0x0002)
++				continue;
++			return usb_open(dev);
++		}
++	return NULL;
++}
++
++
++static int idbg_read(void)
++{
++	uint8_t buf;
++	int res;
++	
++	res = usb_control_msg(usb, FROM_DEV, IDBG_JTAG_GPIO_GET, 0, 0,
++	    &buf, 1, 1000);
++	if (res < 0) {
++		LOG_ERROR("IDBG_JTAG_GPIO_GET failed: %i", res);
++		return 0;
++	}
++//LOG_INFO("got 0x%02x (%d)", buf, (buf >> JTAG_TDO) & 1);
++	return !!(buf & JTAG_TDO);
++}
++
++
++static void idbg_write(int tck, int tms, int tdi)
++{
++	int res;
++
++//LOG_INFO("set tck %d tms %d tdi %d", tck, tms, tdi);
++	res = usb_control_msg(usb, TO_DEV, IDBG_JTAG_GPIO_SET,
++	    !!tck << JTAG_TCK | !!tms << JTAG_TMS | !!tdi << JTAG_TDI,
++	    1 << JTAG_TCK | 1 << JTAG_TMS | 1 << JTAG_TDI,
++	    NULL, 0, 1000);
++	if (res < 0)
++		LOG_ERROR("IDBG_JTAG_GPIO_SET failed: %i", res);
++}
++
++
++static void idbg_reset(int trst, int srst)
++{
++	int res;
++
++LOG_INFO("set trst %d srst %d", trst, srst);
++	res = usb_control_msg(usb, TO_DEV, IDBG_JTAG_GPIO_SET,
++	    !trst << JTAG_nTRST | !srst << JTAG_nSRST,
++	    1 << JTAG_nTRST | 1 << JTAG_nSRST,
++	    NULL, 0, 1000);
++	if (res < 0)
++		LOG_ERROR("IDBG_JTAG_GPIO_SET failed: %i", res);
++}
++
++
++static bitbang_interface_t idbg_bitbang = {
++	.read		= idbg_read,
++	.write		= idbg_write,
++	.reset		= idbg_reset,
++	.blink		= NULL,
++};
++
++
++
++static int idbg_speed(int speed)
++{
++	return ERROR_OK;
++}
++
++
++static int idbg_register_commands(struct command_context_s *cmd_ctx)
++{
++	return ERROR_OK;
++}
++
++
++static int idbg_init(void)
++{
++	int res;
++
++	usb = open_usb();
++	if (!usb) {
++		LOG_ERROR("no IDBG found");
++		return ERROR_JTAG_INIT_FAILED;
++	}
++	res = usb_control_msg(usb, TO_DEV, IDBG_JTAG_ATTACH, 0, 0,
++	    NULL, 0, 1000);
++	if (res < 0) {
++		LOG_ERROR("IDBG_JTAG_ATTACH failed: %i", res);
++		return ERROR_JTAG_INIT_FAILED;
++	}
++	bitbang_interface = &idbg_bitbang;
++	LOG_INFO("IDBG JTAG interface ready");
++	idbg_reset(0, 0);
++	idbg_write(0, 0, 0);
++	return ERROR_OK;
++}
++
++
++static int idbg_quit(void)
++{
++	int res;
++
++	res = usb_control_msg(usb, TO_DEV, IDBG_JTAG_DETACH, 0, 0,
++	    NULL, 0, 1000);
++	if (res < 0) {
++		LOG_ERROR("IDBG_JTAG_DETACH failed: %i", res);
++		return ERROR_JTAG_DEVICE_ERROR;
++	}
++	res = usb_close(usb);
++	if (res < 0) {
++		LOG_ERROR("IDBG_JTAG_ATTACH failed");
++		return ERROR_JTAG_DEVICE_ERROR;
++	}
++	return ERROR_OK;
++}
++
++
++jtag_interface_t idbg_interface = {
++	.name	= "idbg",
++	.execute_queue
++		= bitbang_execute_queue,
++	.speed	= idbg_speed,
++	.register_commands
++		= idbg_register_commands,
++	.init	= idbg_init,
++	.quit	= idbg_quit,
++};
+Index: openocd/src/jtag/jtag.c
+===================================================================
+--- openocd/src/jtag/jtag.c	(revision 1279)
++++ openocd/src/jtag/jtag.c	(working copy)
+@@ -200,6 +200,10 @@
+ 	extern jtag_interface_t rlink_interface;
+ #endif
+ 
++#if BUILD_IDBG == 1
++	extern jtag_interface_t idbg_interface;
++#endif
++
+ jtag_interface_t *jtag_interfaces[] = {
+ #if BUILD_ECOSBOARD == 1
+ 	&zy1000_interface,
+@@ -240,6 +244,9 @@
+ #if BUILD_RLINK == 1
+ 	&rlink_interface,
+ #endif
++#if BUILD_IDBG == 1
++	&idbg_interface,
++#endif
+ 	NULL,
+ };
+ 
+Index: openocd/src/jtag/Makefile.am
+===================================================================
+--- openocd/src/jtag/Makefile.am	(revision 1279)
++++ openocd/src/jtag/Makefile.am	(working copy)
+@@ -96,7 +96,13 @@
+ RLINKFILES =
+ endif
+ 
++if IDBG
++IDBGFILES = idbg.c
++else
++IDBGFILES =
++endif
++
+ libjtag_a_SOURCES = jtag.c $(BITBANGFILES) $(PARPORTFILES) $(DUMMYFILES) $(FT2232FILES) $(AMTJTAGACCELFILES) $(EP93XXFILES) \
+-	$(AT91RM9200FILES) $(GW16012FILES) $(BITQFILES) $(PRESTOFILES) $(USBPROGFILES) $(ECOSBOARDFILES) $(JLINKFILES) $(RLINKFILES)
++	$(AT91RM9200FILES) $(GW16012FILES) $(BITQFILES) $(PRESTOFILES) $(USBPROGFILES) $(ECOSBOARDFILES) $(JLINKFILES) $(RLINKFILES) $(IDBGFILES)
+ 
+ noinst_HEADERS = bitbang.h jtag.h
+Index: openocd/src/Makefile.am
+===================================================================
+--- openocd/src/Makefile.am	(revision 1279)
++++ openocd/src/Makefile.am	(working copy)
+@@ -50,10 +50,14 @@
+ if RLINK
+ LIBUSB = -lusb
+ else
++if IDBG
++LIBUSB = -lusb
++else
+ LIBUSB =
+ endif
+ endif
+ endif
++endif
+ 
+ 
+ 

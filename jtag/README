@@ -1,0 +1,4 @@
+svn checkout -r 1279 svn://svn.berlios.de/openocd/trunk openocd
+patch -p0 <openocd.patch
+./bootstrap
+./configure --enable-bitbang --enable-idbg

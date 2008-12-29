@@ -30,7 +30,7 @@ static enum state {
 	RECV,	/* receive a byte */
 } state = IDLE;
 
-static uint8_t *wbuf, *wpos, *wend;
+static const uint8_t *wbuf, *wpos, *wend;
 static uint8_t *rbuf, *rpos, *rend;
 static uint8_t device, fetched, data;
 static __bit sda;
@@ -63,12 +63,17 @@ __bit i2c_fetch(struct ep_descr *ep, uint8_t len)
 		size = pos < 0 ? -pos : rend-rbuf-pos;
 		if (size > len)
 			size = len;
-		usb_send(ep, wbuf+fetched, size, NULL, 0);
+		if (pos < 0)
+			usb_send(ep, wbuf+fetched, size, NULL, 0);
+		else
+			usb_send(ep, rbuf+pos, size, NULL, 0);
 		fetched += size;
 	}
 	return 1;
 }
 
+
+#ifndef SIMULATION
 
 static void delay(void)
 {
@@ -77,6 +82,8 @@ static void delay(void)
 	for (i = 0; i != 240/3; i++)
 		__asm nop __endasm;
 }
+
+#endif /* !SIMULATION */
 
 
 void i2c_poll(void)
@@ -95,6 +102,7 @@ void i2c_poll(void)
 			data = device | 0x80;
 		else
 			data = device;
+		delay();
 		state = SEND;
 		break;
 	case SEND:
@@ -106,6 +114,9 @@ void i2c_poll(void)
 			I2C_SCL = 1;
 			delay();
 		}
+		I2C_SCL = 0;
+		delay();
+		I2C_SDA = 1;
 		state = ACK;
 		break;
 	case RECV:
@@ -130,6 +141,8 @@ void i2c_poll(void)
 	case ACK:
 		if (I2C_SDA)
 			break;
+		I2C_SCL = 0;
+		delay();
 		if (wpos != wend) {
 			data = *wpos++;
 			state = SEND;
@@ -138,8 +151,8 @@ void i2c_poll(void)
 			if (rpos != rend)
 				state = RECV;
 			else {
-				I2C_SDA = 1;
 				state = IDLE;
+				delay();
 			}
 		}
 		break;
@@ -147,6 +160,8 @@ void i2c_poll(void)
 		if (!I2C_SDA)
 			break;
 		state = IDLE;
+		delay();
+		break;
 	default:
 		break;
 	}

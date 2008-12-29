@@ -88,7 +88,7 @@ static void delay(void)
 
 void i2c_poll(void)
 {
-	int i;
+	int8_t i;
 
 	switch (state) {
 	case IDLE:
@@ -99,14 +99,14 @@ void i2c_poll(void)
 			break;
 		I2C_SDA = 0;
 		if (wpos == wend)
-			data = device | 0x80;
+			data = device << 1 | 1;
 		else
-			data = device;
+			data = device << 1;
 		delay();
 		state = SEND;
 		break;
 	case SEND:
-		for (i = 0; i != 8; i++) {
+		for (i = 7; i != -1; i--) {
 			I2C_SCL = 0;
 			sda = (data >> i) & 1;
 			I2C_SDA = sda;
@@ -121,7 +121,7 @@ void i2c_poll(void)
 		break;
 	case RECV:
 		data = 0;
-		for (i = 0; i != 8; i++) {
+		for (i = 7; i != -1; i--) {
 			I2C_SCL = 0;
 			delay();
 			I2C_SCL = 1;
@@ -141,7 +141,7 @@ void i2c_poll(void)
 	case ACK:
 		if (I2C_SDA)
 			break;
-		I2C_SCL = 0;
+		I2C_SCL = 1;
 		delay();
 		if (wpos != wend) {
 			data = *wpos++;

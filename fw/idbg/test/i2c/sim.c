@@ -39,8 +39,11 @@ static void polln(int n)
 int main(void)
 {
 	int i;
+	uint8_t tmp;
 
 	I2C_SDA = I2C_SCL = 1;
+
+#if 0
 	i2c_start(0x17, "A", 1, NULL, 0);
 	polln(20);
 	I2C_SDA = 0;
@@ -48,8 +51,19 @@ int main(void)
 	polln(20);
 	I2C_SDA = 0;
 	i2c_poll();
+#else
+	i2c_start(0x17, NULL, 0, &tmp, 1);
+	polln(20);
+	I2C_SDA = 0;
+	i2c_poll();
+	polln(20);
+	I2C_SDA = 1;
+	i2c_poll();
+#endif
+
 	polln(20);
 	fprintf(stderr, "state %d\n", state);
 	i2c_fetch(NULL, 10);
+
 	return 0;
 }

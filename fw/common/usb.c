@@ -300,7 +300,7 @@ static void handle_ep0(void)
 
 	if (addr != NO_ADDRESS) {
 		usb_write(FADDR, addr);
-//		putchar('A');
+		debug("A");
 		addr = NO_ADDRESS;
 	}
 
@@ -318,7 +318,7 @@ static void handle_ep0(void)
 
 	/* if transaction was interrupted, clean up */
 	if (csr & SUEND) {
-		putchar('S');
+		debug("S");
 		usb_write(E0CSR, DATAEND | SSUEND);
 		ep0.state = EP_IDLE;
 	}

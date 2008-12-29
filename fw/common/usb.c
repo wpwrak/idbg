@@ -464,10 +464,15 @@ void usb_poll(void)
 			ep0.state = EP_IDLE;
 			/*
 			 * EP state serves as "buffer is valid" indicator for
-			 * EP1OUT, so don't reset it. @@@ call back EP1IN or
-			 * the whole completion callback logic falls apart.
+			 * EP1OUT, so don't reset it. We need to call back
+			 * EP1IN to tell it that the URB can be reused.
+			 *
+			 * (@@@ does this make sense ?)
 			 */
 #ifdef CONFIG_EP1
+			if (ep1in.state == EP_TX && ep1in.callback)
+				ep1in.callback(ep1in.user);
+				
 			ep1in.state = EP_IDLE;
 #endif
 			usb_write(POWER, 0);

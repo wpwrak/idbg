@@ -16,10 +16,12 @@
 
 #include <stdint.h>
 
+#include "usb.h"
 
-/* @@@ we need a bit better signaling for asynchronous operation */
 
-__bit i2c_write(uint8_t device, uint8_t addr, const uint8_t *buf, uint8_t len);
-__bit i2c_read(uint8_t device, uint8_t addr, uint8_t *buf, uint8_t len);
+void i2c_start(uint8_t slave, const uint8_t *wdata, uint8_t wlen,
+    uint8_t *rdata, uint8_t rlen);
+__bit i2c_fetch(struct ep_descr *ep, uint8_t len);
+void i2c_poll(void);
 
 #endif /* !I2C_H */

@@ -15,6 +15,7 @@
 #include "uart.h"
 #include "usb.h"
 #include "serial.h"
+#include "i2c.h"
 #include "ep0idbg.h"
 #include "version.h"
 
@@ -46,5 +47,6 @@ void main(void)
 	while (1) {
 		usb_poll();
 		serial_poll();
+		i2c_poll();
 	}
 }

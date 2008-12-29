@@ -46,7 +46,7 @@ static void do_jtag_send(void *user)
 static void do_i2c_write(void *user)
 {
 	user; /* suppress warning */
-	i2c_write(i2c_device, i2c_addr, buf, size);
+	i2c_start(i2c_device, buf, size, NULL, 0);
 }
 
 
@@ -102,23 +102,25 @@ static __bit my_setup(struct setup_request *setup) __reentrant
 
 	case IDBG_TO_DEV(IDBG_I2C_WRITE):
 		debug("IDBG_I2C_WRITE\n");
-		if (setup->wLength > EP0_SIZE)
+		if (setup->wLength > EP0_SIZE-1)
 			return 0;
 		i2c_device = setup->wIndex;
-		i2c_addr = setup->wValue;
+		*buf = setup->wValue;
 		size = setup->wLength;
-		usb_recv(&ep0, buf, size, do_i2c_write, NULL);
+		usb_recv(&ep0, buf+1, size, do_i2c_write, NULL);
 		return 1;
 	case IDBG_FROM_DEV(IDBG_I2C_READ):
 		debug("IDBG_I2C_READ\n");
-		i2c_read(setup->wIndex, setup->wValue, buf, setup->wLength);
-		usb_send(&ep0, buf, setup->wLength, NULL, NULL);
+		i2c_addr = setup->wValue;
+		i2c_start(setup->wIndex, &i2c_addr, 1, buf, setup->wLength);
+		usb_send(&ep0, NULL, 0, NULL, NULL);
 		return 1;
+	case IDBG_FROM_DEV(IDBG_I2C_FETCH):
+		debug("IDBG_I2C_FETCH\n");
+		return i2c_fetch(&ep0, setup->wLength);
 
 	case IDBG_TO_DEV(IDBG_GPIO_UPDATE):
 		debug("IDBG_GPIO_UPDATE\n");
-usb_send(&ep1in, "Hello, world !\n", 15, NULL, NULL);
-printk("EP1 sent\n");
 		UPDATE_MASKED(p0_shadow, P0, setup->wIndex);
 		UPDATE_MASKED(p2_shadow, P2, setup->wIndex >> 8);
 		return 1;

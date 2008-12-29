@@ -1,4 +1,4 @@
-PCBNEW-BOARD Version 1 date 22/12/2008-02:08:40
+PCBNEW-BOARD Version 1 date 26/12/2008-14:33:46
 
 $GENERAL
 LayerCount 2
@@ -16,7 +16,7 @@ $EndGENERAL
 $SHEETDESCR
 Sheet A4 11700 8267
 Title "Internal Debug Board (for GTA01/GTA02)"
-Date "22 dec 2008"
+Date "26 dec 2008"
 Rev "4"
 Comp "Werner Almesberger"
 Comment1 ""
@@ -95,7 +95,7 @@ Na 8 "/VSYS"
 St ~
 $EndEQUIPOT
 $EQUIPOT
-Na 9 "/DEV_VBUS"
+Na 9 "/DEV_VSYS"
 St ~
 $EndEQUIPOT
 $EQUIPOT
@@ -291,7 +291,7 @@ AR /49388334
 Op 0 0 0
 At SMD 
 T0 0 0 200 200 1800 40 N V 21 "R1"
-T1 0 0 200 200 1800 40 N I 21 "10"
+T1 0 0 200 200 1800 40 N I 21 "100"
 DS -533 257 533 257 50 21
 DS 533 257 533 -257 50 21
 DS 533 -257 -533 -257 50 21
@@ -307,7 +307,7 @@ $PAD
 Sh "2" R 275 314 0 0 1800
 Dr 0 0 0
 At SMD N 00888000
-Ne 9 "/DEV_VBUS"
+Ne 9 "/DEV_VSYS"
 Po 295 0
 $EndPAD
 $EndMODULE  0603
@@ -343,7 +343,7 @@ $PAD
 Sh "1" O 1200 600 0 0 0
 Dr 0 0 0
 At SMD N 00888000
-Ne 9 "/DEV_VBUS"
+Ne 9 "/DEV_VSYS"
 Po 0 0
 $EndPAD
 $EndMODULE  Pad_120x60

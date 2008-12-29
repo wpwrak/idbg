@@ -243,11 +243,6 @@ int main(int argc, const char **argv)
 		fprintf(stderr, ":-(\n");
 		exit(1);
 	}
-	res = usb_reset(dev);
-	if (res < 0) {
-		fprintf(stderr, "usb_reset: %d\n", res);
-		return 1;
-	}
 
 	if (argc > 1) {
 		if (!strcmp(argv[1], "-a"))

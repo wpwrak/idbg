@@ -1,5 +1,5 @@
 EESchema Schematic File Version 2
-LIBS:power,./aoz8205,/home/ee/kicad/kicad-parts/kicad-comp-0/dual_diode,./c8051f326,device,conn,./idbg.cache
+LIBS:power,/home/ee/kicad/kicad-parts/kicad-comp-0/dual_diode,./c8051f326,device,conn,./idbg.cache
 EELAYER 24  0
 EELAYER END
 $Descr A4 11700 8267

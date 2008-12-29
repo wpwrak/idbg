@@ -139,6 +139,6 @@ void serial_poll(void)
 void serial_init(void)
 {
 	usb_recv(&ep1out, urbs->buf, TX_BUF_SIZE, got_tx, urbs);
-	REN0 = 1;
-	ES0 = 1;
+	REN0 = 1; /* enable receiver */
+	ES0 = 1; /* enable interrupt */
 }

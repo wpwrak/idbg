@@ -6,7 +6,7 @@
 #define __interrupt(x)
 
 
-#include "../serial.c"
+#include "../../serial.c"
 
 
 static void (*sim_callback)(void *user);

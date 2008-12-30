@@ -130,7 +130,7 @@ Index: openocd/src/jtag/idbg.c
 +		return 0;
 +	}
 +//LOG_INFO("got 0x%02x (%d)", buf, (buf >> JTAG_TDO) & 1);
-+	return !!(buf & JTAG_TDO);
++	return !!(buf & (1 << JTAG_TDO));
 +}
 +
 +
@@ -152,7 +152,7 @@ Index: openocd/src/jtag/idbg.c
 +{
 +	int res;
 +
-+LOG_INFO("set trst %d srst %d", trst, srst);
++//LOG_INFO("set trst %d srst %d", trst, srst);
 +	res = usb_control_msg(usb, TO_DEV, IDBG_JTAG_GPIO_SET,
 +	    !trst << JTAG_nTRST | !srst << JTAG_nSRST,
 +	    1 << JTAG_nTRST | 1 << JTAG_nSRST,

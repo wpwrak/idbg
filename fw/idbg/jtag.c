@@ -93,10 +93,16 @@ void jtag_attach(void)
 
 	/* Put STCK into idle state */
 	STCK = 0;
+	STMS = 1;
 
 	/* Make the "fast" outputs TDI and TCK push-pull */
 	STDI_MODE |= 1 << STDI_BIT;
 	STCK_MODE |= 1 << STCK_BIT;
+	STMS_MODE |= 1 << STMS_BIT;
+
+	/* Reset the TAP */
+	nSTRST = 0;
+	nSTRST = 1;
 }
 
 
@@ -107,12 +113,13 @@ void jtag_detach(void)
 	/* Return push-pull to open collector */
 	STDI_MODE &= ~(1 << STDI_BIT);
 	STCK_MODE &= ~(1 << STCK_BIT);
+	STMS_MODE &= ~(1 << STMS_BIT);
 	STDI = 1;
 	STCK = 1;
-
-	/* De-assert reset and JTAG mode */
-	nRESET = 1;
 	STMS = 1;
+
+	/* De-assert reset */
+	nRESET = 1;
 
 	/* Reset the TAP */
 	nSTRST = 0;

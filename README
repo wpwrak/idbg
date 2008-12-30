@@ -41,6 +41,9 @@ hw/		Schematics, layout, BOM, and mechanical drawing
 f326/		Flash programmer using the C2 protocol
 tools/		User-space utilities to perform IDBG operations
   idbg-gpio/	Set and read I/O pins
+  idbg-reset/	Reset target (i.e., the Neo) or IDBG
+  idbg-con/	Serial console (based on libusb)
+  idbg-i2c/	Read/write I2C registers
 
 
 Build process
@@ -68,7 +71,9 @@ See also http://www.almesberger.net/misc/idbg/
   connects to contact 9, contact 1 is left open.
 - enable power on the Neo with (**)
   gpio f3=1
-- compile f326 and copy it to the Neo
+  (Note: this only works if the device contains no firmware. With
+  firmware, it draws more current than can be supplied this way.)
+- compile f326 and copy it to the Neo (requires the arm-linux toolchain)
 - identify the device:
   ./f326
   f326 should print a line with 0x0d and a line with 0x01.
@@ -80,14 +85,14 @@ See also http://www.almesberger.net/misc/idbg/
   1kOhm to GND to test that the traces are good and that the pins are
   properly soldered
 - build the firmware in fw/ and copy the boot loader fw/boot/boot.bin
-  to the Neo
+  to the Neo (requires sdcc, package sdcc-nf on Ubuntu 8.10)
 - connect USB power to IDBG
 - put the boot loader into Flash with
   f326 boot.bin
   (This can sometimes fail. Just try again.)
 - IDBG should now respond to DFU. Use dfu-util to load the firmware:
   dfu-util -D fw/idbg/idbg.bin
-- cut the IPL board off IDBG
+- cut the IPL board off IDBG (the IPL board is destroyed in the process)
 - take the Neo's PCB and glue IDBG on the GPS shield
 - make a hole for the Micro USB receptacle in the middle part of the
   Neo's case 

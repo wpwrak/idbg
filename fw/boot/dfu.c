@@ -162,7 +162,7 @@ static __bit block_receive(uint16_t length)
 		return 0;
 	}
 	size = length;
-	usb_recv(&ep0, &buf, size, block_write, &size);
+	usb_recv(&ep0, buf, size, block_write, &size);
 	return 1;
 }
 
@@ -264,7 +264,7 @@ static __bit my_setup(struct setup_request *setup) __reentrant
 		return ok;
 	case DFU_FROM_DEV(DFU_GETSTATUS):
 		debug("DFU_GETSTATUS\n");
-		usb_send(&ep0, &dfu, sizeof(dfu), NULL, NULL);
+		usb_send(&ep0, (uint8_t *) &dfu, sizeof(dfu), NULL, NULL);
 		return 1;
 	case DFU_TO_DEV(DFU_CLRSTATUS):
 		debug("DFU_CLRSTATUS\n");

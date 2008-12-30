@@ -45,8 +45,8 @@ static void got_tx(void *user)
 
 	urb->pos = urb->buf;
 	/*
-	 * Weird. SDCC 2.7.0 doesn't seem to know that "array" is equivalent to
-	 * &array[0] and gets confused. @@@
+	 * Weird. SDCC 2.7.0 and 2.8.0 don't seem to know that "array" is
+	 * equivalent to &array[0] and get confused. @@@
 	 */
 	urb->end = &urb->buf[0]+TX_BUF_SIZE-usb_left(&ep1out);
 	usb_q[0] = usb_q[1];

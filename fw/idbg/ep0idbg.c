@@ -57,7 +57,7 @@ static __bit my_setup(struct setup_request *setup) __reentrant
 		debug("IDBG_ID\n");
 		if (setup->wLength > 2)
 			return 0;
-		usb_send(&ep0, &id, setup->wLength, NULL, NULL);
+		usb_send(&ep0, id, setup->wLength, NULL, NULL);
 		return 1;
 	case IDBG_TO_DEV(IDBG_RESET):
 		debug("IDBG_RESET\n");

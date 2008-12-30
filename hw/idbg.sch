@@ -188,7 +188,7 @@ Connection ~ 4700 4800
 Wire Wire Line
 	4900 4400 3500 4400
 Connection ~ 3500 4400
-Text Label 5850 2200 1    60   ~
+Text Label 7300 2200 1    60   ~
 FUTURE
 $Comp
 L GND #PWR01
@@ -382,7 +382,7 @@ Text Label 9500 6000 0    60   ~
 nNOR_WP
 Text Label 7150 2200 1    60   ~
 X_I2C_SDA
-Text Label 7300 2200 1    60   ~
+Text Label 5850 2200 1    60   ~
 X_I2C_SCL
 Text Label 9500 2150 0    60   ~
 CONSOLE_TXD

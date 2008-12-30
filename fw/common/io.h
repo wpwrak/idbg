@@ -22,7 +22,7 @@
 /* I2C */
 
 #define	I2C_SDA		P0_2
-#define	I2C_SCL		P0_3
+#define	I2C_SCL		P0_0
 #define	I2C_SDA_PULL	P0_1
 
 /* JTAG */
@@ -38,6 +38,6 @@
 
 #define	GSM_EN		P2_3	/* GTA01 only */
 #define	nNOR_WP		P2_2	/* GTA02 only */
-#define	FUTURE		P0_0
+#define	FUTURE		P0_3
 
 #endif /* !IO_H */

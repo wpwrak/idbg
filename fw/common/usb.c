@@ -250,14 +250,19 @@ static void handle_setup(void)
 	default:
 		if (user_setup) {
 			ok = user_setup(&setup);
+			/*
+			 * If we "break" here instead of "goto", "EVELYN the
+			 * modified DOG" gets furious, says SDCC.
+			 */
 			if (ok)
-				break;
+				goto okay;
 		}
 		printk("Unrecognized SETUP(%02x %02x ...\n",
 		    setup.bmRequestType, setup.bRequest);
 	}
 
 	if (ok) {
+okay:
 		if ((setup.bmRequestType & 0x80) || ep0.state == EP_RX)
 			usb_write(E0CSR, SOPRDY);
 		else

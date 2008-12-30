@@ -172,6 +172,8 @@ What works:
   <LI> Starting the IDBG firmware from the boot loader
   <LI> Read/write access to I/O pins through USB using the IDBG EP0 protocol
   <LI> Serial console at 115200bps
+  <LI> JTAG with <A href="http://openocd.berlios.de/">OpenOCD</A>
+       (it's very slow since we're bit-banging over USB)
 </UL>
 What's untested or not yet done:
 <UL>
@@ -182,8 +184,6 @@ What's untested or not yet done:
   <LI> Operation with IDBG connected to VSYS, especially power consumption
   <LI> Protection of boot loader in MCU's Flash
   <LI> GTA01 UART sharing with GSM_EN
-  <LI> JTAG access and driver for
-    <A href="http://openocd.berlios.de/">OpenOCD</A>
   <LI> I2C access
   <LI> Control of nNOR_WP (GTA02)
   <LI> Monitoring of nRESET for automatic JTAG detach
@@ -195,7 +195,6 @@ Known bugs:
 <UL>
   <LI> DFU upload causes stray stalls if sending EP0-sized packets
   <LI> f386 sometimes locks up
-  <LI> Lots of warnings when building fw/idbg/
   <LI> Organization of code and repository isn't nice
 </UL>
 For further study:
@@ -204,8 +203,6 @@ For further study:
     e.g., allowing it to limit inrush current and to override PMU
     settings
   <LI> Could we merge USB power from IDBG into VBUS ?
-  <LI> Should FUTURE and I2C_SCL trade places so that we can interrupt on
-    rising SCL edges and implement an I2C slave/snooper ?
 </UL>
 
 <HR>

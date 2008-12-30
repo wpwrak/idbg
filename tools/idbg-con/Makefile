@@ -11,18 +11,6 @@
 #
 
 
-CFLAGS=-Wall
-LDFLAGS=-lusb
 MAIN=idbg-con
 
-OBJS=
-
-.PHONY:		all clean spotless
-
-all:		$(MAIN)
-
-clean:
-		rm -f $(OBJS)
-
-spotless:	clean
-		rm -f $(MAIN)
+include ../Makefile.common

@@ -11,18 +11,8 @@
 #
 
 
-CFLAGS=-Wall -I../../fw/idbg
-LDFLAGS=-lusb
 MAIN=idbg-reset
 
-OBJS=
+include ../Makefile.common
 
-.PHONY:		all clean spotless
-
-all:		$(MAIN)
-
-clean:
-		rm -f $(OBJS)
-
-spotless:	clean
-		rm -f $(MAIN)
+CFLAGS += -I../../fw/idbg

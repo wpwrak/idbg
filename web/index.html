@@ -1,0 +1,216 @@
+<HTML>
+<TITLE>
+The Internal Debug Board
+</TITLE>
+<BODY>
+<H1>The Internal Debug Board</H1>
+
+<I><B>Disclaimer:</B> This is something I did in my spare time. My "daytime"
+work for Openmoko is not related to this project, except that it provides
+me with old and defective prototypes and spare parts to use for my experiments,
+and of course with plenty of experience in tinkering with Neo internals.</I>
+<P>
+
+The case of the
+<A href="http://www.openmoko.com/">Openmoko</A>
+<A href="http://wiki.openmoko.org/wiki/Neo1973">Neo 1973</A> and
+<A href="http://wiki.openmoko.org/wiki/Neo_FreeRunner">FreeRunner</A>
+contains large pockets of
+Embedded Air. Here is a little project that puts them to good use:
+it integrates the principal functionality of the Openmoko
+<A href="http://wiki.openmoko.org/wiki/Debug_board">Debug
+Board</A>&nbsp;&emdash;&nbsp;USB access to a serial console and to
+JTAG&nbsp;&emdash;&nbsp;into the Neo itself.
+<P>
+
+Repository:<BR>
+<PRE>
+git clone http://www.almesberger.net/misc/idbg.git
+</PRE>
+<P>
+
+<!-- Some technical details have been commented out to make the text less
+     cluttered. -->
+
+<H2>Design</H2>
+
+The Internal Debug Board (IDBG) is designed to provide the following
+features:
+<UL>
+  <LI> Connects directly to <B>USB</B> (Micro-USB, for space reasons)
+  <LI> IDBG firmware can be updated with <B>DFU</B>
+    <!-- independent of state of Neo -->
+  <LI> IDBG gives access to the Neo <B>serial console</B>
+    <!-- , with the host using the Linux "generic USB serial" driver -->
+  <LI> IDBG gives access to <B>JTAG</B>
+    <!-- , with the host using a IDBG-specific driver for OpenOCD -->
+  <LI> IDBG can act as a master on the <B>I2C</B> bus
+    <!-- , allowing I2C devices to be accessed using IDBG-specific tools -->
+  <LI> IDBG handles the model-specific signals
+    GSM_EN (GTA01) and nNOR_WP (GTA02)
+  <LI> If it is not used, the IDBG is transparent to the rest of the system
+</UL>
+Note that only very little of all this has been implemented so far.
+<P>
+
+
+<H2>Illustrated build process</H2>
+
+The board consists of a
+<A href="https://www.silabs.com/">SiLabs</A>
+<A href="https://www.silabs.com/products/mcu/usb/Pages/C8051F3267.aspx">C8051F326</A>
+microcontroller (QFN-28, 0.5mm pitch), the micro-USB B connector, and a few
+discrete components (mainly 0402). The PCB itself is single-sided with 8mil
+traces. The circuit is designed for DIY PCB production using the
+<A href="http://www.fullnet.com/~tomg/gooteepc.htm">toner transfer</A>
+method and manual soldering.
+<A href="http://www.lis.inpg.fr/realise_au_lis/kicad/">KiCad</A>
+files for schematic and layout are in the repository.
+<P>
+
+IDBG comes with a sub-board that gives access
+to the signals needed for programming the internal Flash of the
+microcontroller. This sub-board is called the "IPL" board, for
+<A href="http://en.wikipedia.org/wiki/Initial_Program_Load">Initial
+Program Load</A>.
+<P>
+<!-- 1136x852, 100% -->
+<A href="idbg-soldered.jpg"><IMG
+  src="idbg-soldered.jpg" width=284 height=213></A>&nbsp;
+<!-- 1136x852, 100% -->
+<A href="idbg-ipl.jpg"><IMG
+  src="idbg-ipl.jpg" width=284 height=213></A>
+<P>
+On the left picture we see the IDBG board alone, on the right picture
+it is mounted on a Debug Board v3 (v1 and v2 are not suitable but the
+board could also be wired directly to the Neo).
+In this configuration, power can be supplied
+through a GPIO pin and basic communication with the microcontroller
+is possible, e.g., to perform a boundary scan.
+<P>
+<!--
+If attached to a Debug Board v3 as shown above, EINT3 (GPF3) connects
+through a 100&Omega; resistor to the VSYS pad of the Internal Debug Board.
+Thus, power can be enabled with
+<BR><PRE>neo# gpio f3=1</PRE><BR>
+Note that the resistor may prevent some mishap if there is an overcurrent
+situation, but it is not designed to prevent damage in case of a
+short-circuit.
+<P>
+-->
+For Flash programming, USB must be connected to provide additional power.
+A simple Flash programmer
+called <B>f326</B> that runs on the Neo is included in the git repository.
+<P>
+After the initial programming, the IPL sub-board is cut off and the IDBG
+board is glued on top of the GPS shield. A ground connection is added
+(this is the wire sticking out on the left) and thin wires are soldered
+to all the pads used in this configuration.
+<P>
+<!-- 1136x852, 100% -->
+<A href="idbg-wired.jpg"><IMG
+  src="idbg-wired.jpg" width=284 height=213></A>&nbsp;
+<!-- 568x426, 50% -->
+<A href="idbg-wires.jpg"><IMG
+  src="idbg-wires.jpg" width=284 height=213></A>
+<P>
+<!--
+The wires shown here are stranded 30 AWG wires with an outer diameter
+of 32mil or 0.8mm. Wire-wrap wires with a solid core may be a better choice
+since they have an outer diameter of about 20mil (0.5mm). The main
+disadvantage of wire-wrap wires is their rigidity and thus a higher risk of
+mechanical failure.
+-->
+<P>
+The wires are then bundled with heat-shrink tubing and brought across
+the board edge to the top.
+<P>
+<I>TODO: the side hole</I>
+<P>
+What follows is one of the highlight of the entire
+operation, soldering the wires coming from IDBG to the test points on the
+main PCB.
+<P>
+<!-- 757x568, 67% -->
+<A href="idbg-connected.jpg"><IMG
+  src="idbg-connected.jpg" width=284 height=213></A>&nbsp;
+<!-- 568x426, 50% -->
+<A href="idbg-coexistence.jpg"><IMG
+src="idbg-coexistence.jpg" width=284 height=213></A>
+<P>
+If we keep the path to the FPC connector clear, it should even be
+possible to have the internal debug board coexist with an external
+one.
+<P>
+The last step is to close the case. There are some structures inside
+the top cover that conflict with the new cables and must therefore
+be removed. Their remnants have been marked with a yellow sheen in
+the picture below:
+<!-- 1134x512, 100% cropped -->
+<P>
+<A href="idbg-top.jpg"><IMG
+src="idbg-top.jpg" width=567 height=256></A>
+<P>
+The right-hand side contains almost exactly the same structures,
+which are left untouched. Note that it may actually be unnecessary to
+trim the plastic wall next to the LCM.
+<P>
+
+
+<H2>Status</H2>
+
+What works:
+<UL>
+  <LI> Initial programming of the microcontroller's Flash
+  <LI> Boundary scan through the
+       <A href="https://www.silabs.com/Support Documents/TechnicalDocs/C2spec.pdf">C2</A>
+       interface
+  <LI> Serial debugging output from the microcontroller
+  <LI> USB enumeration in low-speed and full-speed mode
+  <LI> IDBG firmware upload/download through DFU (with
+    <A href="http://wiki.openmoko.org/wiki/Dfu-util"><B>dfu-util</B></A>)
+  <LI> Starting the IDBG firmware from the boot loader
+  <LI> Read/write access to I/O pins through USB using the IDBG EP0 protocol
+  <LI> Serial console at 115200bps
+</UL>
+What's untested or not yet done:
+<UL>
+  <LI> Proper mechanical design with IDBG PCB revision 4
+  <LI> Try wire-wrap wires for better space management
+  <LI> Try a thinner PCB for better space management
+  <LI> Effects of IDBG having no power while Neo is powered
+  <LI> Operation with IDBG connected to VSYS, especially power consumption
+  <LI> Protection of boot loader in MCU's Flash
+  <LI> GTA01 UART sharing with GSM_EN
+  <LI> JTAG access and driver for
+    <A href="http://openocd.berlios.de/">OpenOCD</A>
+  <LI> I2C access
+  <LI> Control of nNOR_WP (GTA02)
+  <LI> Monitoring of nRESET for automatic JTAG detach
+  <LI> Testing on GTA01
+  <LI> Effect on GPS performance
+  <LI> Use a proper USB vendor ID
+</UL>
+Known bugs:
+<UL>
+  <LI> DFU upload causes stray stalls if sending EP0-sized packets
+  <LI> f386 sometimes locks up
+  <LI> Lots of warnings when building fw/idbg/
+  <LI> Organization of code and repository isn't nice
+</UL>
+For further study:
+<UL>
+  <LI> IDBG should be able to command the PMU during power-up,
+    e.g., allowing it to limit inrush current and to override PMU
+    settings
+  <LI> Could we merge USB power from IDBG into VBUS ?
+  <LI> Should FUTURE and I2C_SCL trade places so that we can interrupt on
+    rising SCL edges and implement an I2C slave/snooper ?
+</UL>
+
+<HR>
+<A href="mailto:werner@almesberger.net">Werner Almesberger</A>,
+30-DEC-2008
+<HR>
+</BODY>
+</HTML>

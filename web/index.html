@@ -8,7 +8,7 @@ The Internal Debug Board
 <I><B>Disclaimer:</B> This is something I did in my spare time. My "daytime"
 work for Openmoko is not related to this project except that it provides
 me with old and defective prototypes and spare parts to use for my experiments,
-and of course with plenty of experience in tinkering with Neo internals.</I>
+and of course with plenty of opportunities to tinker with Neo internals.</I>
 <P>
 
 The case of the
@@ -61,12 +61,13 @@ The board consists of a
 <A href="https://www.silabs.com/products/mcu/usb/Pages/C8051F3267.aspx">C8051F326</A>
 microcontroller (QFN-28, 0.5mm pitch), the micro-USB B connector, and a few
 discrete components (mainly 0402). The PCB itself is single-sided with 8mil
-traces. The circuit is designed for DIY PCB production using the
+traces and 5mil clearance between traces. The circuit is designed for DIY
+PCB production using the
 <A href="http://www.fullnet.com/~tomg/gooteepc.htm">toner transfer</A>
 method and manual soldering.
 <A href="http://www.lis.inpg.fr/realise_au_lis/kicad/">KiCad</A>
 sources for schematic and layout are in the repository.
-Postscript versions of the files can also be downloaded by clicking on the
+Postscript versions of the files can be downloaded by clicking on the
 images below.
 <P>
 <A href="idbg.ps"><IMG src="idbg.png"></A>&nbsp;&nbsp;&nbsp;
@@ -106,6 +107,7 @@ short-circuit.
 For Flash programming, USB must be connected to provide additional power.
 A simple Flash programmer
 called <B>f326</B> that runs on the Neo is included in the git repository.
+Please consult the README for further details.
 <P>
 After the initial programming, the IPL sub-board is cut off and the IDBG
 board is glued on top of the GPS shield.
@@ -237,7 +239,7 @@ What's untested or not yet done:
 Known bugs:
 <UL>
   <LI> DFU upload causes stray stalls if sending EP0-sized packets
-  <LI> f386 sometimes locks up
+  <LI> f326 sometimes locks up
   <LI> Organization of code and repository isn't nice
 </UL>
 For further study:

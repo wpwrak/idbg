@@ -50,7 +50,7 @@ features:
     GSM_EN (GTA01) and nNOR_WP (GTA02)
   <LI> If it is not used, the IDBG is transparent to the rest of the system
 </UL>
-Note that only very little of all this has been implemented so far.
+Note that not all of this has been implemented and tested so far.
 <P>
 
 
@@ -65,7 +65,12 @@ traces. The circuit is designed for DIY PCB production using the
 <A href="http://www.fullnet.com/~tomg/gooteepc.htm">toner transfer</A>
 method and manual soldering.
 <A href="http://www.lis.inpg.fr/realise_au_lis/kicad/">KiCad</A>
-files for schematic and layout are in the repository.
+sources for schematic and layout are in the repository.
+Postscript versions of the files can also be downloaded by clicking on the
+images below.
+<P>
+<A href="idbg.ps"><IMG src="idbg.png"></A>&nbsp;&nbsp;&nbsp;
+<A href="idbg-Component.ps"><IMG src="idbg-Component.png"></A>
 <P>
 
 IDBG comes with a sub-board that gives access
@@ -103,10 +108,47 @@ A simple Flash programmer
 called <B>f326</B> that runs on the Neo is included in the git repository.
 <P>
 After the initial programming, the IPL sub-board is cut off and the IDBG
-board is glued on top of the GPS shield. A ground connection is added
-(this is the wire sticking out on the left) and thin wires are soldered
-to all the pads used in this configuration.
+board is glued on top of the GPS shield.
 <P>
+<A href="mech.ps"><IMG src="mech.png"></A>&nbsp;
+<A href="pcb-cut.jpg"><IMG src="pcb-cut.jpg" width=284 height=213></A>&nbsp;
+<A href="glued.jpg"><IMG src="glued.jpg" width=284 height=213></A>
+<P>
+Next, we make a hole for the USB receptacle in the Neo's case. The
+picture on the left shows the general lay of the land. Cutting the hole
+is a process of trial and error and requires some patience.
+It helps to remove only about a millimeter of material at a time and then
+to check the position of the connector, as shown in
+the middle. On the right, we see the final hole from the inside.
+<P>
+<A href="hole-before.jpg"><IMG src="hole-before.jpg" width=284 height=213></A>&nbsp;
+<A href="hole-trying.jpg"><IMG src="hole-trying.jpg" width=284 height=213></A>&nbsp;
+<A href="hole-inside.jpg"><IMG src="hole-inside.jpg" width=284 height=213></A>
+<P>
+The result should look like my clumsy attempt on the left, but hopefully a bit
+more precise and with fewer scratches. The IDBG's PCB may shine through if
+the hole is too high. This can be hidden by painting the edge black with a
+permanent marker. On the right, we see what the Neo now looks like. It is
+important that the entire case closes properly.
+<P>
+<A href="hole-zoom.jpg"><IMG src="hole-zoom.jpg" width=284 height=213></A>&nbsp;
+<A href="hole-done.jpg"><IMG src="hole-done.jpg" width=284 height=213></A>
+<P>
+With the mechanics sorted out, we now return to the electronics.
+A ground connection is added (this is the wire sticking out on the left
+in the middle image below) and thin wires are soldered
+to all the pads used in this configuration. Marking both ends of each
+wire with a "morse code" as shown in the wiring diagram makes it easier
+to make the right connections.
+<!-- wires: IMG_2786.JPG -->
+<!-- GND: IMG_2803.JPG -->
+<!-- soldered: IMG_2806.JPG -->
+<!-- soldered+tubed(top): IMG_2811.JPG -->
+<!-- soldered+tubed(bottom): IMG_2821.JPG -->
+<!-- first: IMG_2826.JPG -->
+<!-- all: IMG_2838.JPG -->
+<P>
+<A href="wiring.ps"><IMG src="wiring.png"></A>&nbsp;
 <!-- 1136x852, 100% -->
 <A href="idbg-wired.jpg"><IMG
   src="idbg-wired.jpg" width=284 height=213></A>&nbsp;
@@ -123,9 +165,9 @@ mechanical failure.
 -->
 <P>
 The wires are then bundled with heat-shrink tubing and brought across
-the board edge to the top.
-<P>
-<I>TODO: the side hole</I>
+the board edge to the top. (These pictures are from an earlier prototype,
+hence the different color of the PCB and the much larger side hole, which
+was made for Mini USB.)
 <P>
 What follows is one of the highlight of the entire
 operation, soldering the wires coming from IDBG to the test points on the
@@ -152,8 +194,12 @@ the picture below:
 src="idbg-top.jpg" width=567 height=256></A>
 <P>
 The right-hand side contains almost exactly the same structures,
-which are left untouched. Note that it may actually be unnecessary to
-trim the plastic wall next to the LCM.
+which are left untouched. Note that it is not necessary to trim the
+plastic wall next to the LCM if the wires are thin enough.
+<P>
+Gee, it still runs !
+<P>
+<IMG src="works.jpg"></A>
 <P>
 
 

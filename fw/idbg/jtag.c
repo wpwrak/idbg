@@ -1,8 +1,8 @@
 /*
  * idbg/jtag.c - JTAG protocol engine
  *
- * Written 2008 by Werner Almesberger
- * Copyright 2008 Werner Almesberger
+ * Written 2008, 2009 by Werner Almesberger
+ * Copyright 2008, 2009 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,12 @@
  * http://www.asset-intertech.com/pdfs/Boundary-Scan_Tutorial_2007.pdf
  */
 
-__xdata uint8_t jtag_data[JTAG_MAX_BITS/8];
+/*
+ * One extra byte so that we don't have to special-case JTAX_MAX_BITS-sized
+ * scans.
+ */
+
+__xdata uint8_t jtag_data[JTAG_MAX_BITS/8+1];
 
 
 uint8_t jtag_gpio_get(void)
@@ -54,35 +59,57 @@ void jtag_gpio_set(uint8_t set, uint8_t mask)
 }
 
 
-void jtag_send(const uint8_t *buf, uint8_t bits)
+void jtag_scan(const uint8_t *buf, uint16_t bits, __bit last)
 {
+	uint16_t pos;
 	uint8_t *res = jtag_data;
-	uint8_t in = 0, out, i;
+	uint8_t in = 0, out = 0;
 
-	printk("jtag_send\n");
-	while (bits > 7) {
-		out = *buf++;
-		for (i = 0; i != 8; i++) {
-			STDI = out & 1;
-			STCK = 1;
-			out >>= 1;
-			STCK = 0;
-			in = STDO | in << 1;
+	debug("jtag_send\n");
+	STMS = 0;
+	for (pos = 0; pos != bits; pos++) {
+		if (!(pos & 7)) {
+			if (pos)
+				*res++ = in;
+			in = 0;
+			out = *buf++;
 		}
-		*res = in;
-		bits -= 8;
+		STCK = 0;
+		STDI = out & 1;
+		if (pos == bits-1 && last)
+			STMS = 1;
+		STCK = 1;
+		out >>= 1;
+		in |= STDO << (pos & 7);
 	}
-	if (bits) {
-		out = *buf;
-		while (bits) {
-			STDI = out & 1;
-			STCK = 1;
-			out >>= 1;
-			STCK = 0;
-			in = STDO | in << 1;
-			bits--;
-		}
-		*res = in;
+	*res = in;
+
+	if (!last)
+		return;
+
+	/*
+	 * Exit the shift state
+	 */
+	STCK = 0;
+	STMS = 0;
+	STDI = 0;
+	STCK = 1;
+}
+
+
+void jtag_move(const uint8_t *buf, uint16_t bits)
+{
+	uint16_t pos;
+	uint8_t out = 0;
+
+	debug("jtag_move\n");
+	for (pos = 0; pos != bits; pos++) {
+		if (!(pos & 7))
+			out = *buf++;
+		STCK = 0;
+		STMS = out & 1;
+		STCK = 1;
+		out >>= 1;
 	}
 }
 
@@ -95,14 +122,10 @@ void jtag_attach(void)
 	STCK = 0;
 	STMS = 1;
 
-	/* Make the "fast" outputs TDI and TCK push-pull */
+	/* Make the "fast" outputs TDI, TMS, and TCK push-pull */
 	STDI_MODE |= 1 << STDI_BIT;
-	STCK_MODE |= 1 << STCK_BIT;
 	STMS_MODE |= 1 << STMS_BIT;
-
-	/* Reset the TAP */
-	nSTRST = 0;
-	nSTRST = 1;
+	STCK_MODE |= 1 << STCK_BIT;
 }
 
 
@@ -120,8 +143,5 @@ void jtag_detach(void)
 
 	/* De-assert reset */
 	nRESET = 1;
-
-	/* Reset the TAP */
-	nSTRST = 0;
 	nSTRST = 1;
 }

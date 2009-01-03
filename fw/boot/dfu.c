@@ -286,7 +286,7 @@ static __bit my_setup(struct setup_request *setup) __reentrant
 		    setup->bmRequestType, setup->bRequest);
 #else
 		/*
-		 * sdcc 2.7.0 ends up OR'in setup->bmRequestType with
+		 * @@@ SDCC 2.7.0 ends up OR'in setup->bmRequestType with
 		 * setup->bRequest unshifted if we don't use at least one of
 		 * them here.
 		 */

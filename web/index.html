@@ -221,7 +221,6 @@ What works:
   <LI> Read/write access to I/O pins through USB using the IDBG EP0 protocol
   <LI> Serial console at 115200bps
   <LI> JTAG with <A href="http://openocd.berlios.de/">OpenOCD</A>
-       (it's very slow since we're bit-banging over USB)
 </UL>
 What's untested or not yet done:
 <UL>
@@ -241,6 +240,7 @@ Known bugs:
   <LI> DFU upload causes stray stalls if sending EP0-sized packets
   <LI> f326 sometimes locks up
   <LI> Organization of code and repository isn't nice
+  <LI> Need to increase buffering of serial console
 </UL>
 For further study:
 <UL>
@@ -252,7 +252,7 @@ For further study:
 
 <HR>
 <A href="mailto:werner@almesberger.net">Werner Almesberger</A>,
-31-DEC-2008
+03-JAN-2009
 <HR>
 </BODY>
 </HTML>

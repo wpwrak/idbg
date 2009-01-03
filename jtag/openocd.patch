@@ -40,7 +40,7 @@ Index: openocd/src/jtag/idbg.c
 ===================================================================
 --- openocd/src/jtag/idbg.c	(revision 0)
 +++ openocd/src/jtag/idbg.c	(revision 0)
-@@ -0,0 +1,194 @@
+@@ -0,0 +1,334 @@
 +/*
 + * idbg.c - IDBG JTAG interface
 + *
@@ -60,10 +60,10 @@ Index: openocd/src/jtag/idbg.c
 + */
 +
 +
++#include <stdint.h>
 +#include <usb.h>
 +
 +#include "jtag.h"
-+#include "bitbang.h"
 +
 +
 +#define TO_DEV		0x40
@@ -71,6 +71,14 @@ Index: openocd/src/jtag/idbg.c
 +
 +#define IDBG_TO_DEV(req)        (0x40 | (req) << 8)
 +#define IDBG_FROM_DEV(req)      (0xc0 | (req) << 8)
++
++/*
++ * @@@ The real limit for MAX_SCAN_BYTES should be 64, but we may hit some EP
++ * size issues when going to this limit. See the corresponding DFU upload
++ * problem. So fix DFU upload first.
++ */
++
++#define MAX_SCAN_BYTES	63
 +
 +
 +enum idbg_requests {
@@ -80,8 +88,9 @@ Index: openocd/src/jtag/idbg.c
 +	IDBG_JTAG_DETACH,
 +	IDBG_JTAG_GPIO_SET,
 +	IDBG_JTAG_GPIO_GET,
-+	IDBG_JTAG_SEND,
++	IDBG_JTAG_SCAN,
 +	IDBG_JTAG_FETCH,
++	IDBG_JTAG_MOVE,
 +};
 +
 +enum jtag_gpios {
@@ -118,57 +127,187 @@ Index: openocd/src/jtag/idbg.c
 +}
 +
 +
-+static int idbg_read(void)
-+{
-+	uint8_t buf;
-+	int res;
-+	
-+	res = usb_control_msg(usb, FROM_DEV, IDBG_JTAG_GPIO_GET, 0, 0,
-+	    &buf, 1, 1000);
-+	if (res < 0) {
-+		LOG_ERROR("IDBG_JTAG_GPIO_GET failed: %i", res);
-+		return 0;
-+	}
-+//LOG_INFO("got 0x%02x (%d)", buf, (buf >> JTAG_TDO) & 1);
-+	return !!(buf & (1 << JTAG_TDO));
-+}
-+
-+
 +static void idbg_write(int tck, int tms, int tdi)
 +{
 +	int res;
 +
-+//LOG_INFO("set tck %d tms %d tdi %d", tck, tms, tdi);
++	LOG_DEBUG("set tck %d tms %d tdi %d", tck, tms, tdi);
 +	res = usb_control_msg(usb, TO_DEV, IDBG_JTAG_GPIO_SET,
 +	    !!tck << JTAG_TCK | !!tms << JTAG_TMS | !!tdi << JTAG_TDI,
 +	    1 << JTAG_TCK | 1 << JTAG_TMS | 1 << JTAG_TDI,
 +	    NULL, 0, 1000);
-+	if (res < 0)
++	if (res < 0) {
 +		LOG_ERROR("IDBG_JTAG_GPIO_SET failed: %i", res);
++		exit(1);
++	}
 +}
-+
 +
 +static void idbg_reset(int trst, int srst)
 +{
 +	int res;
 +
-+//LOG_INFO("set trst %d srst %d", trst, srst);
++	LOG_DEBUG("set trst %d srst %d", trst, srst);
 +	res = usb_control_msg(usb, TO_DEV, IDBG_JTAG_GPIO_SET,
 +	    !trst << JTAG_nTRST | !srst << JTAG_nSRST,
 +	    1 << JTAG_nTRST | 1 << JTAG_nSRST,
 +	    NULL, 0, 1000);
-+	if (res < 0)
++	if (res < 0) {
 +		LOG_ERROR("IDBG_JTAG_GPIO_SET failed: %i", res);
++		exit(1);
++	}
 +}
 +
 +
-+static bitbang_interface_t idbg_bitbang = {
-+	.read		= idbg_read,
-+	.write		= idbg_write,
-+	.reset		= idbg_reset,
-+	.blink		= NULL,
-+};
++static void idbg_move(uint8_t scan)
++{
++	int res;
 +
++	LOG_DEBUG("move: 0x%2x", scan);
++	res = usb_control_msg(usb, TO_DEV, IDBG_JTAG_MOVE,
++	    7, 0, &scan, 1, 1000);
++	if (res < 0) {
++		LOG_ERROR("IDBG_JTAG_MOVE failed: %i", res);
++		exit(1);
++	}
++}
++
++
++static void idbg_state_move(enum tap_state state)
++{
++	uint8_t scan = TAP_MOVE(cur_state, state);
++
++	LOG_DEBUG("idbg_state_move %d -> %d", cur_state, state);
++	if (cur_state == state)
++		return;
++	idbg_move(scan);
++	cur_state = state;
++}
++
++
++static void idbg_path_move(pathmove_command_t *cmd)
++{
++	uint8_t scan = 0;
++	enum tap_state next;
++	int i, tms;
++
++	for (i = 0; i != cmd->num_states; i++) {
++		next = cmd->path[i];
++		tms = tap_transitions[cur_state].low == next;
++		scan |= tms << i;
++		cur_state = next;
++	}
++	idbg_move(scan);
++}
++
++
++void idbg_runtest(int num_cycles)
++{
++	int i;
++
++	LOG_DEBUG("runtest %d", num_cycles);
++	idbg_state_move(TAP_IDLE);
++	for (i = 0; i != num_cycles; i++) {
++		idbg_write(0, 0, 0);
++		idbg_write(1, 0, 0);
++	}
++	idbg_write(0, 0, 0);
++	idbg_state_move(end_state);
++}
++
++
++static void idbg_scan(int ir_scan, enum scan_type type, u8 *buffer,
++    int scan_size)
++{
++	int bit = 0, end, bytes, res;
++
++	LOG_DEBUG("scan %d in %d", scan_size, type != SCAN_OUT);
++	idbg_state_move(ir_scan ? TAP_IRSHIFT : TAP_DRSHIFT);
++	while (bit != scan_size) {
++		end = bit+MAX_SCAN_BYTES*8;
++		if (end > scan_size)
++			end = scan_size;
++		bytes = (end-bit+7) >> 3;
++		res = usb_control_msg(usb, TO_DEV, IDBG_JTAG_SCAN,
++		    end-bit, end == scan_size, buffer, bytes, 1000);
++		if (res < 0) {
++			LOG_ERROR("IDBG_JTAG_SCAN failed: %i", res);
++			exit(1);
++		}
++		if (type != SCAN_OUT) {
++			res = usb_control_msg(usb, FROM_DEV, IDBG_JTAG_FETCH,
++			    end-bit, 0, buffer, bytes, 1000);
++			if (res < 0) {
++				LOG_ERROR("IDBG_JTAG_FETCH failed: %i", res);
++				exit(1);
++			}
++		}
++		bit = end;
++		buffer += MAX_SCAN_BYTES;
++	}
++	cur_state = ir_scan ? TAP_IRPAUSE : TAP_DRPAUSE;
++	idbg_state_move(end_state);
++}
++
++
++static int idbg_execute_queue(void)
++{
++	jtag_command_t *cmd;
++	enum tap_state state;
++	enum scan_type type;
++	int scan_size;
++	u8 *buffer;
++	int res = ERROR_OK;
++
++	for (cmd = jtag_command_queue; cmd; cmd = cmd->next) {
++		switch (cmd->type) {
++		case JTAG_END_STATE:
++			state = cmd->cmd.end_state->end_state;
++			if (state != -1)
++				end_state = state;
++			break;
++		case JTAG_RESET:
++			if (cmd->cmd.reset->trst)
++				cur_state = TAP_RESET;
++			idbg_reset(cmd->cmd.reset->trst, cmd->cmd.reset->srst);
++			break;
++		case JTAG_RUNTEST:
++			state = cmd->cmd.runtest->end_state;
++			if (state != -1)
++				end_state = state;
++			idbg_runtest(cmd->cmd.runtest->num_cycles);
++			break;
++		case JTAG_STATEMOVE:
++			state = cmd->cmd.statemove->end_state;
++			if (state != -1)
++				end_state = state;
++			idbg_state_move(end_state);
++			break;
++		case JTAG_PATHMOVE:
++			idbg_path_move(cmd->cmd.pathmove);
++			break;
++		case JTAG_SCAN:
++			state = cmd->cmd.scan->end_state;
++			if (state != -1)
++				end_state = state;
++			scan_size = jtag_build_buffer(cmd->cmd.scan, &buffer);
++			type = jtag_scan_type(cmd->cmd.scan);
++			idbg_scan(cmd->cmd.scan->ir_scan, type, buffer,
++			    scan_size);
++			if (jtag_read_buffer(buffer, cmd->cmd.scan) != ERROR_OK)
++				res = ERROR_JTAG_QUEUE_FAILED;
++			if (buffer)
++				free(buffer);
++			break;
++		case JTAG_SLEEP:
++			jtag_sleep(cmd->cmd.sleep->us);
++			break;
++		default:
++			LOG_ERROR("unknown JTAG command %d", cmd->type);
++			exit(1);
++		}
++	}
++	return res;
++}
 +
 +
 +static int idbg_speed(int speed)
@@ -179,6 +318,7 @@ Index: openocd/src/jtag/idbg.c
 +
 +static int idbg_register_commands(struct command_context_s *cmd_ctx)
 +{
++	/* @@@ set vid/pid */
 +	return ERROR_OK;
 +}
 +
@@ -198,10 +338,10 @@ Index: openocd/src/jtag/idbg.c
 +		LOG_ERROR("IDBG_JTAG_ATTACH failed: %i", res);
 +		return ERROR_JTAG_INIT_FAILED;
 +	}
-+	bitbang_interface = &idbg_bitbang;
 +	LOG_INFO("IDBG JTAG interface ready");
 +	idbg_reset(0, 0);
 +	idbg_write(0, 0, 0);
++	idbg_move(0x7f);
 +	return ERROR_OK;
 +}
 +
@@ -228,7 +368,7 @@ Index: openocd/src/jtag/idbg.c
 +jtag_interface_t idbg_interface = {
 +	.name	= "idbg",
 +	.execute_queue
-+		= bitbang_execute_queue,
++		= idbg_execute_queue,
 +	.speed	= idbg_speed,
 +	.register_commands
 +		= idbg_register_commands,

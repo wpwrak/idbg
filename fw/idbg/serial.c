@@ -1,8 +1,8 @@
 /*
  * idbg/serial.c - Serial console
  *
- * Written 2008 by Werner Almesberger
- * Copyright 2008 Werner Almesberger
+ * Written 2008, 2009 by Werner Almesberger
+ * Copyright 2008, 2009 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,6 +13,7 @@
 
 #include <stdint.h>
 
+#include "config.h"
 #include "regs.h"
 #include "uart.h"
 #include "usb.h"
@@ -124,6 +125,22 @@ void uart_isr(void) __interrupt(4)
 	rx_buf[rx_curr][rx_pos] = SBUF0;
 	rx_pos++;
 }
+
+
+#ifdef CONFIG_USB_PUTCHAR
+
+void putchar(char ch)
+{
+	EA = 0;
+	EA = 0;
+	if (rx_pos != RX_BUF_SIZE) {
+		rx_buf[rx_curr][rx_pos] = ch;
+		rx_pos++;
+	}
+	EA = 1;
+}
+
+#endif /* CONFIG_USB_PUTCHAR */
 
 
 void serial_poll(void)

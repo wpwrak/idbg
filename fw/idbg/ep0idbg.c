@@ -1,8 +1,8 @@
 /*
  * idbg/ep0idbg.c - EP0 extension protocol
  *
- * Written 2008 by Werner Almesberger
- * Copyright 2008 Werner Almesberger
+ * Written 2008, 2009 by Werner Almesberger
+ * Copyright 2008, 2009 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,8 +26,9 @@
 
 
 static const uint8_t id[] = { EP0IDBG_MAJOR, EP0IDBG_MINOR };
-static __xdata uint8_t buf[EP0_SIZE];
+static __xdata uint8_t buf[EP1_SIZE];
 static uint16_t size, jtag_bits;
+static __bit jtag_last; /* scan is last segment of larger scan */
 static uint8_t i2c_device, i2c_addr;
 static uint8_t p0_shadow = 0xff, p2_shadow = 0xff;
 
@@ -36,10 +37,17 @@ static uint8_t p0_shadow = 0xff, p2_shadow = 0xff;
 	var = ((var) & ~(mask)) | ((value) & (mask))
 
 
-static void do_jtag_send(void *user)
+static void do_jtag_scan(void *user)
 {
 	user; /* suppress warning */
-	jtag_send(buf, jtag_bits);
+	jtag_scan(buf, jtag_bits, jtag_last);
+}
+
+
+static void do_jtag_move(void *user)
+{
+	user; /* suppress warning */
+	jtag_move(buf, jtag_bits);
 }
 
 
@@ -82,27 +90,76 @@ static __bit my_setup(struct setup_request *setup) __reentrant
 		if (setup->wLength)
 			usb_send(&ep0, buf, 1, NULL, NULL);
 		return 1;
-	case IDBG_TO_DEV(IDBG_JTAG_SEND):
+	case IDBG_TO_DEV(IDBG_JTAG_SCAN):
 		debug("IDBG_JTAG_SEND\n");
-		if (setup->wLength > EP0_SIZE)
+		if (setup->wLength > EP1_SIZE)
 			return 0;
 		jtag_bits = setup->wValue;
-		if (jtag_bits >> 8 > setup->wLength)
+		size = (jtag_bits+7) >> 3;
+		if (size > setup->wLength)
 			return 0;
-		usb_recv(&ep0, buf, size, do_jtag_send, NULL);
+		/*
+		 * @@@ Prophylaxis ...
+		 */
+		{
+			volatile uint16_t foo;
+			foo = size;
+			size = foo;
+		}
+		jtag_last = setup->wIndex;
+		usb_recv(&ep0, buf, setup->wLength, do_jtag_scan, NULL);
 		return 1;
 	case IDBG_FROM_DEV(IDBG_JTAG_FETCH):
 		debug("IDBG_JTAG_FETCH\n");
-		if (setup->wLength > EP0_SIZE)
+		if (setup->wLength > EP1_SIZE)
 			return 0;
-		if (setup->wValue >> 8 > setup->wLength)
+		size = (setup->wValue+7) >> 3;
+		/*
+		 * @@@ Prophylaxis ...
+		 */
+		{
+			volatile uint16_t foo;
+			foo = size;
+			size = foo;
+		}
+		if (size > setup->wLength)
 			return 0;
-		usb_send(&ep0, jtag_data, setup->wValue >> 8, NULL, NULL);
+		usb_send(&ep0, jtag_data, size, NULL, NULL);
+		return 1;
+	case IDBG_TO_DEV(IDBG_JTAG_MOVE):
+		debug("IDBG_JTAG_MOVE\n");
+		if (setup->wLength > EP1_SIZE)
+			return 0;
+		jtag_bits = setup->wValue;
+		size = (jtag_bits+7) >> 3;
+		/*
+		 * @@@ SDCC 2.8.0 gets very confused if we don't access "size"
+		 * before using it. May be similar to the code generation bug
+		 * found in ../boot/dfu.c
+		 */
+		{
+			volatile uint16_t foo;
+			foo = size;
+			size = foo;
+		}
+		/*
+		 * @@@ The above attempt to bring code generation back to
+		 * normality upsets the request code calculation. Let's try the
+		 * work-around from ../boot/dfu.c
+		 */
+		{	
+			static volatile uint8_t foo;
+			foo = setup->bRequest;
+                }
+
+		if (size > setup->wLength)
+			return 0;
+		usb_recv(&ep0, buf, setup->wLength, do_jtag_move, NULL);
 		return 1;
 
 	case IDBG_TO_DEV(IDBG_I2C_WRITE):
 		debug("IDBG_I2C_WRITE\n");
-		if (setup->wLength > EP0_SIZE-1)
+		if (setup->wLength > EP1_SIZE-1)
 			return 0;
 		i2c_device = setup->wIndex;
 		*buf = setup->wValue;

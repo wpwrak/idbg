@@ -1,8 +1,8 @@
 /*
  * common/uart.c - UART initialization and debug output
  *
- * Written 2008 by Werner Almesberger
- * Copyright 2008 Werner Almesberger
+ * Written 2008, 2009 by Werner Almesberger
+ * Copyright 2008, 2009 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,8 @@
 /* gpio j4=0 */
 
 
+#ifndef CONFIG_USB_PUTCHAR
+
 void putchar(char c)
 {
 	if (c == '\n')
@@ -29,6 +31,8 @@ void putchar(char c)
 	while (!TI0);
 	TI0 = 0;
 }
+
+#endif /* !CONFIG_USB_PUTCHAR */
 
 
 /* for now, we always use printf_tiny, which doesn't have a vprintf* version */

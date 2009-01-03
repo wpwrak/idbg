@@ -1,8 +1,8 @@
 /*
  * idbg/jtag.h - JTAG protocol engine
  *
- * Written 2008 by Werner Almesberger
- * Copyright 2008 Werner Almesberger
+ * Written 2008, 2009 by Werner Almesberger
+ * Copyright 2008, 2009 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,12 +30,13 @@ enum jtag_gpios {
 };
 
 
-extern __xdata uint8_t jtag_data[JTAG_MAX_BITS/8];
+extern __xdata uint8_t jtag_data[];
 
 uint8_t jtag_gpio_get(void);
 void jtag_gpio_set(uint8_t set, uint8_t mask);
 
-void jtag_send(const uint8_t *buf, uint8_t bits);
+void jtag_scan(const uint8_t *buf, uint16_t bits, __bit last);
+void jtag_move(const uint8_t *buf, uint16_t bits);
 
 void jtag_attach(void);
 void jtag_detach(void);

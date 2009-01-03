@@ -1,8 +1,8 @@
 /*
  * idbg/config.h - IDBG configuration
  *
- * Written 2008 by Werner Almesberger
- * Copyright 2008 Werner Almesberger
+ * Written 2008, 2009 by Werner Almesberger
+ * Copyright 2008, 2009 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 //#define	CONFIG_DEBUG
 //#define	CONFIG_ERROR
 //#define	CONFIG_PRINTK
+//#define	CONFIG_USB_PUTCHAR
 
 #define	CONFIG_EP1
 

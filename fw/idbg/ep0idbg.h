@@ -1,8 +1,8 @@
 /*
  * idbg/ep0idbg.h - EP0 extension protocol
  *
- * Written 2008 by Werner Almesberger
- * Copyright 2008 Werner Almesberger
+ * Written 2008, 2009 by Werner Almesberger
+ * Copyright 2008, 2009 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,8 +24,9 @@
  * host->	IDBG_JTAG_DETACH	0		0	0
  * host->	IDBG_JTAG_GPIO_SET	value		mask	0
  * ->host	IDBG_JTAG_GPIO_GET	0		0	1
- * host->	IDBG_JTAG_SEND		#bits		0	#bytes
+ * host->	IDBG_JTAG_SCAN		#bits		last	#bytes
  * ->host	IDBG_JTAG_FETCH		#bits		0	#bytes
+ * host->	IDBG_JTAG_MOVE		#bits		0	#bytes
  *
  * host->	IDBG_I2C_WRITE		address		device	#bytes
  * ->host	IDBG_I2C_READ		address		device	#bytes
@@ -65,8 +66,9 @@ enum idbg_requests {
 	IDBG_JTAG_DETACH,
 	IDBG_JTAG_GPIO_SET,
 	IDBG_JTAG_GPIO_GET,
-	IDBG_JTAG_SEND,
+	IDBG_JTAG_SCAN,
 	IDBG_JTAG_FETCH,
+	IDBG_JTAG_MOVE,
 	IDBG_I2C_WRITE		= 0x20,
 	IDBG_I2C_READ,
 	IDBG_I2C_FETCH,

@@ -1,8 +1,8 @@
 /*
  * idbg/idbg.c - IDBG initialization and main loop
  *
- * Written 2008 by Werner Almesberger
- * Copyright 2008 Werner Almesberger
+ * Written 2008, 2009 by Werner Almesberger
+ * Copyright 2008, 2009 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 #include "usb.h"
 #include "serial.h"
 #include "i2c.h"
-#include "ep0idbg.h"
+#include "ep0.h"
 #include "version.h"
 
 
@@ -42,7 +42,7 @@ void main(void)
  */
 
 	usb_init();
-	ep0idbg_init();
+	ep0_init();
 	serial_init();
 	while (1) {
 		usb_poll();

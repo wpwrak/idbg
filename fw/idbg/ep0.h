@@ -1,5 +1,5 @@
 /*
- * idbg/ep0idbg.h - EP0 extension protocol
+ * idbg/ep0.h - EP0 extension protocol
  *
  * Written 2008, 2009 by Werner Almesberger
  * Copyright 2008, 2009 Werner Almesberger
@@ -11,8 +11,8 @@
  */
 
 
-#ifndef EP0IDBG_H
-#define EP0IDBG_H
+#ifndef EP0_H
+#define EP0_H
 
 /*
  * Direction	bRequest		wValue		wIndex	wLength
@@ -80,6 +80,6 @@ enum idbg_requests {
 };
 
 
-void ep0idbg_init(void);
+void ep0_init(void);
 
-#endif /* !EP0IDBG_H */
+#endif /* !EP0_H */

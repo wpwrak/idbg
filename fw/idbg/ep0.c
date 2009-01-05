@@ -1,5 +1,5 @@
 /*
- * idbg/ep0idbg.c - EP0 extension protocol
+ * idbg/ep0.c - EP0 extension protocol
  *
  * Written 2008, 2009 by Werner Almesberger
  * Copyright 2008, 2009 Werner Almesberger
@@ -22,7 +22,7 @@
 #include "usb.h"
 #include "i2c.h"
 #include "jtag.h"
-#include "ep0idbg.h"
+#include "ep0.h"
 
 
 static const uint8_t id[] = { EP0IDBG_MAJOR, EP0IDBG_MINOR };
@@ -220,7 +220,7 @@ static __bit my_setup(struct setup_request *setup) __reentrant
 }
 
 
-void ep0idbg_init(void)
+void ep0_init(void)
 {
 	user_setup = my_setup;
 }

@@ -1,8 +1,8 @@
 /*
  * idbg-con/idbg-con.c - IDBG console
  *
- * Written 2008 by Werner Almesberger
- * Copyright 2008 Werner Almesberger
+ * Written 2008, 2009 by Werner Almesberger
+ * Copyright 2008, 2009 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -151,7 +151,7 @@ int main(int argc, const char **argv)
 		if (!reported)
 			fprintf(stderr, "[ Waiting for device ]\r\n");
 		reported = 1;
-		sleep(1);
+		usleep(100000);
 	}
 	return 0;
 }

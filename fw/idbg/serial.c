@@ -31,8 +31,8 @@ static __xdata struct urb {
 	uint8_t *end;
 } urbs[2];
 
-static struct urb *uart_q[2] = { NULL, NULL };
-static struct urb *usb_q[2] = { urbs, urbs+1 };
+static struct urb *__xdata uart_q[2] = { NULL, NULL };
+static struct urb *__xdata usb_q[2] = { urbs, urbs+1 };
 static __bit txing = 0; /* UART is txing */
 
 static __xdata uint8_t rx_buf[2][RX_BUF_SIZE];

@@ -221,6 +221,7 @@ What works:
   <LI> Read/write access to I/O pins through USB using the IDBG EP0 protocol
   <LI> Serial console at 115200bps
   <LI> JTAG with <A href="http://openocd.berlios.de/">OpenOCD</A>
+  <LI> Read/write access to I2C devices through USB using the IDBG EP0 protocol
 </UL>
 What's untested or not yet done:
 <UL>
@@ -228,7 +229,6 @@ What's untested or not yet done:
   <LI> Operation with IDBG connected to VSYS, especially power consumption
   <LI> Protection of boot loader in MCU's Flash
   <LI> GTA01 UART sharing with GSM_EN
-  <LI> I2C access
   <LI> Control of nNOR_WP (GTA02)
   <LI> Monitoring of nRESET for automatic JTAG detach
   <LI> Testing on GTA01
@@ -252,7 +252,7 @@ For further study:
 
 <HR>
 <A href="mailto:werner@almesberger.net">Werner Almesberger</A>,
-03-JAN-2009
+05-JAN-2009
 <HR>
 </BODY>
 </HTML>

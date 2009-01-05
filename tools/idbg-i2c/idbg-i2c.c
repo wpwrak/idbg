@@ -1,8 +1,8 @@
 /*
  * idbg-i2c/idbg-i2c.c - Read/write I2C registers via IDBG
  *
- * Written 2008 by Werner Almesberger
- * Copyright 2008 Werner Almesberger
+ * Written 2008, 2009 by Werner Almesberger
+ * Copyright 2008, 2009 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,14 +59,14 @@ static void i2c_fetch(usb_dev_handle *dev, ssize_t size)
 		res = usb_control_msg(dev, FROM_DEV, IDBG_I2C_FETCH, 0, 0,
 		    (void *) buf, sizeof(buf), 1000);
 		if (res < 0) {
-			fprintf(stderr, "IDBG_I2C_WRITE: %d\n", (int) res);
+			fprintf(stderr, "IDBG_I2C_FETCH: %d\n", (int) res);
 			exit(1);
 		}
 		for (i = 0; i != res; i++)
 			printf("%02X ", buf[i]);
 		left -= res;
 		if (left)
-			sleep(1);
+			usleep(10000);
 	}
 	putchar('\n');
 }
@@ -120,7 +120,7 @@ int main(int argc, const char **argv)
 	switch (argc) {
 	case 4:
 		set = 1;
-		value = strtoul(argv[2], &end, 0);
+		value = strtoul(argv[3], &end, 0);
 		if (*end || value > 0xff)
 			usage(*argv);
 		/* fall through */

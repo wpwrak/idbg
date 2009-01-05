@@ -1,13 +1,20 @@
 /*
  * idbg/i2c.c - I2C protocol engine
  *
- * Written 2008 by Werner Almesberger
- * Copyright 2008 Werner Almesberger
+ * Written 2008, 2009 by Werner Almesberger
+ * Copyright 2008, 2009 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
+ */
+
+/*
+ * "The I2C-bus and how to use it"
+ * http://www.i2c-bus.org/fileadmin/ftp/i2c_bus_specification_1995.pdf
+ * "The I2C-bus specification"
+ * http://www.semiconductors.philips.com/acrobat_download/literature/9398/39340011.pdf
  */
 
 
@@ -24,34 +31,32 @@ static enum state {
 	IDLE,
 	FAILED,
 	START,	/* try to send S */
-	ACK,	/* wait for ACK */
-	STOP,	/* try to send P */
 	SEND,	/* send a byte */
 	RECV,	/* receive a byte */
 } state = IDLE;
 
 static const uint8_t *wbuf, *wpos, *wend;
 static uint8_t *rbuf, *rpos, *rend;
-static uint8_t device, fetched, data;
+static uint8_t fetched, spos;
 static __bit sda;
 
 
-void i2c_start(uint8_t slave, const uint8_t *wdata, uint8_t wlen,
+void i2c_start(uint8_t s, const uint8_t *wdata, uint8_t wlen,
     uint8_t *rdata, uint8_t rlen)
 {
-	device = slave;
 	wbuf = wpos = wdata;
 	wend = wbuf+wlen;
 	rbuf = rpos = rdata;
 	rend = rbuf+rlen;
 	fetched = 0;
+	spos = s;
 	state = START;
 }
 
 
 __bit i2c_fetch(struct ep_descr *ep, uint8_t len)
 {
-	int8_t pos;
+	uint8_t *p;
 	uint8_t size;
 
 	if (state == FAILED)
@@ -59,14 +64,17 @@ __bit i2c_fetch(struct ep_descr *ep, uint8_t len)
 	if (state != IDLE) {
 		usb_send(ep, NULL, 0, NULL, 0);
 	} else {
-		pos = fetched-(wend-wbuf);
-		size = pos < 0 ? -pos : rend-rbuf-pos;
+		size = rend-rbuf;
+		if (size)
+			p = rbuf+fetched;
+		else {
+			p = wbuf+2+fetched;
+			size = wend-wbuf-2;
+		}
+		size -= fetched;
 		if (size > len)
 			size = len;
-		if (pos < 0)
-			usb_send(ep, wbuf+fetched, size, NULL, 0);
-		else
-			usb_send(ep, rbuf+pos, size, NULL, 0);
+		usb_send(ep, p, size, NULL, 0);
 		fetched += size;
 	}
 	return 1;
@@ -77,9 +85,13 @@ __bit i2c_fetch(struct ep_descr *ep, uint8_t len)
 
 static void delay(void)
 {
-	int i;
+	uint8_t i;
 
-	for (i = 0; i != 240/3; i++)
+	/*
+	 * Minimum loop time is 4 cycles. Maximum clock is 24MHz. We want to
+	 * wait at least 5us (for t(LOW)/(tSU;STA), which are both >= 4.7us.
+	 */
+	for (i = 24*5/4; i; i--)
 		__asm nop __endasm;
 }
 
@@ -89,6 +101,8 @@ static void delay(void)
 void i2c_poll(void)
 {
 	int8_t i;
+	uint8_t data;
+	__bit nak;
 
 	switch (state) {
 	case IDLE:
@@ -98,69 +112,97 @@ void i2c_poll(void)
 		if (!I2C_SDA || !I2C_SCL)
 			break;
 		I2C_SDA = 0;
-		if (wpos == wend)
-			data = device << 1 | 1;
-		else
-			data = device << 1;
 		delay();
+		I2C_SCL = 0;
 		state = SEND;
+		delay();
 		break;
 	case SEND:
-		for (i = 7; i != -1; i--) {
+		if (spos && wpos-wbuf == spos) {
+			I2C_SDA = 1;
+			delay();
+			I2C_SCL = 1;
+			delay();
+			if (!I2C_SCL)
+				break;
+			I2C_SDA = 0;
+			spos = 0;
+			delay();
 			I2C_SCL = 0;
-			sda = (data >> i) & 1;
+			delay();
+		}
+		sda = *wpos >> 7;
+		I2C_SDA = sda;
+		delay();
+		I2C_SCL = 1;
+		if (!I2C_SCL)
+			break;
+		delay();
+		I2C_SCL = 0;
+		for (i = 6; i != -1; i--) {
+			sda = (*wpos >> i) & 1;
 			I2C_SDA = sda;
 			delay();
 			I2C_SCL = 1;
 			delay();
+			I2C_SCL = 0;
 		}
+		wpos++;
+		I2C_SDA = 1;
+		delay();
+		I2C_SCL = 1;
+		delay();
+		nak = I2C_SDA;
 		I2C_SCL = 0;
+		I2C_SDA = 0;
+		delay();
+#ifdef SIMULATION
+		nak = 0;
+#endif
+		if (nak) {
+			state = FAILED;
+		} else {
+			if (wpos != wend)
+				break;
+			if (rpos != rend) {
+				state = RECV;
+				break;
+			}
+			state = IDLE;
+		}
+		I2C_SCL = 1;
 		delay();
 		I2C_SDA = 1;
-		state = ACK;
+		delay();
 		break;
 	case RECV:
+		I2C_SDA = 1;
 		data = 0;
 		for (i = 7; i != -1; i--) {
-			I2C_SCL = 0;
 			delay();
 			I2C_SCL = 1;
 			delay();
 			data |= I2C_SDA << i;
+			I2C_SCL = 0;
 		}
 		*rpos++ = data;
 		if (rpos != rend)
 			I2C_SDA = 0;
+		delay();
+		I2C_SCL = 1;
+		delay();
 		I2C_SCL = 0;
+		if (rpos != rend)
+			break;
+
+		delay();
+		I2C_SDA = 0;
 		delay();
 		I2C_SCL = 1;
 		delay();
-		if (rpos == rend)
-			state = STOP;
-		break;
-	case ACK:
-		if (I2C_SDA)
-			break;
-		I2C_SCL = 1;
+		I2C_SDA = 1;
 		delay();
-		if (wpos != wend) {
-			data = *wpos++;
-			state = SEND;
-		}
-		else {
-			if (rpos != rend)
-				state = RECV;
-			else {
-				state = IDLE;
-				delay();
-			}
-		}
-		break;
-	case STOP:
-		if (!I2C_SDA)
-			break;
 		state = IDLE;
-		delay();
 		break;
 	default:
 		break;

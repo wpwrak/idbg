@@ -29,7 +29,6 @@ static const uint8_t id[] = { EP0IDBG_MAJOR, EP0IDBG_MINOR };
 static __xdata uint8_t buf[EP1_SIZE];
 static uint16_t size, jtag_bits;
 static __bit jtag_last; /* scan is last segment of larger scan */
-static uint8_t i2c_device, i2c_addr;
 static uint8_t p0_shadow = 0xff, p2_shadow = 0xff;
 
 
@@ -54,7 +53,7 @@ static void do_jtag_move(void *user)
 static void do_i2c_write(void *user)
 {
 	user; /* suppress warning */
-	i2c_start(i2c_device, buf, size, NULL, 0);
+	i2c_start(0, buf, size+2, NULL, 0);
 }
 
 
@@ -159,17 +158,19 @@ static __bit my_setup(struct setup_request *setup) __reentrant
 
 	case IDBG_TO_DEV(IDBG_I2C_WRITE):
 		debug("IDBG_I2C_WRITE\n");
-		if (setup->wLength > EP1_SIZE-1)
+		if (setup->wLength > EP1_SIZE-2)
 			return 0;
-		i2c_device = setup->wIndex;
-		*buf = setup->wValue;
+		buf[0] = setup->wIndex << 1;
+		buf[1] = setup->wValue;
 		size = setup->wLength;
-		usb_recv(&ep0, buf+1, size, do_i2c_write, NULL);
+		usb_recv(&ep0, buf+2, size, do_i2c_write, NULL);
 		return 1;
 	case IDBG_FROM_DEV(IDBG_I2C_READ):
 		debug("IDBG_I2C_READ\n");
-		i2c_addr = setup->wValue;
-		i2c_start(setup->wIndex, &i2c_addr, 1, buf, setup->wLength);
+		buf[0] = setup->wIndex << 1;
+		buf[1] = setup->wValue;
+		buf[2] = setup->wIndex << 1 | 1;
+		i2c_start(2, buf, 3, buf, setup->wLength);
 		usb_send(&ep0, NULL, 0, NULL, NULL);
 		return 1;
 	case IDBG_FROM_DEV(IDBG_I2C_FETCH):

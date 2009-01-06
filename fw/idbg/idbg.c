@@ -13,6 +13,7 @@
 
 #include "regs.h"
 #include "uart.h"
+#include "io.h"
 #include "usb.h"
 #include "serial.h"
 #include "i2c.h"
@@ -25,11 +26,16 @@ void uart_isr(void) __interrupt(4);
 
 void main(void)
 {
+	/*
+	 * Our pull-up is strong enough to raise nNOR_WP above the threshold.
+	 * Besides, we'd burn power if we didn't drive it low.
+	 */
+	nNOR_WP = 0;
+
 	/* @@@ since boot and payload may run at different USB speeds, we
 	   should also redo the clock init */
 	uart_init(24);
 
-	printk("Hello, payload\n");
 	printk("%s #%u\n", build_date, build_number);
 
 	EA = 1;

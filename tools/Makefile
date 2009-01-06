@@ -1,8 +1,8 @@
 #
 # tools/Makefile - Build the IDBG-specific tools
 #
-# Written 2008 by Werner Almesberger
-# Copyright 2008 Werner Almesberger
+# Written 2008, 2009 by Werner Almesberger
+# Copyright 2008, 2009 Werner Almesberger
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -11,7 +11,7 @@
 #
 
 
-DIRS=idbg-gpio idbg-reset idbg-con idbg-i2c
+DIRS=idbg-gpio idbg-reset idbg-con idbg-i2c idbg-norwp
 
 
 .PHONY:		all install uninstall clean spotless

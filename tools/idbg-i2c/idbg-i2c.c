@@ -18,7 +18,7 @@
 #include <string.h>
 #include <usb.h>
 
-#include "ep0idbg.h"
+#include "ep0.h"
 
 
 #define TO_DEV		0x40

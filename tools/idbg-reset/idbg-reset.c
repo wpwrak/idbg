@@ -1,8 +1,8 @@
 /*
  * idbg-reset/idbg-reset.c - Reset utility for target and IDBG
  *
- * Written 2008 by Werner Almesberger
- * Copyright 2008 Werner Almesberger
+ * Written 2008, 2009 by Werner Almesberger
+ * Copyright 2008, 2009 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 #include <string.h>
 #include <usb.h>
 
-#include "ep0idbg.h"
+#include "ep0.h"
 
 
 #define TO_DEV		0x40

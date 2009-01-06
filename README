@@ -7,7 +7,7 @@ The files in this package are distributed under the terms of the
 GNU General Public License (GPL), either version 2, or (at your
 option) any later version.
 
-This license is included in the file COPYING.GPLv2.
+The full text of the license is included in the file COPYING.GPLv2.
 
 
 The Internal Debug Board (IDBG) provides the core functionality of the
@@ -44,6 +44,7 @@ tools/		User-space utilities to perform IDBG operations
   idbg-reset/	Reset target (i.e., the Neo) or IDBG
   idbg-con/	Serial console (based on libusb)
   idbg-i2c/	Read/write I2C registers
+  idbg-norwp/	Control NOR write protection (GTA02)
 
 
 Build process

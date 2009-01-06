@@ -94,11 +94,13 @@ static int do_poll(usb_dev_handle *dev)
 	int res, i;
 	ssize_t got;
 
-	res = usb_bulk_read(dev, 0x81, buf, sizeof(buf), 10);
-	if (res < 0 && res != -ETIMEDOUT)
-		return 0;
-	if (res > 0)
-		write(1, buf, res);
+	if (dev) {
+		res = usb_bulk_read(dev, 0x81, buf, sizeof(buf), 10);
+		if (res < 0 && res != -ETIMEDOUT)
+			return 0;
+		if (res > 0)
+			write(1, buf, res);
+	}
 	got = read(0, buf, sizeof(buf));
 	if (got < 0) {
 		if (errno == EAGAIN)
@@ -118,6 +120,8 @@ static int do_poll(usb_dev_handle *dev)
 		default:
 			escape = 0;
 		}
+	if (!dev)
+		return 1;
 	res = usb_bulk_write(dev, 0x01, buf, got, 1000);
 	if (res < 0)
 		return 0;
@@ -151,6 +155,7 @@ int main(int argc, const char **argv)
 		if (!reported)
 			fprintf(stderr, "[ Waiting for device ]\r\n");
 		reported = 1;
+		do_poll(NULL);
 		usleep(100000);
 	}
 	return 0;

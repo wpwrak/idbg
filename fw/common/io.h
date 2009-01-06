@@ -36,7 +36,7 @@
 
 /* Special functions */
 
-#define	GSM_EN		P2_3	/* GTA01 only */
+#define	nGSM_EN		P2_3	/* GTA01 only */
 #define	nNOR_WP		P2_2	/* GTA02 only */
 #define	FUTURE		P0_3
 

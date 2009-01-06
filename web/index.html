@@ -47,7 +47,7 @@ features:
   <LI> IDBG can act as a master on the <B>I2C</B> bus
     <!-- , allowing I2C devices to be accessed using IDBG-specific tools -->
   <LI> IDBG handles the model-specific signals
-    GSM_EN (GTA01) and nNOR_WP (GTA02)
+    nGSM_EN (GTA01) and nNOR_WP (GTA02)
   <LI> If it is not used, the IDBG is transparent to the rest of the system
 </UL>
 Note that not all of this has been implemented and tested so far.
@@ -228,7 +228,7 @@ What's untested or not yet done:
   <LI> Effects of IDBG having no power while Neo is powered
   <LI> Operation with IDBG connected to VSYS, especially power consumption
   <LI> Protection of boot loader in MCU's Flash
-  <LI> GTA01 UART sharing with GSM_EN
+  <LI> GTA01 UART sharing with nGSM_EN
   <LI> Control of nNOR_WP (GTA02)
   <LI> Monitoring of nRESET for automatic JTAG detach
   <LI> Testing on GTA01
@@ -252,7 +252,7 @@ For further study:
 
 <HR>
 <A href="mailto:werner@almesberger.net">Werner Almesberger</A>,
-05-JAN-2009
+06-JAN-2009
 <HR>
 </BODY>
 </HTML>

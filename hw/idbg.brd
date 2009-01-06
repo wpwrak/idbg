@@ -1,4 +1,4 @@
-PCBNEW-BOARD Version 1 date 31/12/2008-05:59:00
+PCBNEW-BOARD Version 1 date 6/1/2009-03:35:16
 
 $GENERAL
 LayerCount 2
@@ -16,7 +16,7 @@ $EndGENERAL
 $SHEETDESCR
 Sheet A4 11700 8267
 Title "Internal Debug Board (for GTA01/GTA02)"
-Date "31 dec 2008"
+Date "6 jan 2009"
 Rev "4"
 Comp "Werner Almesberger"
 Comment1 ""
@@ -103,7 +103,7 @@ Na 10 "/FUTURE"
 St ~
 $EndEQUIPOT
 $EQUIPOT
-Na 11 "/GSM_EN"
+Na 11 "/nGSM_EN"
 St ~
 $EndEQUIPOT
 $EQUIPOT
@@ -415,7 +415,7 @@ $PAD
 Sh "1" O 787 196 0 0 900
 Dr 0 0 0
 At SMD N 00888000
-Ne 11 "/GSM_EN"
+Ne 11 "/nGSM_EN"
 Po 0 0
 $EndPAD
 $EndMODULE  Pad_2mm
@@ -724,7 +724,7 @@ $PAD
 Sh "11" R 114 354 0 0 1800
 Dr 0 0 0
 At SMD N 00888000
-Ne 11 "/GSM_EN"
+Ne 11 "/nGSM_EN"
 Po 0 1003
 $EndPAD
 $PAD

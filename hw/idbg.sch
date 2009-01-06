@@ -299,7 +299,7 @@ F 1 "100" V 4150 6350 50  0000 C C
 	0    1    -1   0   
 $EndComp
 Text Label 9500 6200 0    60   ~
-GSM_EN
+nGSM_EN
 $Comp
 L CONN_1 P21
 U 1 1 49385578

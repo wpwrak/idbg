@@ -36,7 +36,7 @@ static struct pin {
 	const char *idbg_name;
 } pins[] = {
 	{  1,	0, 0,	"I2C_SCL",	"SCL",		},
-	{ 11,	2, 3,	"GSM_EN",	NULL		},
+	{ 11,	2, 3,	"nGSM_EN",	NULL		},
 	{ 12,	2, 2,	"nNOR_WP",	NULL		},
 	{ 16,	2, 5,	"STDI",		"TDI"		},
 	{ 17,	2, 4,	"STMS",		"TMS"		},

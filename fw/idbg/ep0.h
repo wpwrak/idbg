@@ -32,7 +32,6 @@
  * ->host	IDBG_I2C_READ		address		device	#bytes
  * ->host	IDBG_I2C_FETCH		0		0	#bytes
  *
- * host->	IDBG_GPIO_UPDATE	0		mask	0
  * host->	IDBG_GPIO_DATA_SET	value		mask	0
  * ->host	IDBG_GPIO_DATA_GET	0		0	2
  * host->	IDBG_GPIO_MODE_SET	value		mask	0
@@ -72,8 +71,7 @@ enum idbg_requests {
 	IDBG_I2C_WRITE		= 0x20,
 	IDBG_I2C_READ,
 	IDBG_I2C_FETCH,
-	IDBG_GPIO_UPDATE	= 0x30,
-	IDBG_GPIO_DATA_SET,
+	IDBG_GPIO_DATA_SET	= 0x30,
 	IDBG_GPIO_DATA_GET,
 	IDBG_GPIO_MODE_SET,
 	IDBG_GPIO_MODE_GET,

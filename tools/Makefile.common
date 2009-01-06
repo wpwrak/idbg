@@ -22,7 +22,7 @@ OBJS=
 
 all:		$(MAIN)
 
-install:
+install:	$(MAIN)
 		install $(MAIN) $(INSTALL_PREFIX)/bin/
 
 uninstall:

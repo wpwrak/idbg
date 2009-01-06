@@ -29,7 +29,6 @@ static const uint8_t id[] = { EP0IDBG_MAJOR, EP0IDBG_MINOR };
 static __xdata uint8_t buf[EP1_SIZE];
 static uint16_t size, jtag_bits;
 static __bit jtag_last; /* scan is last segment of larger scan */
-static uint8_t p0_shadow = 0xff, p2_shadow = 0xff;
 
 
 #define	UPDATE_MASKED(var, value, mask) \
@@ -57,8 +56,37 @@ static void do_i2c_write(void *user)
 }
 
 
+#define SET_GPIO(port, bit, value)		\
+	case port*4+bit:			\
+		P##port##_##bit	= value;	\
+		break
+
+
+static void set_gpio(uint8_t n, uint8_t v)
+{
+	switch (n) {
+		SET_GPIO(0, 0, v);
+		SET_GPIO(0, 1, v);
+		SET_GPIO(0, 2, v);
+		SET_GPIO(0, 3, v);
+		SET_GPIO(0, 4, v);
+		SET_GPIO(0, 5, v);
+		SET_GPIO(0, 6, v);
+		SET_GPIO(0, 7, v);
+		SET_GPIO(2, 0, v);
+		SET_GPIO(2, 1, v);
+		SET_GPIO(2, 2, v);
+		SET_GPIO(2, 3, v);
+		SET_GPIO(2, 4, v);
+		SET_GPIO(2, 5, v);
+	}
+}
+
+
 static __bit my_setup(struct setup_request *setup) __reentrant
 {
+	uint8_t i;
+
 	switch (setup->bmRequestType | setup->bRequest << 8) {
 	case IDBG_FROM_DEV(IDBG_ID):
 		debug("IDBG_ID\n");
@@ -177,18 +205,11 @@ static __bit my_setup(struct setup_request *setup) __reentrant
 		debug("IDBG_I2C_FETCH\n");
 		return i2c_fetch(&ep0, setup->wLength);
 
-	case IDBG_TO_DEV(IDBG_GPIO_UPDATE):
-		debug("IDBG_GPIO_UPDATE\n");
-		UPDATE_MASKED(p0_shadow, P0, setup->wIndex);
-		UPDATE_MASKED(p2_shadow, P2, setup->wIndex >> 8);
-		return 1;
 	case IDBG_TO_DEV(IDBG_GPIO_DATA_SET):
 		debug("IDBG_GPIO_DATA_SET");
-		UPDATE_MASKED(p0_shadow, setup->wValue, setup->wIndex);
-		UPDATE_MASKED(p2_shadow, setup->wValue >> 8,
-		    setup->wIndex >> 8);
-		P0 = p0_shadow;
-		P2 = p2_shadow;
+		for (i = 0; i != 16; i++)
+			if (setup->wIndex & (1 << i))
+				set_gpio(i, (setup->wValue >> i) & 1);
 		return 1;
 	case IDBG_FROM_DEV(IDBG_GPIO_DATA_GET):
 		debug("IDBG_GPIO_DATA_GET");

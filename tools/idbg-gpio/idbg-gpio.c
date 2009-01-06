@@ -218,12 +218,12 @@ static void dump_all(void)
 static void usage(const char *name)
 {
 	fprintf(stderr,
-"usage: %s [-a] pin[=value] ...\n"
+"usage: %s\n"
+"       %s pin[=value] ...\n"
 "       %s -l\n\n"
-"  -a  dump the state of all pins\n"
 "  -l  list valid pin names\n\n"
 "Pin values are 0, 1, and R.\n"
-  , name, name);
+  , name, name, name);
 	exit(1);
 }
 
@@ -244,21 +244,15 @@ int main(int argc, const char **argv)
 		exit(1);
 	}
 
-	if (argc > 1) {
-		if (!strcmp(argv[1], "-a"))
-			all = 1;
-		else if (*argv[1] == '-')
+	if (argc == 1)
+		all = 1;
+	else {
+		if (*argv[1] == '-')
 			usage(*argv);
 	}
 
 	parse_set(argv+1, argc-1);
 	if (mask[0] || mask[1]) {
-		res = usb_control_msg(dev, TO_DEV, IDBG_GPIO_UPDATE,
-		    0, mask[0] | mask[1] << 8, NULL, 0, 1000);
-		if (res < 0) {
-			fprintf(stderr, "IDBG_GPIO_UPDATE: %d\n", res);
-			return 1;
-		}
 		res = usb_control_msg(dev, TO_DEV, IDBG_GPIO_DATA_SET,
 		    data[0] | data[1] << 8, mask[0] | mask[1] << 8,
 		    NULL, 0, 1000);

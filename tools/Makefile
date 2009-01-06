@@ -13,20 +13,4 @@
 
 DIRS=idbg-gpio idbg-reset idbg-con idbg-i2c idbg-norwp
 
-
-.PHONY:		all install uninstall clean spotless
-
-all:
-		for d in $(DIRS); do make -C $$d all || exit 1; done
-
-install:
-		for d in $(DIRS); do make -C $$d install || exit 1; done
-
-uninstall:
-		for d in $(DIRS); do make -C $$d uninstall || exit 1; done
-
-clean:
-		for d in $(DIRS); do make -C $$d clean || exit 1; done
-
-spotless:
-		for d in $(DIRS); do make -C $$d spotless || exit 1; done
+include ../Makefile.recurse

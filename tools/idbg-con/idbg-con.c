@@ -157,8 +157,11 @@ static int poll_tty(usb_dev_handle *dev)
 			escape = 1;
 			break;
 		case '.':
-			if (escape)
+			if (escape) {
+				if (dev)
+					usb_reset(dev);
 				exit(0);
+			}
 			/* fall through */
 		default:
 			escape = 0;

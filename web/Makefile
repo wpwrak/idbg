@@ -1,7 +1,8 @@
 ACCOUNT=werner@almesberger.net
 DIR=/home/httpd/almesberger/misc/idbg/
 
-IMAGES=mech.ps wiring.ps mech.png wiring.png idbg.png idbg-Component.png
+IMAGES=mech.ps wiring.ps \
+       mech.png wiring.png idbg.png idbg-Component.png idbg-SilkS_Cmp.png
 
 FILES=index.html idbg-coexistence.jpg idbg-connected.jpg idbg-ipl.jpg \
       idbg-soldered.jpg idbg-top.jpg idbg-wired.jpg idbg-wires.jpg \
@@ -39,6 +40,11 @@ idbg.png:	../hw/idbg.ps
 
 idbg-Component.png:	../hw/idbg-Component.ps
 		pstopnm -xmax 1500 -ymax 1200 -landscape -stdout $< | \
+		  pnmcrop | pnmflip -r180 | pnmtopng >$@ || \
+		  { rm -f $@; exit 1; }
+
+idbg-SilkS_Cmp.png:	../hw/idbg-SilkS_Cmp.ps
+		pstopnm -xmax 6000 -ymax 4800 -landscape -stdout $< | \
 		  pnmcrop | pnmflip -r180 | pnmtopng >$@ || \
 		  { rm -f $@; exit 1; }
 

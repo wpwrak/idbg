@@ -54,6 +54,7 @@ static volatile uint8_t rx_pos = 0;
 /* ----- Queue handling ---------------------------------------------------- */
 
 
+#pragma save
 #pragma nooverlay
 
 static void enqueue(__xdata struct queue *q, __xdata struct urb *urb)
@@ -78,6 +79,8 @@ static __xdata struct urb *dequeue(__xdata struct queue *q)
 		q->head = urb->next;
 	return urb;
 }
+
+#pragma restore
 
 
 static void init_queue(struct queue *q, __xdata struct urb *urbs,
@@ -131,6 +134,7 @@ static void do_tx(void)
 /* ----- Host -> Neo ------------------------------------------------------- */
 
 
+#pragma save
 #pragma nooverlay
 
 static void rx_submit(void)
@@ -144,6 +148,8 @@ static void rx_submit(void)
 	enqueue(&rx_wait_q, urb);
 	rx_pos = 0;
 }
+
+#pragma restore
 
 
 static void rx_done(void *user) __critical
@@ -173,6 +179,7 @@ static void do_rx(void)
 }
 
 
+#pragma save
 #pragma nooverlay
 
 static void rx_enqueue(char ch) __critical
@@ -187,11 +194,13 @@ static void rx_enqueue(char ch) __critical
 	/*
 	 * Put the current URB into the USB wait queue if:
 	 * - we're idle, or
-	 * - it is full
+	 * - the URB is full
 	 */
 	if ((!rxing && !rx_wait_q.head) || rx_pos == SERIAL_BUF_SIZE)
 		rx_submit();
 }
+
+#pragma restore
 
 
 void uart_isr(void) __interrupt(4)

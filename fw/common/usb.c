@@ -1,8 +1,8 @@
 /*
  * common/usb.c - USB hardware setup and standard device requests
  *
- * Written 2008 by Werner Almesberger
- * Copyright 2008 Werner Almesberger
+ * Written 2008, 2009 by Werner Almesberger
+ * Copyright 2008m 2009 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,6 @@
 #define BUG_ON(x)
 
 
-#define N 2
 #define NO_ADDRESS	0xff	/* null value for function address */
 
 
@@ -70,18 +69,6 @@ void usb_io(struct ep_descr *ep, enum ep_state state, uint8_t *buf,
 	ep->end = buf+size;
 	ep->callback = callback;
 	ep->user = user;
-}
-
-
-static void trigger(void)
-{
-	static uint16_t count = 0;
-
-	if (++count == N) {
-		P2_0 = 0;
-		P2_0 = 1;
-		putchar('*');
-	}
 }
 
 

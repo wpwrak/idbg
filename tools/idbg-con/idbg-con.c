@@ -14,6 +14,11 @@
  * Polling is a bit crude but it helps us to avoid the complexity of
  * asynchronous libusb. Besides, one should rather use the in-kernel USB serial
  * driver anyway.
+ *
+ * Note that the polling also has a race condition in the USB stack: it seems
+ * that, if a packet arrives when we're just about to time out, the packet is
+ * lost. We work around this issue by creating a thread that just blocks until
+ * data has arrived.
  */
 
 
@@ -22,13 +27,18 @@
 #include <unistd.h>
 #include <string.h>
 #include <termios.h>
+#include <signal.h>
+#include <pthread.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/types.h>
+#include <sys/ioctl.h>
 #include <usb.h>
+#include <linux/usbdevice_fs.h>
 
 
 static struct termios console;
+static volatile int disconnected;
 
 
 static usb_dev_handle *open_usb(void)
@@ -87,24 +97,57 @@ static void cleanup(void)
 }
 
 
-static int do_poll(usb_dev_handle *dev)
+static int synchronous_bulk_read(usb_dev_handle *dev)
+{
+	int got;
+	ssize_t wrote;
+	char buf[100];
+	struct usbdevfs_bulktransfer req = {
+		.ep = 0x81,
+		.len = sizeof(buf),
+		.timeout = 0,
+		.data = buf,
+	};
+
+	got = ioctl(*(int *) dev, USBDEVFS_BULK, &req);
+	if (got < 0)
+		return 0;
+	wrote = write(1, buf, got);
+	if (wrote < 0) {
+		perror("write");
+		exit(1);
+	}
+	if (wrote != got) {
+		fprintf(stderr, "short write\n");
+		exit(1);
+	}
+	return 1;
+}
+
+
+static void *usb_read_loop(void *arg)
+{
+	usb_dev_handle *dev = arg;
+
+	while (synchronous_bulk_read(dev));
+	disconnected = 1;
+	return NULL;
+}
+
+
+static int poll_tty(usb_dev_handle *dev)
 {
 	static int escape = 0;
 	char buf[100];
 	int res, i;
 	ssize_t got;
 
-	if (dev) {
-		res = usb_bulk_read(dev, 0x81, buf, sizeof(buf), 10);
-		if (res < 0 && res != -ETIMEDOUT)
-			return 0;
-		if (res > 0)
-			write(1, buf, res);
-	}
 	got = read(0, buf, sizeof(buf));
 	if (got < 0) {
-		if (errno == EAGAIN)
+		if (errno == EAGAIN) {
+			usleep(10000);
 			return 1;
+		}
 		perror("read");
 		exit(1);
 	}
@@ -133,6 +176,26 @@ static int do_poll(usb_dev_handle *dev)
 }
 
 
+static void poll_loop(usb_dev_handle *dev)
+{
+	pthread_t thread;
+
+	disconnected = 0;
+	if (pthread_create(&thread, NULL, usb_read_loop, dev) < 0) {
+		perror("pthread_create");
+		exit(1);
+	}
+	while (1) {
+		if (disconnected)
+			break;
+		if (!poll_tty(dev))
+			break;
+	}
+	pthread_kill(thread, SIGINT);
+	pthread_join(thread, NULL);
+}
+
+
 int main(int argc, const char **argv)
 {
 	usb_dev_handle *dev;
@@ -148,14 +211,14 @@ int main(int argc, const char **argv)
 			if (res >= 0) {
 				fprintf(stderr, "[ Connected ]\r\n");
 				reported = 0;
-				while (do_poll(dev));
+				poll_loop(dev);
 			}
 			usb_close(dev);
 		}
 		if (!reported)
 			fprintf(stderr, "[ Waiting for device ]\r\n");
 		reported = 1;
-		do_poll(NULL);
+		poll_tty(NULL);
 		usleep(100000);
 	}
 	return 0;

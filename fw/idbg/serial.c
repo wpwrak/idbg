@@ -25,41 +25,94 @@
 #endif
 
 
+/*
+ * USB Request Blocks
+ */
+
+#define	RX_URBS	10	/* that's probably too many, but XRAM is cheap :-) */
+#define	TX_URBS	2
+
+
 static __xdata struct urb {
-	uint8_t buf[TX_BUF_SIZE];
-	uint8_t *pos;
-	uint8_t *end;
-} urbs[2];
+	uint8_t buf[SERIAL_BUF_SIZE];
+	uint8_t len;
+	__xdata struct urb *next;
+} rx_urbs[RX_URBS], urbs[2];
+
+static __xdata struct queue {
+	__xdata struct urb *volatile head;
+	__xdata struct urb *volatile tail; /* undefined if head == NULL */
+} rx_uart_q, rx_wait_q;
 
 static struct urb *__xdata uart_q[2] = { NULL, NULL };
 static struct urb *__xdata usb_q[2] = { urbs, urbs+1 };
 static __bit txing = 0; /* UART is txing */
+static uint8_t tx_pos = 0;
 
-static __xdata uint8_t rx_buf[2][RX_BUF_SIZE];
-static __bit rx_curr = 0, rx_busy = 0;
+static volatile __xdata struct urb *rxing = NULL;
 static volatile uint8_t rx_pos = 0;
+
+
+/* ----- Queue handling ---------------------------------------------------- */
+
+
+#pragma nooverlay
+
+static void enqueue(__xdata struct queue *q, __xdata struct urb *urb)
+{
+	if (q->head) {
+		q->tail->next = urb;
+	} else {
+		q->head = urb;
+	}
+	q->tail = urb;
+	urb->next = NULL;
+}
+
+
+#pragma nooverlay
+
+static __xdata struct urb *dequeue(__xdata struct queue *q)
+{
+	__xdata struct urb *urb = q->head;
+	
+	if (urb)
+		q->head = urb->next;
+	return urb;
+}
+
+
+static void init_queue(struct queue *q, __xdata struct urb *urbs,
+    uint8_t n_urbs)
+{
+	uint8_t i;
+
+	q->head = urbs;
+	q->tail = urbs+n_urbs-1;
+	for (i = 0; i != n_urbs; i++)
+		urbs[i].next = i == n_urbs-1 ? NULL : urbs+i+1;
+}
+
+
+/* ----- Neo -> Host ------------------------------------------------------- */
 
 
 static void got_tx(void *user)
 {
 	struct urb *urb = user;
 
-	urb->pos = urb->buf;
-	/*
-	 * Weird. SDCC 2.7.0 and 2.8.0 don't seem to know that "array" is
-	 * equivalent to &array[0] and get confused. @@@
-	 */
-	urb->end = &urb->buf[0]+TX_BUF_SIZE-usb_left(&ep1out);
+	urb->len = SERIAL_BUF_SIZE-usb_left(&ep1out);
 	usb_q[0] = usb_q[1];
 	usb_q[1] = NULL;
 	if (uart_q[0]) {
 		uart_q[1] = urb;
 	} else {
 		uart_q[0] = urb;
+		tx_pos = 0;
 	}
 	urb = usb_q[0];
 	if (urb)
-		usb_recv(&ep1out, urb->buf, TX_BUF_SIZE, got_tx, urb);
+		usb_recv(&ep1out, urb->buf, SERIAL_BUF_SIZE, got_tx, urb);
 }
 
 
@@ -73,43 +126,85 @@ static void do_tx(void)
 		return;
 	}
 	txing = 1;
-	SBUF0 = *urb->pos++;
-	if (urb->pos != urb->end)
+	SBUF0 = urb->buf[tx_pos];
+	tx_pos++;
+	if (tx_pos != urb->len)
 		return;
 	uart_q[0] = uart_q[1];
 	uart_q[1] = NULL;
+	tx_pos = 0;
 	if (usb_q[0]) {
 		usb_q[1] = urb;
 	} else {
 		usb_q[0] = urb;
-		usb_recv(&ep1out, urb->buf, TX_BUF_SIZE, got_tx, urb);
+		usb_recv(&ep1out, urb->buf, SERIAL_BUF_SIZE, got_tx, urb);
 	}
 }
 
 
-static void rx_done(void *user)
+/* ----- Host -> Neo ------------------------------------------------------- */
+
+
+#pragma nooverlay
+
+static void rx_submit(void)
 {
-	user; /* silence sdcc */
-	rx_busy = 0;
+	__xdata struct urb *urb;
+
+	urb = dequeue(&rx_uart_q);
+	if (!urb)
+		return;
+	urb->len = rx_pos;
+	enqueue(&rx_wait_q, urb);
+	rx_pos = 0;
 }
 
 
-static void send_rx(void)
+static void rx_done(void *user) __critical
 {
-	usb_send(&ep1in, rx_buf[rx_curr], rx_pos, rx_done, NULL);
-	rx_busy = 1;
-	rx_curr = !rx_curr;
-	rx_pos = 0;
+	user; /* silence sdcc */
+
+	enqueue(&rx_uart_q, rxing);
+	rxing = NULL;
+	/*
+	 * Check if we're idle but have a partially filled URB in the UART
+	 * queue.
+	 */
+	if (rx_pos && !rx_wait_q.head)
+		rx_submit();
 }
 
 
 static void do_rx(void)
 {
-	EA = 0;
-	EA = 0;
-	if (rx_pos && !rx_busy)
-		send_rx();
-	EA = 1;
+	if (rxing)
+		return;
+	__critical {
+		rxing = dequeue(&rx_wait_q);
+		if (rxing)
+			usb_send(&ep1in, rxing->buf, rxing->len, rx_done, NULL);
+	}
+}
+
+
+#pragma nooverlay
+
+static void rx_enqueue(char ch) __critical
+{
+	__xdata struct urb *urb;
+
+	urb = rx_uart_q.head;
+	if (!urb)
+		return;
+	urb->buf[rx_pos] = ch;
+	rx_pos++;
+	/*
+	 * Put the current URB into the USB wait queue if:
+	 * - we're idle, or
+	 * - it is full
+	 */
+	if ((!rxing && !rx_wait_q.head) || rx_pos == SERIAL_BUF_SIZE)
+		rx_submit();
 }
 
 
@@ -117,27 +212,16 @@ void uart_isr(void) __interrupt(4)
 {
 	if (!RI0)
 		return;
+	rx_enqueue(SBUF0);
 	RI0 = 0;
-	if (rx_pos == RX_BUF_SIZE) {
-		debug("do_rx overrun\n");
-		return;
-	}
-	rx_buf[rx_curr][rx_pos] = SBUF0;
-	rx_pos++;
 }
 
 
 #ifdef CONFIG_USB_PUTCHAR
 
-void putchar(char ch)
+void putchar(char ch) __critical
 {
-	EA = 0;
-	EA = 0;
-	if (rx_pos != RX_BUF_SIZE) {
-		rx_buf[rx_curr][rx_pos] = ch;
-		rx_pos++;
-	}
-	EA = 1;
+	rx_enqueue(ch);
 }
 
 #endif /* CONFIG_USB_PUTCHAR */
@@ -155,7 +239,9 @@ void serial_poll(void)
 
 void serial_init(void)
 {
-	usb_recv(&ep1out, urbs->buf, TX_BUF_SIZE, got_tx, urbs);
+	init_queue(&rx_uart_q, rx_urbs, RX_URBS);
+	init_queue(&rx_wait_q, NULL, 0);
+	usb_recv(&ep1out, urbs->buf, SERIAL_BUF_SIZE, got_tx, urbs);
 	REN0 = 1; /* enable receiver */
 	ES0 = 1; /* enable interrupt */
 }

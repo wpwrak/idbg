@@ -6,6 +6,9 @@
 #define __interrupt(x)
 
 
+#define SERIAL_H
+#define SERIAL_BUF_SIZE 2
+
 #include "../../serial.c"
 
 
@@ -55,7 +58,8 @@ static void rx(char c)
 {
 	SBUF0 = c;
 	RI0 = 1;
-	serial_poll();
+fprintf(stderr, "RX %c\n", c);
+	uart_isr();
 	RI0 = 0;
 }
 
@@ -108,12 +112,25 @@ int main(void)
 	/* RX test */
 
 	rx('A');
+	serial_poll();
 	rx('B');
 	rx('C');
 	rx('D');
-	callback();
-	callback();
 	rx('E');
+	rx('F');
+	rx('G');
+	serial_poll();
+	serial_poll();
+	callback();
+	serial_poll();
+	serial_poll();
+	callback();
+	rx('H');
+	serial_poll();
+	serial_poll();
+	callback();
+	serial_poll();
+	serial_poll();
 
 	return 0;
 }

@@ -37,15 +37,13 @@ static __xdata struct urb {
 	uint8_t buf[SERIAL_BUF_SIZE];
 	uint8_t len;
 	__xdata struct urb *next;
-} rx_urbs[RX_URBS], urbs[2];
+} rx_urbs[RX_URBS], tx_urbs[TX_URBS];
 
 static __xdata struct queue {
 	__xdata struct urb *volatile head;
 	__xdata struct urb *volatile tail; /* undefined if head == NULL */
-} rx_uart_q, rx_wait_q;
+} rx_uart_q, rx_wait_q, tx_uart_q, tx_usb_q;
 
-static struct urb *__xdata uart_q[2] = { NULL, NULL };
-static struct urb *__xdata usb_q[2] = { urbs, urbs+1 };
 static __bit txing = 0; /* UART is txing */
 static uint8_t tx_pos = 0;
 
@@ -99,18 +97,11 @@ static void init_queue(struct queue *q, __xdata struct urb *urbs,
 
 static void got_tx(void *user)
 {
-	struct urb *urb = user;
+	__xdata struct urb *urb = user;
 
 	urb->len = SERIAL_BUF_SIZE-usb_left(&ep1out);
-	usb_q[0] = usb_q[1];
-	usb_q[1] = NULL;
-	if (uart_q[0]) {
-		uart_q[1] = urb;
-	} else {
-		uart_q[0] = urb;
-		tx_pos = 0;
-	}
-	urb = usb_q[0];
+	enqueue(&tx_uart_q, dequeue(&tx_usb_q));
+	urb = tx_usb_q.head;
 	if (urb)
 		usb_recv(&ep1out, urb->buf, SERIAL_BUF_SIZE, got_tx, urb);
 }
@@ -118,9 +109,9 @@ static void got_tx(void *user)
 
 static void do_tx(void)
 {
-	struct urb *urb;
+	__xdata struct urb *urb;
 
-	urb = uart_q[0];
+	urb = tx_uart_q.head;
 	if (!urb) {
 		txing = 0;
 		return;
@@ -130,15 +121,10 @@ static void do_tx(void)
 	tx_pos++;
 	if (tx_pos != urb->len)
 		return;
-	uart_q[0] = uart_q[1];
-	uart_q[1] = NULL;
 	tx_pos = 0;
-	if (usb_q[0]) {
-		usb_q[1] = urb;
-	} else {
-		usb_q[0] = urb;
+	enqueue(&tx_usb_q, dequeue(&tx_uart_q));
+	if (tx_usb_q.head == urb)
 		usb_recv(&ep1out, urb->buf, SERIAL_BUF_SIZE, got_tx, urb);
-	}
 }
 
 
@@ -239,9 +225,11 @@ void serial_poll(void)
 
 void serial_init(void)
 {
+	init_queue(&tx_usb_q, tx_urbs, TX_URBS);
+	init_queue(&tx_uart_q, NULL, 0);
 	init_queue(&rx_uart_q, rx_urbs, RX_URBS);
 	init_queue(&rx_wait_q, NULL, 0);
-	usb_recv(&ep1out, urbs->buf, SERIAL_BUF_SIZE, got_tx, urbs);
+	usb_recv(&ep1out, tx_urbs->buf, SERIAL_BUF_SIZE, got_tx, tx_urbs);
 	REN0 = 1; /* enable receiver */
 	ES0 = 1; /* enable interrupt */
 }

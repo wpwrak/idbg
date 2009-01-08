@@ -141,17 +141,14 @@ important that the entire case closes properly.
 <P>
 With the mechanics sorted out, we now return to the electronics.
 A ground connection is added (this is the wire sticking out on the left
-in the middle image below) and thin wires are soldered
+in the middle image below&nbsp;&emdash;&nbsp;<A href="ww-gnd.jpg">here</A>
+is a better view of the ground connection) and thin wires are soldered
 to all the pads used in this configuration. Marking both ends of each
-wire with a "morse code" as shown in the wiring diagram makes it easier
+wire with a "Morse code" as shown in the wiring diagram makes it easier
 to make the right connections.
 <!-- wires: IMG_2786.JPG -->
-<!-- GND: IMG_2803.JPG -->
 <!-- soldered: IMG_2806.JPG -->
 <!-- soldered+tubed(top): IMG_2811.JPG -->
-<!-- soldered+tubed(bottom): IMG_2821.JPG -->
-<!-- first: IMG_2826.JPG -->
-<!-- all: IMG_2838.JPG -->
 <P>
 <A href="wiring.ps"><IMG src="wiring.png"></A>&nbsp;
 <!-- 1136x852, 100% -->
@@ -160,14 +157,6 @@ to make the right connections.
 <!-- 568x426, 50% -->
 <A href="idbg-wires.jpg"><IMG
   src="idbg-wires.jpg" width=284 height=213></A>
-<P>
-<!--
-The wires shown here are stranded 30 AWG wires with an outer diameter
-of 32mil or 0.8mm. Wire-wrap wires with a solid core may be a better choice
-since they have an outer diameter of about 20mil (0.5mm). The main
-disadvantage of wire-wrap wires is their rigidity and thus a higher risk of
-mechanical failure.
--->
 <P>
 The wires are then bundled with heat-shrink tubing and brought across
 the board edge to the top. (These pictures are from an earlier prototype,
@@ -185,9 +174,34 @@ main PCB.
 <A href="idbg-coexistence.jpg"><IMG
 src="idbg-coexistence.jpg" width=284 height=213></A>
 <P>
-If we keep the path to the FPC connector clear, it should even be
+If we keep the path to the FPC connector clear, it's even
 possible to have the internal debug board coexist with an external
 one.
+<P>
+The wires shown above are stranded 30 AWG wires with an outer diameter
+of 32mil or 0.8mm. This is about the thickest type of wire that can be
+used&nbsp;&emdash;&nbsp;anything thicker would overflow the free space
+under and around the board, and also the contacts on IDBG would be spaced
+too closely. The images below show an alternative solution: wire-wrap
+wires with a solid core that have an outer diameter of only about 20mil
+or 0.5mm.
+<P>
+<!-- 1136x852, 100% -->
+<A href="ww-wired.jpg"><IMG
+  src="ww-wired.jpg" width=284 height=213></A>&nbsp;
+<!-- 1136x852, 100% -->
+<A href="ww-first.jpg"><IMG
+  src="ww-first.jpg" width=284 height=213></A>&nbsp;
+<!-- 757x568, 67% -->
+<A href="ww-connected.jpg"><IMG
+  src="ww-connected.jpg" width=284 height=213></A>
+<P>
+The main disadvantage of wire-wrap wires is their rigidity and thus a
+higher risk of mechanical failure. The image in the middle also highlights
+another problem: the isolation becomes very soft and vulnerable when heated.
+If the wire is held down with a fingernail during soldering, the fingernail
+may penetrate and damage the isolation. It's better to hold the wire with
+something softer, e.g., the fingertip.
 <P>
 The last step is to close the case. There are some structures inside
 the top cover that conflict with the new cables and must therefore

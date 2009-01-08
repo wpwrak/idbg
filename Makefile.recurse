@@ -14,7 +14,8 @@
 .PHONY:		all install uninstall clean spotless
 
 all:
-		for d in $(DIRS); do make -C $$d all || exit 1; done
+		for d in $(DIRS) $(TARGET_ONLY_DIRS); \
+		  do make -C $$d all || exit 1; done
 
 install:
 		for d in $(DIRS); do make -C $$d install || exit 1; done
@@ -23,7 +24,9 @@ uninstall:
 		for d in $(DIRS); do make -C $$d uninstall || exit 1; done
 
 clean:
-		for d in $(DIRS); do make -C $$d clean || exit 1; done
+		for d in $(DIRS) $(TARGET_ONLY_DIRS); do \
+		  make -C $$d clean || exit 1; done
 
 spotless:
-		for d in $(DIRS); do make -C $$d spotless || exit 1; done
+		for d in $(DIRS_ $(TARGET_ONLY_DIRS); do \
+		  make -C $$d spotless || exit 1; done

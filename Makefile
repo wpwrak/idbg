@@ -12,7 +12,8 @@
 ACCOUNT=werner@almesberger.net
 DIR=/home/httpd/almesberger/misc/idbg.git/
 
-DIRS=fw f326 tools
+DIRS=fw tools
+TARGET_ONLY_DIRS=f326
 
 .PHONY:		push
 

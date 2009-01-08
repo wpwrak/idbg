@@ -251,12 +251,15 @@ What's untested or not yet done:
   <LI> Testing on GTA01
   <LI> Effect on GPS performance
   <LI> Use a proper USB vendor ID
+  <LI> Find out what descriptors to use for serial console
 </UL>
 Known bugs:
 <UL>
   <LI> DFU upload causes stray stalls if sending EP0-sized packets
   <LI> f326 sometimes locks up
   <LI> Organization of code and repository isn't nice
+  <LI> Need more fine-grained licensing, e.g., CC for schematics,
+    LGPL for libraries
 </UL>
 For further study:
 <UL>
@@ -265,11 +268,14 @@ For further study:
     settings
   <LI> Could we merge USB power from IDBG into VBUS ?
   <LI> Could IDBG snoop the I2C bus and report transactions ?
+  <LI> Consider adding special serial console functions. Some ideas:
+    ~r to reset (GPIO), ~p to power down (PMU),
+    ~d to dump the log buffer from a crashed kernel (JTAG), ...
 </UL>
 
 <HR>
 <A href="mailto:werner@almesberger.net">Werner Almesberger</A>,
-07-JAN-2009
+08-JAN-2009
 <HR>
 </BODY>
 </HTML>

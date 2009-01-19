@@ -17,7 +17,8 @@
 #include <string.h>
 #include <usb.h>
 
-#include "ep0.h"
+#include "idbg/usb-ids.h"
+#include "idbg/ep0.h"
 
 
 #define TO_DEV		0x40
@@ -38,9 +39,9 @@ static usb_dev_handle *open_usb(void)
 
 	for (bus = usb_get_busses(); bus; bus = bus->next)
 		for (dev = bus->devices; dev; dev = dev->next) {
-			if (dev->descriptor.idVendor != 0x1234)
+			if (dev->descriptor.idVendor != USB_VENDOR_OPENMOKO)
 				continue;
-			if (dev->descriptor.idProduct != 0x0002)
+			if (dev->descriptor.idProduct != USB_PRODUCT_IDBG)
 				continue;
 			return usb_open(dev);
 		}

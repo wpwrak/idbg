@@ -1,8 +1,8 @@
 /*
  * common/usb.h - USB hardware setup and standard device requests
  *
- * Written 2008 by Werner Almesberger
- * Copyright 2008 Werner Almesberger
+ * Written 2008, 2009 by Werner Almesberger
+ * Copyright 2008, 2009 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,11 +18,6 @@
 #include <stdint.h>
 
 #include "config.h"
-
-
-/* all fake ... */
-#define	USB_VENDOR	0x1234
-#define	USB_PRODUCT	0x0001
 
 
 /*

@@ -1,8 +1,8 @@
 /*
  * idbg/descr.c - USB descriptors
  *
- * Written 2008 by Werner Almesberger
- * Copyright 2008 Werner Almesberger
+ * Written 2008, 2009 by Werner Almesberger
+ * Copyright 2008, 2009 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,6 +12,7 @@
 
 
 #include "usb.h"
+#include "idbg/usb-ids.h"
 
 
 /*
@@ -26,8 +27,8 @@ const uint8_t device_descriptor[18] = {
 	0x00,			/* bDeviceSubClass */
 	0x00,			/* bDeviceProtocol */
 	EP0_SIZE,		/* bMaxPacketSize */
-	LE(0x1234),		/* idVendor */
-	LE(0x0002),		/* idProduct */
+	LE(USB_VENDOR_OPENMOKO),/* idVendor */
+	LE(USB_PRODUCT_IDBG),	/* idProduct */
 	LE(0x0001),		/* bcdDevice */
 	0,			/* iManufacturer */
 	0,			/* iProduct */

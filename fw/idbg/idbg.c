@@ -17,7 +17,7 @@
 #include "usb.h"
 #include "serial.h"
 #include "i2c.h"
-#include "ep0.h"
+#include "idbg/ep0.h"
 #include "version.h"
 
 

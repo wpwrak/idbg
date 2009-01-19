@@ -17,7 +17,7 @@ OBJS=$(MAIN) uart usb descr version ep0 serial jtag i2c
 include ../common/Makefile.system
 include ../common/Makefile.common
 
-CFLAGS += # -DLOW_SPEED
+CFLAGS += -I../include # -DLOW_SPEED
 LDFLAGS += --code-size $(PAYLOAD_SIZE) --code-loc $(PAYLOAD_START)
 
 uart.rel:	../common/uart.c

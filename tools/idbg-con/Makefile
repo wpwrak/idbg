@@ -15,4 +15,5 @@ MAIN=idbg-con
 
 include ../Makefile.common
 
+CFLAGS += -I../../fw/include
 LDFLAGS += -lpthread

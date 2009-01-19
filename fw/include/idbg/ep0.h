@@ -1,5 +1,5 @@
 /*
- * idbg/ep0.h - EP0 extension protocol
+ * include/idbg/ep0.h - EP0 extension protocol
  *
  * Written 2008, 2009 by Werner Almesberger
  * Copyright 2008, 2009 Werner Almesberger

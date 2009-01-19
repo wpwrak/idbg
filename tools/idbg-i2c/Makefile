@@ -1,8 +1,8 @@
 #
 # idbg-i2c/Makefile - Build the IDBG I2C read/write utility
 #
-# Written 2008 by Werner Almesberger
-# Copyright 2008 Werner Almesberger
+# Written 2008, 2009 by Werner Almesberger
+# Copyright 2008, 2009 Werner Almesberger
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,4 +15,4 @@ MAIN=idbg-i2c
 
 include ../Makefile.common
 
-CFLAGS += -I../../fw/idbg
+CFLAGS += -I../../fw/idbg -I../../fw/include

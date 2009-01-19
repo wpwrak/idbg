@@ -22,7 +22,7 @@
 #include "usb.h"
 #include "i2c.h"
 #include "jtag.h"
-#include "ep0.h"
+#include "idbg/ep0.h"
 
 
 static const uint8_t id[] = { EP0IDBG_MAJOR, EP0IDBG_MINOR };

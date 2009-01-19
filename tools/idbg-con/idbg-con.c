@@ -36,6 +36,8 @@
 #include <usb.h>
 #include <linux/usbdevice_fs.h>
 
+#include "idbg/usb-ids.h"
+
 
 static struct termios console;
 static volatile int disconnected;
@@ -52,9 +54,9 @@ static usb_dev_handle *open_usb(void)
 
 	for (bus = usb_get_busses(); bus; bus = bus->next)
 		for (dev = bus->devices; dev; dev = dev->next) {
-			if (dev->descriptor.idVendor != 0x1234)
+			if (dev->descriptor.idVendor != USB_VENDOR_OPENMOKO)
 				continue;
-			if (dev->descriptor.idProduct != 0x0002)
+			if (dev->descriptor.idProduct != USB_PRODUCT_IDBG)
 				continue;
 			return usb_open(dev);
 		}

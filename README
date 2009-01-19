@@ -37,6 +37,7 @@ fw/		Firmware sources
   boot/		DFU-capable boot loader
   common/	Code shared between boot loader and IDBG
   idbg/		IDBG firmware
+  include/	Headers shared between firmware and user space
 hw/		Schematics, layout, BOM, and mechanical drawing
 f326/		Flash programmer using the C2 protocol
 tools/		User-space utilities to perform IDBG operations

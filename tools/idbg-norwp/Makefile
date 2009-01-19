@@ -15,4 +15,4 @@ MAIN=idbg-norwp
 
 include ../Makefile.common
 
-CFLAGS += -I../../fw/idbg -I../../fw/include
+CFLAGS += -I../../fw/include

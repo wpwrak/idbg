@@ -28,5 +28,5 @@ clean:
 		  make -C $$d clean || exit 1; done
 
 spotless:
-		for d in $(DIRS_ $(TARGET_ONLY_DIRS); do \
+		for d in $(DIRS) $(TARGET_ONLY_DIRS); do \
 		  make -C $$d spotless || exit 1; done

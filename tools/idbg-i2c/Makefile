@@ -15,4 +15,4 @@ MAIN=idbg-i2c
 
 include ../Makefile.common
 
-CFLAGS += -I../../fw/idbg -I../../fw/include
+CFLAGS += -I../../fw/include

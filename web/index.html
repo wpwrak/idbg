@@ -265,7 +265,17 @@ For further study:
 <UL>
   <LI> IDBG should be able to command the PMU during power-up,
     e.g., allowing it to limit inrush current and to override PMU
-    settings
+    settings.<BR>
+    The idea is as follows:
+    <UL>
+      <LI> connect IDBG VSYS to the PMU's SYS1/SYS2
+      <LI> remove SYS1/SYS2 from VB_SYS
+      <LI> connect SYS1/SYS2 to VB_SYS through a switch, e.g., a
+	Fairchild FPF1003A or similar.
+      <LI> control the switch via IDBG FUTURE
+    </UL>
+    Since VB_SYS is hard to interrupt on GTA02, the idea could be tried by
+    switching only IO_3V3.
   <LI> Could we merge USB power from IDBG into VBUS ?
   <LI> Could IDBG snoop the I2C bus and report transactions ?
   <LI> Consider adding special serial console functions. Some ideas:
@@ -275,7 +285,7 @@ For further study:
 
 <HR>
 <A href="mailto:werner@almesberger.net">Werner Almesberger</A>,
-18-JAN-2009
+08-FEB-2009
 <HR>
 </BODY>
 </HTML>

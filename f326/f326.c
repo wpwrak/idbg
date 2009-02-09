@@ -1,8 +1,8 @@
 /*
  * f326/f326.c - Simple C8051F326/7 Flash programmer
  *
- * Written 2008 by Werner Almesberger
- * Copyright 2008 Werner Almesberger
+ * Written 2008, 2009 by Werner Almesberger
+ * Copyright 2008, 2009 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,12 @@
 #include "c2.h"
 #include "flash.h"
 #include "boundary.h"
+
+
+#define	LOCK_BYTE	0x3dff
+
+
+static size_t file_size;
 
 
 static void dump(const char *title, void *data, size_t size)
@@ -131,34 +137,48 @@ static void do_flash(const char *name)
 {
     FILE *file;
     uint8_t code[16384];
-    size_t size;
 
     file = fopen(name, "r");
     if (!file) {
 	perror(name);
 	exit(1);
     }
-    size = fread(code, 1, sizeof(code), file);
+    file_size = fread(code, 1, sizeof(code), file);
     (void) fclose(file);
-    flash_device(code, size);
+    flash_device(code, file_size);
+}
+
+
+static void protect(void)
+{
+    uint8_t pages, lock_byte;
+
+    pages = (file_size+511) >> 9;
+    printf("Protecting %d page%s\n", pages, pages == 1 ? "" : "s");
+    lock_byte = ~pages;
+    flash_block_write(LOCK_BYTE, &lock_byte, 1);
 }
 
 
 static void usage(const char *name)
 {
     fprintf(stderr,
-"usage: %s [-d|-e|file]\n"
-"       %s -b pin_setup\n\n"
-"  -d  dump Flash content\n"
-"  -e  erase whole Flash\n"
+"usage: %s [-p] file\n"
+"       %s -d\n"
+"       %s -e\n"
+"       %s -b pin_setup\n"
+"       %s\n\n"
 "  -b pin_setup\n"
 "    Perform a boundary scan. pin_setup sets all 14 pins in this order:\n"
 "    P0_0, P0_1, ..., P0_7, P2_0, ..., P2_5.\n"
 "    Pins can be set to 0, 1, or R (pull-up). Dots can be used to structure\n"
 "    the bit string. Prints what the pins read back (0 or 1) in the same\n"
-"    order, with a dot between P0 and P2.\n\n"
-"No argument resets the F326.\n"
-  , name, name);
+"    order, with a dot between P0 and P2.\n"
+"  -d  dump Flash content\n"
+"  -e  erase whole Flash\n"
+"  -p  Protect the data after writing\n"
+"Invocation without argument resets the F326.\n"
+  , name, name, name, name, name);
     exit(1);
 }
 
@@ -168,14 +188,14 @@ int main(int argc, char **argv)
     c2_init();
     identify();
 
-    if (argc == 3 && !strcmp(argv[1], "-b"))
-	boundary(argv[2]);
-    else if (argc > 2)
-	usage(*argv);
-    else if (argc == 2) {
-	if (!strcmp(argv[1], "-d"))	
+    switch (argc) {
+    case 1:
+	/* just reset */
+	break;
+    case 2:
+	if (!strcmp(argv[1], "-d"))
 	    dump_flash(0x4000);
-	else if (!strcmp(argv[1], "-e"))	
+	else if (!strcmp(argv[1], "-e"))
 	    erase_flash();
 	else if (*argv[1] == '-')
 	    usage(*argv);
@@ -183,6 +203,22 @@ int main(int argc, char **argv)
 	    do_flash(argv[1]);
 	    identify();
 	}
+	break;
+    case 3:
+	if (!strcmp(argv[1], "-p")) {
+	    if (*argv[2] == '-')
+		usage(*argv);
+	    do_flash(argv[2]);
+	    protect();
+	    identify();
+	    break;
+	}
+	if (strcmp(argv[1], "-b"))
+	    usage(*argv);
+	boundary(argv[2]);
+	break;
+    default:
+	usage(*argv);
     }
     c2_reset();
 

@@ -90,7 +90,7 @@ See also http://www.almesberger.net/misc/idbg/
   to the Neo (requires sdcc, package sdcc-nf on Ubuntu 8.10)
 - connect USB power to IDBG
 - put the boot loader into Flash with
-  f326 boot.bin
+  f326 -p boot.bin
   (This can sometimes fail. Just try again.)
 - IDBG should now respond to DFU. Use dfu-util to load the firmware:
   dfu-util -D fw/idbg/idbg.bin
@@ -98,7 +98,7 @@ See also http://www.almesberger.net/misc/idbg/
 - take the Neo's PCB and glue IDBG on the GPS shield
 - make a hole for the Micro USB receptacle in the middle part of the
   Neo's case 
-- insert the Neo PCB in the case and make sure it fit properly and that
+- insert the Neo PCB in the case and make sure it fits properly and that
   also the top cover closes
 - remove the PCB again
 - optional: connect the VSYS pad to the Neo's VSYS

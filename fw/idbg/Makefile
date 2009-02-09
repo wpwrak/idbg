@@ -20,8 +20,16 @@ include ../common/Makefile.common
 CFLAGS += -I../include # -DLOW_SPEED
 LDFLAGS += --code-size $(PAYLOAD_SIZE) --code-loc $(PAYLOAD_START)
 
+.PHONY:		dfu dfu-reset
+
 uart.rel:	../common/uart.c
 		$(CC) $(CFLAGS) -o $@ -c $<
 
 usb.rel:	../common/usb.c
 		$(CC) $(CFLAGS) -o $@ -c $<
+
+dfu:
+		dfu-util -d 0x1d50:0x1db5 -D idbg.bin
+
+dfu-reset:
+		dfu-util -d 0x1d50:0x1db5 -R -D idbg.bin

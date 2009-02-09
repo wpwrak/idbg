@@ -276,7 +276,24 @@ For further study:
     </UL>
     Since VB_SYS is hard to interrupt on GTA02, the idea could be tried by
     switching only IO_3V3.
-  <LI> Could we merge USB power from IDBG into VBUS ?
+  <LI> Could we merge USB power from IDBG into VBUS ?<BR>
+    Some considerations:
+    <UL>
+      <LI> The PMU does not support "merging" USB and adapter power.
+	If adapter power is present, it takes precedence over USB.
+      <LI> If we merge directly into VB_SYS and main USB is not connected,
+	the PMU will not charge the battery.
+      <LI> If we merge into VBUS, we can share the PMU's USB current limiter.
+	However, if the limiter was set to the sum of the inputs, we would
+	overload the remaining input if the other one is disconnected.
+	To prevent this, we would either have to draw power from only one
+	USB source at a time or have external current limiters on both.
+      <LI> If GTA02 provides USB power, this power is taken from VB, so
+	there is a conflict with accepting power from another party. We
+	could probably connect U4904 to VB_SYS.
+      <LI> If we merge into USB_VBUS, we could feed the USB output
+	directly but would lose the reverse current protection of U4905.
+    </UL>
   <LI> Could IDBG snoop the I2C bus and report transactions ?
   <LI> Consider adding special serial console functions. Some ideas:
     ~r to reset (GPIO), ~p to power down (PMU),

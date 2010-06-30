@@ -20,6 +20,7 @@
 
 #include "idbg/usb-ids.h"
 #include "idbg/ep0.h"
+#include "../lib/usb.h"
 
 
 #define TO_DEV		0x40
@@ -27,27 +28,6 @@
 
 
 #define	nRESET	0x100
-
-
-static usb_dev_handle *open_usb(void)
-{
-	const struct usb_bus *bus;
-	struct usb_device *dev;
-
-	usb_init();
-	usb_find_busses();
-	usb_find_devices();
-
-	for (bus = usb_get_busses(); bus; bus = bus->next)
-		for (dev = bus->devices; dev; dev = dev->next) {
-			if (dev->descriptor.idVendor != USB_VENDOR_OPENMOKO)
-				continue;
-			if (dev->descriptor.idProduct != USB_PRODUCT_IDBG)
-				continue;
-			return usb_open(dev);
-		}
-	return NULL;
-}
 
 
 static void i2c_fetch(usb_dev_handle *dev, ssize_t size)
@@ -105,31 +85,42 @@ static void i2c_read(usb_dev_handle *dev, uint8_t slave, uint8_t addr,
 
 static void usage(const char *name)
 {
-	fprintf(stderr, "usage: %s slave address [value]\n", name);
+	fprintf(stderr,
+	    "usage: %s [-d vendor:product] slave address [value]\n", name);
 	exit(1);
 }
 
 
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
 	usb_dev_handle *dev;
+	int c;
 	int set = 0;
 	unsigned long slave, addr, value;
 	uint8_t tmp;
 	char *end;
 
-	switch (argc) {
-	case 4:
+	while ((c = getopt(argc, argv, "d:")) != EOF)
+		switch (c) {
+		case 'd':
+			parse_usb_id(optarg);
+			break;
+		default:
+			usage(*argv);
+		}
+
+	switch (argc-optind) {
+	case 3:
 		set = 1;
-		value = strtoul(argv[3], &end, 0);
+		value = strtoul(argv[optind+2], &end, 0);
 		if (*end || value > 0xff)
 			usage(*argv);
 		/* fall through */
-	case 3:
-		slave = strtoul(argv[1], &end, 0);
+	case 2:
+		slave = strtoul(argv[optind], &end, 0);
 		if (*end || slave > 0x7f)
 			usage(*argv);
-		addr = strtoul(argv[2], &end, 0);
+		addr = strtoul(argv[optind+1], &end, 0);
 		if (*end || addr > 0xff)
 			usage(*argv);
 		break;

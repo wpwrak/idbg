@@ -22,6 +22,7 @@
  */
 
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -37,31 +38,11 @@
 #include <linux/usbdevice_fs.h>
 
 #include "idbg/usb-ids.h"
+#include "../lib/usb.h"
 
 
 static struct termios console;
 static volatile int disconnected;
-
-
-static usb_dev_handle *open_usb(void)
-{
-	const struct usb_bus *bus;
-	struct usb_device *dev;
-
-	usb_init();
-	usb_find_busses();
-	usb_find_devices();
-
-	for (bus = usb_get_busses(); bus; bus = bus->next)
-		for (dev = bus->devices; dev; dev = dev->next) {
-			if (dev->descriptor.idVendor != USB_VENDOR_OPENMOKO)
-				continue;
-			if (dev->descriptor.idProduct != USB_PRODUCT_IDBG)
-				continue;
-			return usb_open(dev);
-		}
-	return NULL;
-}
 
 
 static void make_raw(int fd, struct termios *old)
@@ -201,11 +182,28 @@ static void poll_loop(usb_dev_handle *dev)
 }
 
 
-int main(int argc, const char **argv)
+static void usage(const char *name)
+{
+	fprintf(stderr, "usage: %s [-d vendor:product]\n", name);
+	exit(1);
+}
+
+
+int main(int argc, char **argv)
 {
 	usb_dev_handle *dev;
+	int c;
 	int reported = 0;
 	int res;
+
+	while ((c = getopt(argc, argv, "d:")) != EOF)
+		switch (c) {
+		case 'd':
+			parse_usb_id(optarg);
+			break;
+		default:
+			usage(*argv);
+		}
 
 	make_raw(0, &console);
 	atexit(cleanup);

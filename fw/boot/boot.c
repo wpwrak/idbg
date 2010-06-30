@@ -1,8 +1,8 @@
 /*
  * boot/boot.c - Boot loader setup and main loop
  *
- * Written 2008 by Werner Almesberger
- * Copyright 2008 Werner Almesberger
+ * Written 2008, 2010 by Werner Almesberger
+ * Copyright 2008, 2010 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -164,10 +164,23 @@ static void boot_loader(void)
 	 * We can therefore detect if IO_3V3 is any good by checking whether
 	 * SDA is high.
 	 *
-	 * This should work even without out own pull-down. However, when the
+	 * This should work even without our own pull-down. However, when the
 	 * IDBG board is operating standalone (or, generally, if SDA isn't
 	 * connected), SDA would float. We therefore have to pull it down a
 	 * little.
+	 */
+
+	/*
+	 * Ben variant:
+	 *
+	 * P0_1 (I2C_SDA_PULL) connects to KEYOUT1. P0_4 (CONSOLE_RXD) connects
+	 * to KEYIN8. If "Up" is pressed, KEYOUT1 and KEYIN8 are connected. We
+	 * can thus read back a 0 on CONSOLE_RXD.
+	 *
+	 * In the Ben variant, P0_2 (I2C_SDA) is not connected. In the
+	 * GTA01/GTA02 variant, P0_4 (CONSOLE_RXD) is an output. We can
+	 * therefore test both conditions, without having to distinguish which
+	 * IDBG variant we're running on.
 	 */
 
 	GPIOCN |= WEAKPUD;
@@ -176,7 +189,7 @@ static void boot_loader(void)
 
 	dfu_init();
 	usb_init();
-	while (!I2C_SDA || dfu.state != dfuIDLE)
+	while (!I2C_SDA || !CONSOLE_RXD || dfu.state != dfuIDLE)
 		usb_poll();
 }
 

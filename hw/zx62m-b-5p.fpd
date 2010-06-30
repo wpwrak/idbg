@@ -1,0 +1,106 @@
+/* MACHINE-GENERATED ! */
+
+frame signal {
+	__0: vec @(sx/2, sy/2)
+	__1: vec @(-sx/2, -sy/2)
+	pad "$n" . __0
+}
+
+frame signals {
+	table
+	    { sx, sy }
+	    { 0.4mm, 1.05mm }
+
+	loop n = 1, 5
+
+	__0: vec @((n-3)*1.3mm/2, -sy/2)
+	frame signal .
+}
+
+frame rear {
+	__0: vec @(rx/2, ry/2)
+	__1: vec @(-rx/2, -ry/2)
+	pad "$gnd" . __0
+}
+
+frame corner {
+	__0: vec @(cx/2, cy/2)
+	__1: vec @(-cx/2, -cy/2)
+	pad "$gnd" . __0
+}
+
+frame lateral {
+	__0: vec @(lx/2, ly/2)
+	__1: vec @(-lx/2, -ly/2)
+	pad "$gnd" . __0
+}
+
+frame pads {
+	table
+	    { lx, ly, cx, cy, rx, ry }
+	    { (12mm-8.8mm)/2, 2.4mm, (12mm-6.9mm)/2, 2.4mm, 2mm, 1.5mm }
+
+	set gnd = "6"
+
+	__0: vec @(-(12mm+8.8mm)/4, 0mm)
+	frame lateral .
+	__1: vec @((12mm+8.8mm)/4, 0mm)
+	frame lateral .
+	__2: vec @((12mm+6.9mm)/4, 4.3mm)
+	frame corner .
+	__3: vec @(-(12mm+6.9mm)/4, 4.3mm)
+	frame corner .
+	__4: vec @(-4.7mm/2, 7.15mm-ry/2)
+	frame rear .
+	__5: vec @(4.7mm/2, 7.15mm-ry/2)
+	frame rear .
+	__6: vec @(0mm, 5.15mm)
+	frame signals .
+}
+
+frame edge {
+	table
+	    { bw, hx }
+	    { 2mm, 7.8mm }
+
+	__0: vec @(-hx/2, 3.6mm)
+	__1: vec @(hx/2, 3.6mm)
+	line __0 . w
+	__2: vec @(hx/2, -1.9mm)
+	line __1 . w
+	__3: vec .(bw, 0mm)
+	line __2 . w
+	__4: vec @(-hx/2, -1.9mm)
+	line . __0 w
+	__5: vec .(-bw, 0mm)
+	line . __4 w
+}
+
+frame outline {
+}
+
+package "ZX62M-B-BP"
+unit mm
+set w = 0.2mm
+
+__0: vec @(0mm, -1.9mm)
+__1: vec @(0mm, 0mm)
+frame pads @
+frame outline @
+frame edge @
+measx lateral.__1 >> lateral.__0 2.4mm/2-1.9mm-1mm
+measx lateral.__0 >> lateral.__1 -2.4mm/2-1.9mm-0.5mm
+measx rear.__1 -> rear.__0 3mm
+measx pads.__4 >> pads.__5 1.7mm
+measx signals.__0 >> signals.__0 -2mm
+measx signal.__1 -> signal.__0 -2mm
+measx edge.__4 >> edge.__2
+measx corner.__0 >> corner.__1 -5mm
+measy __1 >> pads.__2 -3mm
+measy edge.__2 >> __1 -3mm+3.9mm
+measy lateral.__1 -> lateral.__0 -(12mm-8.8mm)/2-0.5mm
+measy pads.__0 >> edge.__0 1.3mm
+measy pads.__0 -> signal.__0 2.3mm
+measy pads.__0 -> rear.__0 2.8mm
+measy corner.__1 -> corner.__0 -(12mm-6.9mm)/2-0.5mm
+measy signal.__1 -> signal.__0 0.5mm

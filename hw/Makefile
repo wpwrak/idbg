@@ -1,8 +1,9 @@
 .PHONY:	all view print
 
-all:
-	@echo "make what ?" 2>&1
-	@exit 1
+all:	zx62m-b-5p.mod
+
+zx62m-b-5p.mod:	zx62m-b-5p.fpd
+	fped -k zx62m-b-5p.fpd
 
 view:
 	./kicad-nxn.pl idbg-Component.ps | gv -

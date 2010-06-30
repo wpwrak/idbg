@@ -11,7 +11,8 @@
 #
 
 
-MAIN=idbg-con
+MAIN = idbg-con
+OBJS = ../lib/usb.o
 
 include ../Makefile.common
 

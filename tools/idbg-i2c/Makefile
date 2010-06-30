@@ -11,7 +11,8 @@
 #
 
 
-MAIN=idbg-i2c
+MAIN = idbg-i2c
+OBJS = ../lib/usb.o
 
 include ../Makefile.common
 

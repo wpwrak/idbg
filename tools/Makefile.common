@@ -16,11 +16,12 @@ INSTALL_PREFIX=/usr/local
 CFLAGS=-Wall
 LDFLAGS=-lusb
 
-OBJS=
-
 .PHONY:		all install uninstall clean spotless
 
 all:		$(MAIN)
+
+$(MAIN):	$(MAIN).o $(OBJS)
+		$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(MAIN).o $(OBJS)
 
 install:	$(MAIN)
 		install $(MAIN) $(INSTALL_PREFIX)/bin/
@@ -29,7 +30,7 @@ uninstall:
 		rm -f $(INSTALL_PREFIX)/bin/$(MAIN)
 
 clean:
-		rm -f $(OBJS)
+		rm -f $(MAIN).o $(OBJS)
 
 spotless:	clean
 		rm -f $(MAIN)

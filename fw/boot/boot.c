@@ -173,14 +173,11 @@ static void boot_loader(void)
 	/*
 	 * Ben variant:
 	 *
-	 * P0_1 (I2C_SDA_PULL) connects to KEYOUT1. P0_4 (CONSOLE_RXD) connects
-	 * to KEYIN8. If "Up" is pressed, KEYOUT1 and KEYIN8 are connected. We
-	 * can thus read back a 0 on CONSOLE_RXD.
-	 *
-	 * In the Ben variant, P0_2 (I2C_SDA) is not connected. In the
-	 * GTA01/GTA02 variant, P0_4 (CONSOLE_RXD) is an output. We can
-	 * therefore test both conditions, without having to distinguish which
-	 * IDBG variant we're running on.
+	 * We use exactly the same logic as on GTA01/02, but with different
+	 * signals. P0_1 (I2C_SDA_PULL) and P0_2 (I2C_SDA) both connect to
+	 * +V3.3, with a 1 kOhm resistor on P0_1. If the Ben is not powered, we
+	 * can therefore pull +V3.3 to GND, and detect this condition. As on
+	 * the GTA01/02, once the system is powered up, IDBG exits this loop.
 	 */
 
 	GPIOCN |= WEAKPUD;
@@ -189,7 +186,7 @@ static void boot_loader(void)
 
 	dfu_init();
 	usb_init();
-	while (!I2C_SDA || !CONSOLE_RXD || dfu.state != dfuIDLE)
+	while (!I2C_SDA || dfu.state != dfuIDLE)
 		usb_poll();
 }
 

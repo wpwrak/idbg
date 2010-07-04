@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date Mon Jun 28 13:43:51 2010
+EESchema Schematic File Version 2  date Wed Jun 30 21:47:44 2010
 LIBS:power
 LIBS:device
 LIBS:conn
@@ -9,106 +9,109 @@ EELAYER END
 $Descr A4 11700 8267
 Sheet 1 1
 Title "Internal Debug Board (for Ben NanoNote)"
-Date "28 jun 2010"
-Rev "0"
+Date "1 jul 2010"
+Rev "1"
 Comp "Werner Almesberger"
 Comment1 ""
 Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
+Connection ~ 7150 1550
 Wire Wire Line
-	4000 4600 2000 4600
+	7150 2750 7150 1550
+Connection ~ 2900 4600
 Wire Wire Line
-	4500 4600 6050 4600
-Connection ~ 5350 4600
-Wire Wire Line
-	5350 4600 5350 4800
-Wire Wire Line
-	4000 4150 1350 4150
-Wire Wire Line
-	7150 6350 7150 5550
-Wire Wire Line
-	7000 2050 7000 1550
-Wire Wire Line
-	7000 1550 10450 1550
-Wire Wire Line
-	3500 4850 3500 4000
-Wire Wire Line
-	3500 4000 6050 4000
-Wire Wire Line
-	4750 1450 4750 2400
-Connection ~ 3500 4050
-Wire Wire Line
-	3200 5350 3200 5550
-Wire Wire Line
-	10450 2150 7600 2150
-Wire Wire Line
-	7600 2150 7600 2750
-Wire Wire Line
-	6050 3850 5150 3850
-Connection ~ 5850 4450
-Wire Wire Line
-	5850 4800 5850 4300
-Wire Wire Line
-	5850 4300 6050 4300
-Wire Wire Line
-	6050 4450 5850 4450
-Wire Wire Line
-	5350 5450 5350 5200
-Wire Wire Line
-	1350 3850 1850 3850
-Wire Wire Line
-	1850 3850 1850 3750
-Wire Wire Line
-	1350 3950 1850 3950
-Wire Wire Line
-	1350 3750 2400 3750
-Connection ~ 1850 3750
-Wire Wire Line
-	1350 4050 3500 4050
-Wire Wire Line
-	5850 5450 5850 5200
-Wire Wire Line
-	8350 5750 8350 5550
-Wire Wire Line
-	7000 5550 7000 5750
-Wire Wire Line
-	7450 2750 7450 1950
-Wire Wire Line
-	7450 1950 10450 1950
-Wire Wire Line
-	5350 3650 5350 3850
-Connection ~ 5350 3850
-Wire Wire Line
-	2900 5350 2900 5550
-Wire Wire Line
-	3500 5350 3500 5550
-Wire Wire Line
-	3200 4850 3200 4150
-Connection ~ 3200 4150
-Wire Wire Line
-	7000 2550 7000 2750
-Wire Wire Line
-	10450 1750 7300 1750
-Wire Wire Line
-	7300 1750 7300 2750
-Wire Wire Line
-	4500 4150 6050 4150
-Wire Wire Line
-	7300 5550 7300 6350
-Wire Wire Line
-	7000 5750 5000 5750
-Wire Wire Line
-	5000 5750 5000 4600
-Connection ~ 5000 4600
-Wire Wire Line
-	1350 4250 2000 4250
+	2900 4600 2900 4850
 Wire Wire Line
 	2000 4250 2000 4600
 Wire Wire Line
-	2900 4600 2900 4850
-Connection ~ 2900 4600
+	2000 4250 1350 4250
+Connection ~ 5000 4600
+Wire Wire Line
+	5000 4600 5000 5750
+Wire Wire Line
+	5000 5750 7000 5750
+Wire Wire Line
+	7300 5550 7300 6350
+Wire Wire Line
+	4500 4150 6050 4150
+Wire Wire Line
+	7300 2750 7300 1750
+Wire Wire Line
+	7300 1750 10450 1750
+Wire Wire Line
+	7000 2550 7000 2750
+Connection ~ 3200 4150
+Wire Wire Line
+	3200 4850 3200 4150
+Wire Wire Line
+	3500 5350 3500 5550
+Wire Wire Line
+	2900 5350 2900 5550
+Connection ~ 5350 3850
+Wire Wire Line
+	5350 3650 5350 3850
+Wire Wire Line
+	10450 1950 7450 1950
+Wire Wire Line
+	7450 1950 7450 2750
+Wire Wire Line
+	7000 5750 7000 5550
+Wire Wire Line
+	8350 5750 8350 5550
+Wire Wire Line
+	5850 5450 5850 5200
+Wire Wire Line
+	1350 4050 3500 4050
+Connection ~ 1850 3750
+Wire Wire Line
+	1350 3750 2400 3750
+Wire Wire Line
+	1350 3950 1850 3950
+Wire Wire Line
+	1850 3750 1850 3850
+Wire Wire Line
+	1850 3850 1350 3850
+Wire Wire Line
+	5350 5450 5350 5200
+Wire Wire Line
+	6050 4450 5850 4450
+Wire Wire Line
+	6050 4300 5850 4300
+Wire Wire Line
+	5850 4300 5850 4800
+Connection ~ 5850 4450
+Wire Wire Line
+	6050 3850 5150 3850
+Wire Wire Line
+	7600 2750 7600 2150
+Wire Wire Line
+	7600 2150 10450 2150
+Wire Wire Line
+	3200 5350 3200 5550
+Connection ~ 3500 4050
+Wire Wire Line
+	4750 1450 4750 2400
+Wire Wire Line
+	6050 4000 3500 4000
+Wire Wire Line
+	3500 4000 3500 4850
+Wire Wire Line
+	10450 1550 7000 1550
+Wire Wire Line
+	7000 1550 7000 2050
+Wire Wire Line
+	7150 6350 7150 5550
+Wire Wire Line
+	4000 4150 1350 4150
+Wire Wire Line
+	5350 4600 5350 4800
+Connection ~ 5350 4600
+Wire Wire Line
+	4500 4600 6050 4600
+Wire Wire Line
+	2000 4600 4000 4600
 $Comp
 L R R2
 U 1 1 4C288370
@@ -128,7 +131,7 @@ F 1 "0" V 4250 4150 50  0000 C CNN
 	0    -1   -1   0   
 $EndComp
 Text Label 9500 1550 0    60   ~ 0
-KEYOUT1(TP59)
++V3.3(TP9)
 $Comp
 L CONN_1 P3
 U 1 1 4C28761B
@@ -156,7 +159,6 @@ NoConn ~ 8850 4150
 NoConn ~ 8850 4000
 NoConn ~ 7900 2750
 NoConn ~ 7750 2750
-NoConn ~ 7150 2750
 Text Label 9500 1750 0    60   ~ 0
 BOOT_SEL1(R9)
 $Comp
@@ -247,9 +249,9 @@ F 1 "PWR_FLAG" H 5350 3880 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Text Label 9500 2150 0    60   ~ 0
-TXD(TP75)
+TDO(TP5)
 Text Label 9500 1950 0    60   ~ 0
-KEYIN8(TP74)
+TDI(TP4)
 $Comp
 L GND #PWR06
 U 1 1 49330E8E

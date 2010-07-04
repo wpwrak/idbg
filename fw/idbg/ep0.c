@@ -1,8 +1,8 @@
 /*
  * idbg/ep0.c - EP0 extension protocol
  *
- * Written 2008, 2009 by Werner Almesberger
- * Copyright 2008, 2009 Werner Almesberger
+ * Written 2008-2010 by Werner Almesberger
+ * Copyright 2008-2010 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,6 +79,13 @@ static void set_gpio(uint8_t n, uint8_t v)
 		SET_GPIO(2, 3, v);
 		SET_GPIO(2, 4, v);
 		SET_GPIO(2, 5, v);
+	/*
+	 * P0_0 ... P0_7: bits 0 ... 7
+	 * P2_0 ... P2_5: bits 8 ... 13
+	 * P3_0: bit 14
+	 */
+		case 14:
+			P3_0 = v;
 	}
 }
 

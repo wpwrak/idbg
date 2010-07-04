@@ -1,8 +1,8 @@
 /*
  * idbg-reset/idbg-reset.c - Reset utility for target and IDBG
  *
- * Written 2008, 2009 by Werner Almesberger
- * Copyright 2008, 2009 Werner Almesberger
+ * Written 2008-2010 by Werner Almesberger
+ * Copyright 2008-2010 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,8 @@
 #define	FROM_DEV	0xc0
 
 
-#define	nRESET	0x100
+#define	nRESET_GTA	0x100
+#define	nRESET_BEN	0x4000
 
 
 static usb_dev_handle *open_usb(void)
@@ -54,13 +55,13 @@ static void reset_target(usb_dev_handle *dev)
 	int res;
 
 	res = usb_control_msg(dev, TO_DEV, IDBG_GPIO_DATA_SET,
-	    0, nRESET, NULL, 0, 1000);
+	    0, nRESET_GTA | nRESET_BEN, NULL, 0, 1000);
 	if (res < 0) {
 		fprintf(stderr, "IDBG_GPIO_DATA_SET: %d\n", res);
 		exit(1);
 	}
 	res = usb_control_msg(dev, TO_DEV, IDBG_GPIO_DATA_SET,
-	    nRESET, nRESET, NULL, 0, 1000);
+	    nRESET_GTA | nRESET_BEN, nRESET_GTA | nRESET_BEN, NULL, 0, 1000);
 	if (res < 0) {
 		fprintf(stderr, "IDBG_GPIO_DATA_SET: %d\n", res);
 		exit(1);

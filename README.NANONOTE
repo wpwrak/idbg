@@ -1,0 +1,140 @@
+Internal Debug Board, Ben NanoNote variant
+==========================================
+
+This document briefly describes how IDBG is used on the Ben NanoNote.
+We call this variant IDBG-Ben. Please see README for an overview of
+the general architecture.
+
+
+Build process
+-------------
+
+The components should be placed in the following order:
+
+- USB connector P1
+- the microcontroller (U1)
+- the capacitors C1 and C2 (it may be a bit easier to place C2 before
+  C1, but either order is possible)
+- VR3, R1, VR2, and R2, in this order
+- VR1. Again, VR1 can be placed before R2 if desired.
+- R3
+
+Since the USB receptacle descends below the bottom of the PCB, the
+board needs to be placed on some support for the soldering. Such a
+support can be made from a piece of PCB material of 1.6 mm thickness
+with a square hole of approximately 8 x 8 mm.
+
+For modifying the case, proceed as follows:
+
+- first, build the IDBG-Ben and flash the firmware
+- open the Ben NanoNote and remove the main PCB
+- attach IDBG-Ben with double-sided adhesive tape to the speaker,
+  on the metal surface that says "8 Ohm". Orient it with the USB
+  receptacle facing to the Ben's left side, such that the rear of
+  the USB receptacle touches the side of the central part of the
+  speaker. This is shown in the drawing in doc/idbg-ben-place.fig
+- insert the Ben PCB into the Ben such that the USB receptacle of
+  IDBG-Ben rests on the plastic side wall. The USB receptacle should
+  still be inside the outer edge of the case.
+- mark where the USB receptacle touches the case and remove the
+  plastic with a suitable tool such that the Ben PCB with IDBG
+  mounted can slide towards its normal position. It's fairly easy to
+  remove precisely the correct amount of plastic if using a Dremel
+  Rotary tool with an 110 Engraving Cutter, or a similar device.
+- remove only small quantities of plastic at a time, then try the
+  board again to see if and where the boards encounters obstacles.
+- the USB receptacle will touch the bottom of the case. In order to
+  let the Ben PCB to be fully inserted, a cavity of about 9 x 9 mm
+  with a depth of 0.5 mm has to be cut into the case floor.
+- the PCB should now fit such that the case can be assembled. The
+  PCB may be raised a fraction of a millimeter above its original
+  position, but the case should still close properly.
+- until now, the case side should not have been penetrated. It is
+  now time to make a small hole about one millimeter above the
+  bottom of the cavity. Then insert the PCB with IDBG Ben mounted
+  to see where exactly the receptacle is located. Then remove the
+  PCB, extend the hole a bit, and repeat.
+- once you're confident that the receptacle will fit properly,
+  remove IDBG-Ben from the Ben PCB, remove the adhesive tape, clean
+  the bottom of IDBG-Ben and the metal surface of the speaker with
+  alcohol, and glue IDBG-Ben with super-glue to the speaker.
+- you can now cut the hole to the precise location where the
+  receptacle will end up.
+- at the end, the metal border of the receptacle should be visible
+  from the outside. Note that the receptacle stays about one
+  millimeter inside the case.
+- verify that you can connect a Micro-USB cable
+- assemble the complete case and verify again that the case closes
+  properly and that you can still connect the Micro-USB cable.
+
+The whole process can take a while, perhaps 30-60 minutes.
+
+Once the case has been modified and IDBG-Ben has been glued to the
+Ben PCB, take out the PCB again and add the wires that connect
+IDBG-Ben with the PCB. If using  thin enough wires, e.g., AWG 30
+wire-wrap, the wiring should fit without needing cuts in the plastic
+walls surrounding the battery.
+
+
+Initial firmware download
+-------------------------
+
+The build process of IDBG-Ben does not include a specific method for
+downloading the firmware into a factory-new MCU. The contacts for the
+C2 protocol are located such that one can easily add wires to connect
+a 100 mil connector that mimics the IPL board integrated into the
+GTA01/GTA02 variant of IDBG.
+
+Note that there is no pad for the supply voltage since the trace
+running along the edge of IDBG-Ben offers plenty of space for
+soldering a wire.
+
+The resistors used between the host and IDBG in the GTA01/GTA02
+variant only serve as a (weak) protection, and it's not necessary to
+have such resistors in a a programmer for IDBG-Ben.
+
+If you have an Openmoko GTA01/GTA02 and the Openmoko Debug Board V3,
+you can use exactly the same flashing procedure as described for the
+GTA01/GTA02 variant.
+
+
+Firmware updates
+----------------
+
+The firmware in IDBG consists of two parts: a boot loader and the
+application. The boot loader is protected against accidental
+overwriting and should never have to be changed. In case this should
+be necessary, it can be done through the C2 interface.
+
+The boot loader normally jumps directly to the application. The
+exception from this rule is when the Ben is not powered up (i.e.,
+if there is no power on the +V3.3 supply.) In this case, IDBG
+remains in the boot loader and listens for DFU requests until the
+Ben is powered up.
+
+When the application runs, the serial console and related functions
+are available. Note that IDBG remains in the application (and does
+not return to the boot loader) when the Ben gets powered down. This
+way, the serial console does not get interrupted when powering the
+Ben up or down.
+
+To update the application, download the new firmware image (idbg.bin)
+with dfu-util.
+
+When in the boot loader, IDBG-Ben has the USB product ID 0x1db5.
+When in the application, the USB product ID changes to 0x1db6.
+
+
+Tools
+-----
+
+idbg-con and idbg-reset work as normal. To enable USB boot, issue
+idbg-gpio P0_3=0
+Disable USB boot with
+idbg-gpio P0_3=R
+
+Note that the USB boot setting is not persistent. Your Ben will
+revert to booting from NAND when resetting or disconnecting IDBG-Ben.
+
+When not connected to USB, IDBG-Ben is turned off and does not draw
+any power from the system.

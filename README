@@ -1,7 +1,7 @@
 Internal Debug Board
 ====================
 
-Copyright 2008, 2009 Werner Almesberger
+Copyright 2008-2010 Werner Almesberger
 
 The files in this package are distributed under the terms of the
 GNU General Public License (GPL), either version 2, or (at your
@@ -46,6 +46,7 @@ tools/		User-space utilities to perform IDBG operations
   idbg-con/	Serial console (based on libusb)
   idbg-i2c/	Read/write I2C registers
   idbg-norwp/	Control NOR write protection (GTA02)
+doc/		Additional documentation material.
 
 
 Build process

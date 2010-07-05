@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date Wed Jun 30 21:47:44 2010
+EESchema Schematic File Version 2  date Mon Jul  5 05:48:22 2010
 LIBS:power
 LIBS:device
 LIBS:conn
@@ -9,7 +9,7 @@ EELAYER END
 $Descr A4 11700 8267
 Sheet 1 1
 Title "Internal Debug Board (for Ben NanoNote)"
-Date "1 jul 2010"
+Date "5 jul 2010"
 Rev "1"
 Comp "Werner Almesberger"
 Comment1 ""
@@ -17,6 +17,10 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
+Wire Wire Line
+	10450 6550 7150 6550
+Wire Wire Line
+	7150 6550 7150 5550
 Connection ~ 7150 1550
 Wire Wire Line
 	7150 2750 7150 1550
@@ -32,8 +36,6 @@ Wire Wire Line
 	5000 4600 5000 5750
 Wire Wire Line
 	5000 5750 7000 5750
-Wire Wire Line
-	7300 5550 7300 6350
 Wire Wire Line
 	4500 4150 6050 4150
 Wire Wire Line
@@ -66,7 +68,7 @@ Wire Wire Line
 	1350 4050 3500 4050
 Connection ~ 1850 3750
 Wire Wire Line
-	1350 3750 2400 3750
+	2400 3750 1350 3750
 Wire Wire Line
 	1350 3950 1850 3950
 Wire Wire Line
@@ -83,7 +85,7 @@ Wire Wire Line
 	5850 4300 5850 4800
 Connection ~ 5850 4450
 Wire Wire Line
-	6050 3850 5150 3850
+	5150 3850 6050 3850
 Wire Wire Line
 	7600 2750 7600 2150
 Wire Wire Line
@@ -102,16 +104,27 @@ Wire Wire Line
 Wire Wire Line
 	7000 1550 7000 2050
 Wire Wire Line
-	7150 6350 7150 5550
-Wire Wire Line
-	4000 4150 1350 4150
+	1350 4150 4000 4150
 Wire Wire Line
 	5350 4600 5350 4800
 Connection ~ 5350 4600
 Wire Wire Line
-	4500 4600 6050 4600
+	6050 4600 4500 4600
 Wire Wire Line
 	2000 4600 4000 4600
+Wire Wire Line
+	7300 5550 7300 6350
+Wire Wire Line
+	7300 6350 10450 6350
+$Comp
+L CONN_1 P8
+U 1 1 49330E58
+P 10600 6350
+F 0 "P8" H 10680 6350 40  0000 L CNN
+F 1 "CONN_1" H 10600 6405 30  0001 C CNN
+	1    10600 6350
+	1    0    0    -1  
+$EndComp
 $Comp
 L R R2
 U 1 1 4C288370
@@ -130,7 +143,7 @@ F 1 "0" V 4250 4150 50  0000 C CNN
 	1    4250 4150
 	0    -1   -1   0   
 $EndComp
-Text Label 9500 1550 0    60   ~ 0
+Text Label 9300 1550 0    60   ~ 0
 +V3.3(TP9)
 $Comp
 L CONN_1 P3
@@ -159,7 +172,7 @@ NoConn ~ 8850 4150
 NoConn ~ 8850 4000
 NoConn ~ 7900 2750
 NoConn ~ 7750 2750
-Text Label 9500 1750 0    60   ~ 0
+Text Label 9300 1750 0    60   ~ 0
 BOOT_SEL1(R9)
 $Comp
 L GND #PWR01
@@ -233,9 +246,9 @@ F 1 "CONN_1" H 10600 1805 30  0001 C CNN
 	1    10600 1750
 	1    0    0    -1  
 $EndComp
-Text Label 7300 6150 1    60   ~ 0
-C2D
-Text Label 7150 6150 1    60   ~ 0
+Text Label 9300 6350 0    60   ~ 0
+C2D/RESETP_N(TP6)
+Text Label 9300 6550 0    60   ~ 0
 C2CK
 Text Label 4750 2200 1    60   ~ 0
 GND(TP76)
@@ -248,9 +261,9 @@ F 1 "PWR_FLAG" H 5350 3880 30  0000 C CNN
 	1    5350 3650
 	1    0    0    -1  
 $EndComp
-Text Label 9500 2150 0    60   ~ 0
+Text Label 9300 2150 0    60   ~ 0
 TDO(TP5)
-Text Label 9500 1950 0    60   ~ 0
+Text Label 9300 1950 0    60   ~ 0
 TDI(TP4)
 $Comp
 L GND #PWR06
@@ -264,20 +277,11 @@ $EndComp
 $Comp
 L CONN_1 P7
 U 1 1 49330E5A
-P 7150 6500
-F 0 "P7" H 7230 6500 40  0000 L CNN
-F 1 "CONN_1" H 7150 6555 30  0001 C CNN
-	1    7150 6500
-	0    1    1    0   
-$EndComp
-$Comp
-L CONN_1 P8
-U 1 1 49330E58
-P 7300 6500
-F 0 "P8" H 7380 6500 40  0000 L CNN
-F 1 "CONN_1" H 7300 6555 30  0001 C CNN
-	1    7300 6500
-	0    1    1    0   
+P 10600 6550
+F 0 "P7" H 10680 6550 40  0000 L CNN
+F 1 "CONN_1" H 10600 6605 30  0001 C CNN
+	1    10600 6550
+	1    0    0    -1  
 $EndComp
 $Comp
 L GND #PWR07

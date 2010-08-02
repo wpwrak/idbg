@@ -30,7 +30,6 @@ Type			Package	Manufacturer	Part number	Reference
 Microcontroller		QFN-28	SiLabs		C8051F326	U1
 Varistor 5.6V		0402	Panasonic	EZJP0V080GA	VR1, VR2, VR3
 Resistor 0R		0402	generic				R1, R2
-Resistor 1k		0402	generic				R3
 Capacitor 1uF, 6.3V	0402	generic				C1
 Capacitor 100nF, 6.3V	0402	generic				C2
 USB Micro-B receptacle, mid-mnt	Hirose		ZX62M-B-5P	P1

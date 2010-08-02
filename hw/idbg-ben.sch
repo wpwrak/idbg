@@ -1,4 +1,4 @@
-EESchema Schematic File Version 2  date Fri Jul 30 15:16:16 2010
+EESchema Schematic File Version 2  date Sun Aug  1 22:54:47 2010
 LIBS:power
 LIBS:device
 LIBS:conn
@@ -9,7 +9,7 @@ EELAYER END
 $Descr A4 11700 8267
 Sheet 1 1
 Title "Internal Debug Board (for Ben NanoNote)"
-Date "30 jul 2010"
+Date "2 aug 2010"
 Rev "2"
 Comp "Werner Almesberger"
 Comment1 ""
@@ -232,7 +232,7 @@ F 1 "CONN_1" H 10300 1805 30  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Text Label 9000 6350 0    60   ~ 0
-C2D/BOOT_SEL(TP6)
+C2D/BOOT_SEL1(TP6)
 Text Label 9000 6550 0    60   ~ 0
 C2CK
 Text Label 4750 2200 1    60   ~ 0

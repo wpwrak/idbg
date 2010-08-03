@@ -25,7 +25,7 @@
 #include "idbg/ep0.h"
 
 
-static const uint8_t id[] = { EP0IDBG_MAJOR, EP0IDBG_MINOR };
+static const uint8_t id[] = { EP0IDBG_MAJOR, EP0IDBG_MINOR, HW_TYPE };
 static __xdata uint8_t buf[EP1_SIZE];
 static uint16_t size, jtag_bits;
 static __bit jtag_last; /* scan is last segment of larger scan */
@@ -97,7 +97,7 @@ static __bit my_setup(struct setup_request *setup) __reentrant
 	switch (setup->bmRequestType | setup->bRequest << 8) {
 	case IDBG_FROM_DEV(IDBG_ID):
 		debug("IDBG_ID\n");
-		if (setup->wLength > 2)
+		if (setup->wLength > 3)
 			return 0;
 		usb_send(&ep0, id, setup->wLength, NULL, NULL);
 		return 1;

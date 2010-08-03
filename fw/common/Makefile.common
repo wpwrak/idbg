@@ -1,8 +1,8 @@
 #
 # common/Makefile.common - Common rules and definitions
 #
-# Written 2008 by Werner Almesberger
-# Copyright 2008 Werner Almesberger
+# Written 2008, 2010 by Werner Almesberger
+# Copyright 2008, 2010 Werner Almesberger
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,7 +13,8 @@
 
 CC=sdcc
 CFLAGS=--std-c99 -I. -I../common \
-       -DPAYLOAD_START=$(PAYLOAD_START) -DPAYLOAD_SIZE=$(PAYLOAD_SIZE)
+       -DPAYLOAD_START=$(PAYLOAD_START) -DPAYLOAD_SIZE=$(PAYLOAD_SIZE) \
+       -D`cat ../.target`
 LDFLAGS=--xram-size 1024
 
 
@@ -68,7 +69,10 @@ $(MAIN).ihx:	$(OBJS:%=%.rel)
 		$(CC) $(CFLAGS) -c $<
 
 
-depend:
+$(OBJS:%=%.rel): ../.target
+
+
+depend:		.depend ../.target
 		>.depend
 		touch version.h version.c
 		for n in $(OBJS:%=%.c); do \

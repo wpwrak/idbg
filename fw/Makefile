@@ -1,8 +1,8 @@
 #
 # fw/Makefile - IDBG firmware build
 #
-# Written 2008, 2009 by Werner Almesberger
-# Copyright 2008, 2009 Werner Almesberger
+# Written 2008-2010 by Werner Almesberger
+# Copyright 2008-2010 Werner Almesberger
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,9 +15,23 @@ DIRS=common boot idbg
 
 
 .PHONY:		all depend install uninstall clean spotless
+.PHONY:		target gta ben-v1 ben-v2
 
-all:
+all:		.target
 		for d in $(DIRS); do make -C $$d all || exit 1; done
+
+.target target:
+		@echo "Please run  make gta|ben-v1|ben-v2" 2>&1
+		@exit 1
+
+gta:
+		echo GTA >.target
+
+ben-v1:
+		echo BEN_V1 >.target
+
+ben-v2:
+		echo BEN_V2 >.target
 
 depend:
 		for d in $(DIRS); do make -C $$d depend || exit 1; done
@@ -34,3 +48,4 @@ clean:
 
 spotless:
 		for d in $(DIRS); do make -C $$d spotless || exit 1; done
+		rm -f .target

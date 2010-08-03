@@ -1,8 +1,8 @@
 #
 # idbg/Makefile - Makefile for IDBG payload
 #
-# Written 2008, 2009 by Werner Almesberger
-# Copyright 2008, 2009 Werner Almesberger
+# Written 2008-2010 by Werner Almesberger
+# Copyright 2008-2010 Werner Almesberger
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ LDFLAGS += --code-size $(PAYLOAD_SIZE) --code-loc $(PAYLOAD_START)
 .PHONY:		dfu dfu-reset
 
 uart.rel:	../common/uart.c
-		$(CC) $(CFLAGS) -o $@ -c $<
+		$(CC) $(CFLAGS) $(DEFINE_UART_SPEED) -o $@ -c $<
 
 usb.rel:	../common/usb.c
 		$(CC) $(CFLAGS) -o $@ -c $<

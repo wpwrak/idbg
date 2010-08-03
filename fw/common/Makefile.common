@@ -68,18 +68,20 @@ $(MAIN).ihx:	$(OBJS:%=%.rel)
 .c.rel:
 		$(CC) $(CFLAGS) -c $<
 
-
 $(OBJS:%=%.rel): ../.target
 
+# below, set dummy UART speed to make dependencies build without error
 
-depend:		.depend ../.target
+depend .depend:	
 		>.depend
 		touch version.h version.c
 		for n in $(OBJS:%=%.c); do \
-		    $(CPP) $(CFLAGS) -MM -MG \
+		    $(CPP) $(CFLAGS) -DUART_115200_BPS -MM -MG \
 		      `[ -f $$n ] || echo ../common/`$$n >>.depend || \
 		      { rm -f .depend; exit 1; }; \
 		done
+
+.depend:	../.target
 
 ifeq (.depend,$(wildcard .depend))
 include .depend

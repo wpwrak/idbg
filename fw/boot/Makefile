@@ -1,8 +1,8 @@
 #
 # boot/Makefile - Makefile for DFU-capable boot loader
 #
-# Written 2008 by Werner Almesberger
-# Copyright 2008 Werner Almesberger
+# Written 2008, 2010 by Werner Almesberger
+# Copyright 2008, 2010 Werner Almesberger
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ CFLAGS += -I../include # -DLOW_SPEED
 LDFLAGS += --code-size $(PAYLOAD_START)
 
 uart.rel:	../common/uart.c
-		$(CC) $(CFLAGS) -o $@ -c $<
+		$(CC) $(CFLAGS) $(DEFINE_UART_SPEED) -o $@ -c $<
 
 usb.rel:	../common/usb.c
 		$(CC) $(CFLAGS) -o $@ -c $<

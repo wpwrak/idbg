@@ -76,6 +76,7 @@ void uart_init(uint8_t brg_mhz)
 	 * Depending on signal quality, we would need something like +/-5%.
 	 */
 
+#if defined(UART_115200_BPS)
 	switch (brg_mhz) {
 	case 3:
 		SBRL0 = 0xfff3;
@@ -93,6 +94,27 @@ void uart_init(uint8_t brg_mhz)
 		SBRL0 = 0xff30;
 		break;
 	}
+#elif defined(UART_57600_BPS)
+	switch (brg_mhz) {
+	case 3:
+		SBRL0 = 0xffe6;
+		break;
+	case 6:
+		SBRL0 = 0xffcc;
+		break;
+	case 12:
+		SBRL0 = 0xff98;
+		break;
+	case 24:
+		SBRL0 = 0xff30;
+		break;
+	case 48:
+		SBRL0 = 0xfe5f;
+		break;
+	}
+#else
+#error "must set either UART_115200_BPS or UART_57600_BPS"
+#endif
 
 	SBCON0 = SB0RUN | SB0PS0 | SB0PS1;
 

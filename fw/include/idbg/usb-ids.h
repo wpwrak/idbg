@@ -32,10 +32,6 @@
 
 #define USB_VENDOR		USB_VENDOR_QI_HW
 
-#else
-
-#error  "Must define target (GTA, BEN_V1, or BEN_V2)"
-
 #endif
 
 #endif /* !USB_IDS_H */

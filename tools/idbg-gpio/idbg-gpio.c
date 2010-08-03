@@ -1,8 +1,8 @@
 /*
  * idbg-gpio/idbg-gpio.c - GPIO get/set utility
  *
- * Written 2008, 2009 by Werner Almesberger
- * Copyright 2008, 2009 Werner Almesberger
+ * Written 2008-2010 by Werner Almesberger
+ * Copyright 2008-2010 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 
 #include "idbg/usb-ids.h"
 #include "idbg/ep0.h"
+#include "../lib/usb.h"
 
 
 #define TO_DEV		0x40
@@ -56,27 +57,6 @@ static struct pin {
 
 static uint8_t data[2], mode[2], mask[2];
 static int have_get = 0;
-
-
-static usb_dev_handle *open_usb(void)
-{
-	const struct usb_bus *bus;
-	struct usb_device *dev;
-
-	usb_init();
-	usb_find_busses();
-	usb_find_devices();
-
-	for (bus = usb_get_busses(); bus; bus = bus->next)
-		for (dev = bus->devices; dev; dev = dev->next) {
-			if (dev->descriptor.idVendor != USB_VENDOR_OPENMOKO)
-				continue;
-			if (dev->descriptor.idProduct != USB_PRODUCT_IDBG)
-				continue;
-			return usb_open(dev);
-		}
-	return NULL;
-}
 
 
 static const struct pin *lookup_pin(const char *name)

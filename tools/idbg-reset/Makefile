@@ -1,8 +1,8 @@
 #
 # idbg-reset/Makefile - Build the IDBG reset utility
 #
-# Written 2008, 2009 by Werner Almesberger
-# Copyright 2008, 2009 Werner Almesberger
+# Written 2008-2010 by Werner Almesberger
+# Copyright 2008-2010 Werner Almesberger
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -11,7 +11,8 @@
 #
 
 
-MAIN=idbg-reset
+MAIN = idbg-reset
+OBJS = ../lib/usb.o
 
 include ../Makefile.common
 

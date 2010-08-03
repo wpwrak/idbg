@@ -1,8 +1,8 @@
 /*
  * lib/usb.c - Common USB code for IDBG tools
  *
- * Written 2008, 2009 by Werner Almesberger
- * Copyright 2008, 2009 Werner Almesberger
+ * Written 2008-2010 by Werner Almesberger
+ * Copyright 2008-2010 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,8 @@
 #include "idbg/usb-ids.h"
 
 
-static uint16_t vendor = USB_VENDOR_OPENMOKO;
+static uint16_t vendor = 0;
+    /* search for USB_VENDOR_OPENMOKO and USB_VENDOR_QI_HW by default */
 static uint16_t product = USB_PRODUCT_IDBG;
 
 
@@ -36,7 +37,11 @@ usb_dev_handle *open_usb(void)
 
 	for (bus = usb_get_busses(); bus; bus = bus->next)
 		for (dev = bus->devices; dev; dev = dev->next) {
-			if (dev->descriptor.idVendor != vendor)
+			if (!vendor &&
+			    dev->descriptor.idVendor != USB_VENDOR_OPENMOKO &&
+			    dev->descriptor.idVendor != USB_VENDOR_QI_HW)
+				continue;
+			if (vendor && dev->descriptor.idVendor != vendor)
 				continue;
 			if (dev->descriptor.idProduct != product)
 				continue;

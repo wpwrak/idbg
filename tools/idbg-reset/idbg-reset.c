@@ -19,6 +19,7 @@
 
 #include "idbg/usb-ids.h"
 #include "idbg/ep0.h"
+#include "../lib/usb.h"
 
 
 #define TO_DEV		0x40
@@ -27,27 +28,6 @@
 
 #define	nRESET_GTA	0x100
 #define	nRESET_BEN	0x4000
-
-
-static usb_dev_handle *open_usb(void)
-{
-	const struct usb_bus *bus;
-	struct usb_device *dev;
-
-	usb_init();
-	usb_find_busses();
-	usb_find_devices();
-
-	for (bus = usb_get_busses(); bus; bus = bus->next)
-		for (dev = bus->devices; dev; dev = dev->next) {
-			if (dev->descriptor.idVendor != USB_VENDOR_OPENMOKO)
-				continue;
-			if (dev->descriptor.idProduct != USB_PRODUCT_IDBG)
-				continue;
-			return usb_open(dev);
-		}
-	return NULL;
-}
 
 
 static void reset_target(usb_dev_handle *dev)

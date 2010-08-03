@@ -58,8 +58,6 @@
 #define	HW_TYPE		HW_TYPE_BEN_V1
 #elif defined(BEN_V2)
 #define	HW_TYPE		HW_TYPE_BEN_V2
-#else
-#error "Must define target (GTA, BEN_V1, or BEN_V2)"
 #endif
 
 

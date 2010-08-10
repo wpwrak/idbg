@@ -15,7 +15,7 @@ DIRS=common boot idbg
 
 
 .PHONY:		all depend install uninstall clean spotless
-.PHONY:		target gta ben-v1 ben-v2
+.PHONY:		target gta ben-v1 ben_v1 ben-v2 ben_v2
 
 all:		.target
 		for d in $(DIRS); do make -C $$d all || exit 1; done
@@ -27,10 +27,10 @@ all:		.target
 gta:
 		echo GTA >.target
 
-ben-v1:
+ben-v1 ben_v1:
 		echo BEN_V1 >.target
 
-ben-v2:
+ben-v2 ben_v2:
 		echo BEN_V2 >.target
 
 depend:

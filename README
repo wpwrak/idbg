@@ -46,6 +46,7 @@ tools/		User-space utilities to perform IDBG operations
   idbg-con/	Serial console (based on libusb)
   idbg-i2c/	Read/write I2C registers
   idbg-norwp/	Control NOR write protection (GTA02)
+  idbg-id/	Identify an IDBG board
 doc/		Additional documentation material.
 
 

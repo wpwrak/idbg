@@ -1,8 +1,8 @@
 #
-# tools/Makefile - Build the IDBG-specific tools
+# idbg-id/Makefile - Build the IDBG identification utility
 #
-# Written 2008-2010 by Werner Almesberger
-# Copyright 2008-2010 Werner Almesberger
+# Written 2010 by Werner Almesberger
+# Copyright 2010 Werner Almesberger
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -11,6 +11,9 @@
 #
 
 
-DIRS=idbg-gpio idbg-reset idbg-con idbg-i2c idbg-norwp idbg-id
+MAIN = idbg-id
+OBJS = ../lib/usb.o ../lib/identify.o
 
-include ../Makefile.recurse
+include ../Makefile.common
+
+CFLAGS += -I../../fw/include

@@ -24,7 +24,7 @@
 
 #define USB_VENDOR		USB_VENDOR_OPENMOKO
 
-#elif defined(BEN_V1) || defined(BEN_v2)
+#elif defined(BEN_V1) || defined(BEN_V2)
 
 /*
  * Note: the two original V1 boards use USB_VENDOR_OPENMOKO if not updated.

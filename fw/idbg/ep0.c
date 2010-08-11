@@ -23,6 +23,7 @@
 #include "i2c.h"
 #include "jtag.h"
 #include "idbg/ep0.h"
+#include "version.h"
 
 
 static const uint8_t id[] = { EP0IDBG_MAJOR, EP0IDBG_MINOR, HW_TYPE };
@@ -104,6 +105,22 @@ static __bit my_setup(struct setup_request *setup) __reentrant
 		if (setup->wLength > 3)
 			return 0;
 		usb_send(&ep0, id, setup->wLength, NULL, NULL);
+		return 1;
+	case IDBG_FROM_DEV(IDBG_BUILD_NUMBER):
+		debug("IDBG_BUILD_DATE\n");
+		if (setup->wLength > 2)
+			return 0;
+		usb_send(&ep0, (void *) &build_number, setup->wLength,
+		    NULL, NULL);
+		return 1;
+	case IDBG_FROM_DEV(IDBG_BUILD_DATE):
+		debug("IDBG_BUILD_DATE\n");
+		for (size = 0; build_date[size]; size++);
+		if (size > EP1_SIZE)
+			return 0;
+		if (size > setup->wLength)
+			return 0;
+		usb_send(&ep0, build_date, size, NULL, NULL);
 		return 1;
 	case IDBG_TO_DEV(IDBG_RESET):
 		debug("IDBG_RESET\n");

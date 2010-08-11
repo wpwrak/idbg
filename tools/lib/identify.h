@@ -22,6 +22,8 @@
 
 int idbg_get_protocol(usb_dev_handle *dev, uint8_t *major, uint8_t *minor);
 int idbg_get_hw_type(usb_dev_handle *dev);
+int idbg_get_build_number(usb_dev_handle *dev, uint16_t *build);
+int idbg_get_build_date(usb_dev_handle *dev, char *buf, size_t size);
 int idbg_print_id(FILE *file, usb_dev_handle *dev);
 
 /*

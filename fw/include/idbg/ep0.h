@@ -19,6 +19,8 @@
  *
  * ->host	IDBG_ID			0		0	3
  * host->	IDBG_RESET		0		0	0
+ * ->host	IDBG_BUILD_NUMBER	-		-	2
+ * ->host	IDBG_BUILD_DATE		-		-	#bytes
  *
  * host->	IDBG_JTAG_ATTACH	0		0	0
  * host->	IDBG_JTAG_DETACH	0		0	0
@@ -43,10 +45,11 @@
  *
  * 0.0	initial release, some versions with P3_0
  * 0.1	support three-byte IDBG_ID with hardware type
+ * 0.2	support IDBG_BUILD_NUMBER, IDBG_BUILD_DATE
  */
 
 #define EP0IDBG_MAJOR	0	/* EP0 protocol, major revision */
-#define EP0IDBG_MINOR	1	/* EP0 protocol, minor revision */
+#define EP0IDBG_MINOR	2	/* EP0 protocol, minor revision */
 
 #define	HW_TYPE_GTA	0	/* GTA01/GTA02 */
 #define	HW_TYPE_BEN_V1	1	/* Ben NanoNote, version 1 */
@@ -79,6 +82,8 @@
 enum idbg_requests {
 	IDBG_ID			= 0x00,
 	IDBG_RESET,
+	IDBG_BUILD_NUMBER,
+	IDBG_BUILD_DATE,
 	IDBG_JTAG_ATTACH	= 0x10,
 	IDBG_JTAG_DETACH,
 	IDBG_JTAG_GPIO_SET,

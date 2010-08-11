@@ -63,6 +63,43 @@ int idbg_get_hw_type(usb_dev_handle *dev)
 }
 
 
+int idbg_get_build_number(usb_dev_handle *dev, uint16_t *build)
+{
+	uint8_t major, minor;
+	int res;
+
+	if (idbg_get_protocol(dev, &major, &minor) < 0)
+		return -1;
+	if (!major && minor < 2)
+		return 0;
+	res = usb_control_msg(dev, FROM_DEV, IDBG_BUILD_NUMBER, 0, 0,
+	    (void *) build, 2, 1000);
+	if (res < 0)
+		fprintf(stderr, "IDBG_BUILD_NUMBER: %s\n", usb_strerror());
+	return res;
+}
+
+
+int idbg_get_build_date(usb_dev_handle *dev, char *buf, size_t size)
+{
+	uint8_t major, minor;
+	int res;
+
+	if (idbg_get_protocol(dev, &major, &minor) < 0)
+		return -1;
+	if (!major && minor < 2) {
+		if (size)
+			*buf = 0;
+		return 0;
+	}
+	res = usb_control_msg(dev, FROM_DEV, IDBG_BUILD_DATE, 0, 0, buf, size,
+	    1000);
+	if (res < 0)
+		fprintf(stderr, "IDBG_BUILD_DATE: %s\n", usb_strerror());
+	return res;
+}
+
+
 int idbg_print_id(FILE *file, usb_dev_handle *dev)
 {
 	const struct usb_device *device = usb_device(dev);
@@ -115,7 +152,8 @@ int idbg_print_id(FILE *file, usb_dev_handle *dev)
 		break;
 	}
 	
-	res = fprintf(file, "%04x:%04x (%s, %s) protocol %d.%d type %d (%s)",
+	res = fprintf(file,
+	    "%04x:%04x (%s, %s) protocol %d.%d hw type %d (%s)",
 	    device->descriptor.idVendor, device->descriptor.idProduct,
 	    vendor, product, major, minor, type, hw_type);
 	if (res < 0)

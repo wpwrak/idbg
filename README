@@ -51,6 +51,18 @@ tools/		User-space utilities to perform IDBG operations
 doc/		Additional documentation material.
 
 
+Compilation
+-----------
+
+Depending on the target, run one of the following commands:
+
+make gta	# for GTA01 or GTA02, any version of IDBG
+make ben-v1	# Ben NanoNote, IDBG-Ben version 1
+make ben-v2	# Ben NanoNote, IDBG-Ben version 2
+
+Then "make" will build all the rest.
+
+
 Build process
 -------------
 

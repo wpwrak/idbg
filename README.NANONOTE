@@ -6,6 +6,18 @@ We call this variant IDBG-Ben. Please see README for an overview of
 the general architecture.
 
 
+Compilation
+-----------
+
+If you have a version 1 IDBG-Ben (July 2010), then run
+make ben-v1
+
+If you have a version 2 IDBG-Ben (August 2010 and later), then run
+make ben-v2
+
+Then "make" will build all the rest.
+
+
 Build process
 -------------
 

@@ -19,6 +19,17 @@ TARGET_ONLY_DIRS=f326
 
 include Makefile.recurse
 
+.PHONY:		gta ben-v1 ben_v1 ben-v2 ben_v2
+
 push:
 		git update-server-info
 		rsync -av -e ssh .git/ $(ACCOUNT):$(DIR)
+
+gta:
+		$(MAKE) -C fw gta
+
+ben-v1 ben_v1:
+		$(MAKE) -C fw ben-v1
+
+ben-v2 ben_v2:
+		$(MAKE) -C fw ben-v2

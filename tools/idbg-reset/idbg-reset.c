@@ -65,8 +65,8 @@ static void reset_idbg(usb_dev_handle *dev)
 static void usage(const char *name)
 {
 	fprintf(stderr,
-"usage: %s [-d|-t]\n\n"
-"  -d  reset IDBG\n"
+"usage: %s [-i|-t]\n\n"
+"  -i  reset IDBG\n"
 "  -t  reset target (default)\n"
     , name);
 	exit(1);
@@ -85,7 +85,7 @@ int main(int argc, const char **argv)
 		if (!strcmp(argv[1], "-t"))
 			break;
 		target = 0;
-		if (!strcmp(argv[1], "-d"))
+		if (!strcmp(argv[1], "-i"))
 			break;
 		/* fall through */
 	default:

@@ -1,8 +1,8 @@
 /*
  * idbg-i2c/idbg-i2c.c - Read/write I2C registers via IDBG
  *
- * Written 2008, 2009 by Werner Almesberger
- * Copyright 2008, 2009 Werner Almesberger
+ * Written 2008-2010 by Werner Almesberger
+ * Copyright 2008-2010 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,11 @@
 #include "idbg/usb-ids.h"
 #include "idbg/ep0.h"
 #include "../lib/usb.h"
+#include "../lib/identify.h"
 
 
 #define TO_DEV		0x40
 #define	FROM_DEV	0xc0
-
-
-#define	nRESET	0x100
 
 
 static void i2c_fetch(usb_dev_handle *dev, ssize_t size)
@@ -94,7 +92,7 @@ static void usage(const char *name)
 int main(int argc, char **argv)
 {
 	usb_dev_handle *dev;
-	int c;
+	int c, hw;
 	int set = 0;
 	unsigned long slave, addr, value;
 	uint8_t tmp;
@@ -131,6 +129,14 @@ int main(int argc, char **argv)
 	dev = open_usb();
 	if (!dev) {
 		fprintf(stderr, ":-(\n");
+		exit(1);
+	}
+
+	hw = idbg_get_hw_type(dev);
+	if (hw != HW_TYPE_GTA) {
+		fprintf(stderr, "IDBG connects to I2C only on GTA "
+		"(hw revision %d), not on revision %d\n",
+		HW_TYPE_GTA, hw);
 		exit(1);
 	}
 

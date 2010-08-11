@@ -1,9 +1,9 @@
 /*
  * idbg-norwp/idbg-norwp.c - Control the GTA02 nNOR_WP line through IDBG
  *
- * Written 2008, 2009 by Werner Almesberger
+ * Written 2008-2010 by Werner Almesberger
  * Copyright (C) 2008 by OpenMoko, Inc.
- * Copyright 2008, 2009 Werner Almesberger
+ * Copyright 2008-2010 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,8 @@
 
 #include "idbg/usb-ids.h"
 #include "idbg/ep0.h"
+#include "../lib/usb.h"
+#include "../lib/identify.h"
 
 
 #define TO_DEV		0x40
@@ -27,27 +29,6 @@
 
 
 #define	nNOR_WP	0x400
-
-
-static usb_dev_handle *open_usb(void)
-{
-	const struct usb_bus *bus;
-	struct usb_device *dev;
-
-	usb_init();
-	usb_find_busses();
-	usb_find_devices();
-
-	for (bus = usb_get_busses(); bus; bus = bus->next)
-		for (dev = bus->devices; dev; dev = dev->next) {
-			if (dev->descriptor.idVendor != USB_VENDOR_OPENMOKO)
-				continue;
-			if (dev->descriptor.idProduct != USB_PRODUCT_IDBG)
-				continue;
-			return usb_open(dev);
-		}
-	return NULL;
-}
 
 
 static void norwp_query(usb_dev_handle *dev)
@@ -95,6 +76,7 @@ int main(int argc, char **argv)
 {
 	usb_dev_handle *dev;
 	int set = 0, rw = 0;
+	int hw;
 
 	if (argc != 1 && argc != 2)
 		usage(*argv);
@@ -110,6 +92,14 @@ int main(int argc, char **argv)
 	dev = open_usb();
 	if (!dev) {
 		fprintf(stderr, ":-(\n");
+		exit(1);
+	}
+
+	hw = idbg_get_hw_type(dev);
+	if (hw != HW_TYPE_GTA) {
+		fprintf(stderr, "nNOR_WP only exists on IDBG for GTA02 "
+		    "(hw revision %d), not on revision %d\n",
+		    HW_TYPE_GTA, hw);
 		exit(1);
 	}
 

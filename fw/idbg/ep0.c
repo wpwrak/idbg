@@ -248,20 +248,24 @@ static __bit my_setup(struct setup_request *setup) __reentrant
 		if (setup->wLength > 2)
 			return 0;
 		buf[0] = P0;
-		buf[1] = P2;
+		buf[1] = P2 & 0x3f;
+		buf[1] |= P3 << 6;
 		usb_send(&ep0, buf, setup->wLength, NULL, NULL);
 		return 1;
 	case IDBG_TO_DEV(IDBG_GPIO_MODE_SET):
 		debug("IDBG_GPIO_MODE_SET");
 		UPDATE_MASKED(P0MDOUT, setup->wValue, setup->wIndex);
 		UPDATE_MASKED(P2MDOUT, setup->wValue >> 8, setup->wIndex >> 8);
+		UPDATE_MASKED(P3MDOUT, setup->wValue >> 14,
+		    setup->wIndex >> 14);
 		return 1;
 	case IDBG_FROM_DEV(IDBG_GPIO_MODE_GET):
 		debug("IDBG_GPIO_MODE_GET");
 		if (setup->wLength > 2)
 			return 0;
 		buf[0] = P0MDOUT;
-		buf[1] = P2MDOUT;
+		buf[1] = P2MDOUT & 0x3f;
+		buf[1] |= P3MDOUT << 6;
 		usb_send(&ep0, buf, setup->wLength, NULL, NULL);
 		return 1;
 

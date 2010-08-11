@@ -21,25 +21,29 @@
 #include "idbg/usb-ids.h"
 #include "idbg/ep0.h"
 #include "../lib/usb.h"
+#include "../lib/identify.h"
 
 
 #define TO_DEV		0x40
 #define	FROM_DEV	0xc0
 
 
+struct pin {
+	int pin;	/* on C8051F326 */
+	int port, bit;
+	const char *host_name;
+	const char *idbg_name;
+};
+
+
 /*
  * @@@ we really ought to generate this from a central table
  */
 
-static struct pin {
-	int pin;
-	int port, bit;
-	const char *neo_name;
-	const char *idbg_name;
-} pins[] = {
+static struct pin gta_pins[] = {
 	{  1,	0, 0,	"I2C_SCL",	"SCL",		},
 	{ 11,	2, 3,	"nGSM_EN",	NULL		},
-	{ 12,	2, 2,	"nNOR_WP",	NULL		},
+	{ 12,	2, 2,	"nNOR_WP",	NULL		},	
 	{ 16,	2, 5,	"STDI",		"TDI"		},
 	{ 17,	2, 4,	"STMS",		"TMS"		},
 	{ 18,	2, 1,	"STDO",		"TDO"		},
@@ -55,8 +59,27 @@ static struct pin {
 };
 
 
+static struct pin ben_v1_pins[] = {
+	{ 24,	0, 5,	"TDO",		"RX"		},
+	{ 25,	0, 4,	"TDI",		"TX"		},
+	{ 26,	0, 3,	"BOOT_SEL1",	"USB_BOOT",	},
+	{ 10,	3, 0,	"RESET_N",	NULL		},
+	{ 0, }
+};
+
+
+static struct pin ben_v2_pins[] = {
+	{ 24,	0, 5,	"TDO",		"RX"		},
+	{ 25,	0, 4,	"TDI",		"TX"		},
+	{ 28,	0, 1,	"RESET_N",	NULL		},
+	{ 10,	3, 0,	"BOOT_SEL1",	"USB_BOOT",	},
+	{ 0, }
+};
+
+
 static uint8_t data[2], mode[2], mask[2];
 static int have_get = 0;
+static const struct pin *pins = NULL; /* set after identifying board */
 
 
 static const struct pin *lookup_pin(const char *name)
@@ -65,7 +88,7 @@ static const struct pin *lookup_pin(const char *name)
 	char tmp[5];
 
 	for (pin = pins; pin->pin; pin++) {
-		if (pin->neo_name && !strcasecmp(pin->neo_name, name))
+		if (pin->host_name && !strcasecmp(pin->host_name, name))
 			return pin;
 		if (pin->idbg_name && !strcasecmp(pin->idbg_name, name))
 			return pin;
@@ -80,11 +103,23 @@ static const struct pin *lookup_pin(const char *name)
 }
 
 
+static void translate_pin(const struct pin *pin, int *port, int *bit)
+{
+	if (pin->port != 3) {
+		*port = !!pin->port;
+		*bit = 1 << pin->bit;
+	} else {
+		*port = 1;
+		*bit = 1 << 6;
+	}
+}
+
+
 static void set_pin(const struct pin *pin, const char *value)
 {
-	int port = !!pin->port;
-	int bit = 1 << pin->bit;
+	int port, bit;
 
+	translate_pin(pin, &port, &bit);
 	mask[port] |= bit;
 	if (!*value || value[1]) {
 		fprintf(stderr, "invalid pin state \"%s\"\n", value);
@@ -136,9 +171,9 @@ static void parse_set(const char **args, int num_args)
 static void print_names(const struct pin *pin)
 {
 	printf("%2d: P%d_%d (", pin->pin, pin->port, pin->bit);
-	if (pin->neo_name)
-		printf("%s", pin->neo_name);
-	if (pin->neo_name && pin->idbg_name)
+	if (pin->host_name)
+		printf("%s", pin->host_name);
+	if (pin->host_name && pin->idbg_name)
 		printf(", ");
 	if (pin->idbg_name)
 		printf("%s", pin->idbg_name);
@@ -148,9 +183,9 @@ static void print_names(const struct pin *pin)
 
 static void get_pin(const struct pin *pin)
 {
-	int port = !!pin->port;
-	int bit = 1 << pin->bit;
+	int port, bit;
 
+	translate_pin(pin, &port, &bit);
 	print_names(pin);
 	printf(" = %c\n",
 	    data[port] & bit ? mode[port] & bit ? '1' : 'R' : '0');
@@ -176,14 +211,24 @@ static void parse_get(const char **args, int num_args)
 }
 
 
-static void list_pins(void)
+static void dump_pin_table(const char *device, const struct pin *pin_table)
 {
 	const struct pin *pin;
 
-	for (pin = pins; pin->pin; pin++) {
+	printf("%s\n", device);
+	for (pin = pin_table; pin->pin; pin++) {
+		printf("  ");
 		print_names(pin);
 		putchar('\n');
 	}
+}
+
+
+static void list_pins(void)
+{
+	dump_pin_table("GTA01/GTA02", gta_pins);
+	dump_pin_table("Ben NanoNote, IDBG V1", ben_v1_pins);
+	dump_pin_table("Ben NanoNote, IDBG V2", ben_v2_pins);
 }
 
 
@@ -213,6 +258,7 @@ int main(int argc, const char **argv)
 {
 	usb_dev_handle *dev;
 	int res, all = 0;
+	int hw;
 
 	if (argc == 2 && !strcmp(argv[1], "-l")) {
 		list_pins();
@@ -222,6 +268,22 @@ int main(int argc, const char **argv)
 	dev = open_usb();
 	if (!dev) {
 		fprintf(stderr, ":-(\n");
+		exit(1);
+	}
+
+	hw = idbg_get_hw_type(dev);
+	switch (hw) {
+	case HW_TYPE_GTA:
+		pins = gta_pins;
+		break;
+	case HW_TYPE_BEN_V1:
+		pins = ben_v1_pins;
+		break;
+	case HW_TYPE_BEN_V2:
+		pins = ben_v2_pins;
+		break;
+	default:
+		fprintf(stderr, "unknown hardware revision %d\n", hw);
 		exit(1);
 	}
 

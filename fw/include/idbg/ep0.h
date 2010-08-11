@@ -101,6 +101,17 @@ enum idbg_requests {
 };
 
 
+/*
+ * Note that P2 and P3 are folded into the second byte of GPIO commands as
+ * follows:
+ *
+ *   --  P3_0 P2_5 P2_4 P2_3 P2_2 P2_1 P2_0
+ * +----+----+----+----+----+----+----+----+
+ * |  7 |  6 |  5 |  4 |  3 |  2 |  1 |  0 |
+ * +----+----+----+----+----+----+----+----+
+ */
+
+
 void ep0_init(void);
 
 #endif /* !EP0_H */

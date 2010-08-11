@@ -1,8 +1,8 @@
 /*
  * idbg/idbg.c - IDBG initialization and main loop
  *
- * Written 2008, 2009 by Werner Almesberger
- * Copyright 2008, 2009 Werner Almesberger
+ * Written 2008-2010 by Werner Almesberger
+ * Copyright 2008-2010 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,11 +26,13 @@ void uart_isr(void) __interrupt(4);
 
 void main(void)
 {
+#ifdef GTA
 	/*
 	 * Our pull-up is strong enough to raise nNOR_WP above the threshold.
 	 * Besides, we'd burn power if we didn't drive it low.
 	 */
 	nNOR_WP = 0;
+#endif
 
 	/* @@@ since boot and payload may run at different USB speeds, we
 	   should also redo the clock init */
@@ -53,6 +55,8 @@ void main(void)
 	while (1) {
 		usb_poll();
 		serial_poll();
+#ifdef GTA
 		i2c_poll();
+#endif
 	}
 }

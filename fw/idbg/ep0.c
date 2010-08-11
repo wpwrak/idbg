@@ -35,6 +35,8 @@ static __bit jtag_last; /* scan is last segment of larger scan */
 	var = ((var) & ~(mask)) | ((value) & (mask))
 
 
+#ifdef GTA
+
 static void do_jtag_scan(void *user)
 {
 	user; /* suppress warning */
@@ -54,6 +56,8 @@ static void do_i2c_write(void *user)
 	user; /* suppress warning */
 	i2c_start(0, buf, size+2, NULL, 0);
 }
+
+#endif /* GTA */
 
 
 #define SET_GPIO(port, bit, value)		\
@@ -105,6 +109,8 @@ static __bit my_setup(struct setup_request *setup) __reentrant
 		debug("IDBG_RESET\n");
 		RSTSRC = SWRSF;
 		while (1);
+
+#ifdef GTA
 
 	case IDBG_TO_DEV(IDBG_JTAG_ATTACH):
 		debug("IDBG_JTAG_ATTACH\n");
@@ -211,6 +217,8 @@ static __bit my_setup(struct setup_request *setup) __reentrant
 	case IDBG_FROM_DEV(IDBG_I2C_FETCH):
 		debug("IDBG_I2C_FETCH\n");
 		return i2c_fetch(&ep0, setup->wLength);
+
+#endif /* GTA */
 
 	case IDBG_TO_DEV(IDBG_GPIO_DATA_SET):
 		debug("IDBG_GPIO_DATA_SET");

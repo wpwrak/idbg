@@ -11,8 +11,12 @@
 #
 
 
-MAIN=idbg
-OBJS=$(MAIN) uart usb descr version ep0 serial jtag i2c
+MAIN = idbg
+
+OBJS = $(MAIN) uart usb descr version ep0 serial
+ifeq ($(shell cat ../.target),GTA)
+OBJS += jtag i2c
+endif
 
 include ../common/Makefile.system
 include ../common/Makefile.common

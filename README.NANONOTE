@@ -17,7 +17,6 @@ The components should be placed in the following order:
   C1, but either order is possible)
 - VR3, R1, VR2, and R2, in this order
 - VR1. Again, VR1 can be placed before R2 if desired.
-- R3
 
 Since the USB receptacle descends below the bottom of the PCB, the
 board needs to be placed on some support for the soldering. Such a
@@ -106,11 +105,18 @@ application. The boot loader is protected against accidental
 overwriting and should never have to be changed. In case this should
 be necessary, it can be done through the C2 interface.
 
-The boot loader normally jumps directly to the application. The
-exception from this rule is when the Ben is not powered up (i.e.,
-if there is no power on the +V3.3 supply.) In this case, IDBG
-remains in the boot loader and listens for DFU requests until the
-Ben is powered up.
+Version 1 of IDBG-Ben:
+
+  The boot loader normally jumps directly to the application. The
+  exception from this rule is when the Ben is not powered up (i.e.,
+  if there is no power on the +V3.3 supply.) In this case, IDBG
+  remains in the boot loader and listens for DFU requests until the
+  Ben is powered up.
+
+Version 2 of IDBG-Ben:
+
+  The boot loader waits two seconds for DFU requests. If none
+  arrive within this time interval, it jumps to the application.
 
 When the application runs, the serial console and related functions
 are available. Note that IDBG remains in the application (and does
@@ -129,9 +135,13 @@ Tools
 -----
 
 idbg-con and idbg-reset work as normal. To enable USB boot, issue
-idbg-gpio P0_3=0
+idbg-nnboot usb
+
 Disable USB boot with
-idbg-gpio P0_3=R
+idbg-nnboot nand
+
+Query the current setting with
+idbg-nnboot
 
 Note that the USB boot setting is not persistent. Your Ben will
 revert to booting from NAND when resetting or disconnecting IDBG-Ben.

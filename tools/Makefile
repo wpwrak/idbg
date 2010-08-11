@@ -11,6 +11,6 @@
 #
 
 
-DIRS=idbg-gpio idbg-reset idbg-con idbg-i2c idbg-norwp idbg-id
+DIRS=idbg-gpio idbg-reset idbg-con idbg-i2c idbg-norwp idbg-id idbg-nnboot
 
 include ../Makefile.recurse

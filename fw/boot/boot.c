@@ -38,8 +38,10 @@ void run_payload(void)
 	/* Re-enable pull-ups */
 	GPIOCN &= ~WEAKPUD;
 
+#ifdef GTA
 	/* Don't waste power in pull-down */
 	I2C_SDA_PULL = 1;
+#endif
 
 	debug("launching payload\n");
 
@@ -181,13 +183,35 @@ static void boot_loader(void)
 	 */
 
 	GPIOCN |= WEAKPUD;
+#ifdef GTA
 	I2C_SDA_PULL = 0;
+#endif
 	delay();
 
 	dfu_init();
 	usb_init();
+
+#ifdef GTA
+
 	while (!I2C_SDA || dfu.state != dfuIDLE)
 		usb_poll();
+
+#else /* GTA */
+
+#define	MS_TO_LOOPS(ms)	((uint32_t) (ms)*190)
+
+	{
+		uint32_t loop = 0;
+
+		while (loop != MS_TO_LOOPS(2000)) {
+			usb_poll();
+			if (dfu.state == dfuIDLE)
+				loop++;
+			else
+				loop = 0;
+		}
+	}
+#endif /* !GTA */
 }
 
 

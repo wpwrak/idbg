@@ -20,28 +20,46 @@
 #include "idbg/usb-ids.h"
 #include "idbg/ep0.h"
 #include "../lib/usb.h"
+#include "../lib/identify.h"
 
 
 #define TO_DEV		0x40
 #define	FROM_DEV	0xc0
 
 
-#define	nRESET_GTA	0x100
-#define	nRESET_BEN	0x4000
+#define	nRESET_GTA	0x0100	/* P2_0 */
+#define	nRESET_BEN_V1	0x4000	/* P3_0, folded to "P2_6" */
+#define	nRESET_BEN_V2	0x0002	/* P0_1 */
 
 
 static void reset_target(usb_dev_handle *dev)
 {
-	int res;
+	int hw, mask, res;
 
-	res = usb_control_msg(dev, TO_DEV, IDBG_GPIO_DATA_SET,
-	    0, nRESET_GTA | nRESET_BEN, NULL, 0, 1000);
+	hw = idbg_get_hw_type(dev);
+	switch (hw) {
+	case HW_TYPE_GTA:
+		mask = nRESET_GTA;
+		break;
+	case HW_TYPE_BEN_V1:
+		mask = nRESET_BEN_V1;
+		break;
+	case HW_TYPE_BEN_V2:
+		mask = nRESET_BEN_V2;
+		break;
+	default:
+		fprintf(stderr, "unknown hardware revision %d\n", hw);
+		exit(1);
+	}
+
+	res = usb_control_msg(dev, TO_DEV, IDBG_GPIO_DATA_SET, 0, mask,
+	    NULL, 0, 1000);
 	if (res < 0) {
 		fprintf(stderr, "IDBG_GPIO_DATA_SET: %d\n", res);
 		exit(1);
 	}
-	res = usb_control_msg(dev, TO_DEV, IDBG_GPIO_DATA_SET,
-	    nRESET_GTA | nRESET_BEN, nRESET_GTA | nRESET_BEN, NULL, 0, 1000);
+	res = usb_control_msg(dev, TO_DEV, IDBG_GPIO_DATA_SET, mask, mask,
+	    NULL, 0, 1000);
 	if (res < 0) {
 		fprintf(stderr, "IDBG_GPIO_DATA_SET: %d\n", res);
 		exit(1);

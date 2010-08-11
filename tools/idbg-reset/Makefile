@@ -12,7 +12,7 @@
 
 
 MAIN = idbg-reset
-OBJS = ../lib/usb.o
+OBJS = ../lib/usb.o ../lib/identify.o
 
 include ../Makefile.common
 

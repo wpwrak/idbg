@@ -5,12 +5,6 @@ The Internal Debug Board
 <BODY>
 <H1>The Internal Debug Board</H1>
 
-<I><B>Disclaimer:</B> This is something I did in my spare time. My "daytime"
-work for Openmoko was not related to this project except that it provided
-me with old and defective prototypes and spare parts to use for my experiments,
-and of course with plenty of opportunities to tinker with Neo internals.</I>
-<P>
-
 The case of the
 <A href="http://www.openmoko.com/">Openmoko</A>
 <A href="http://wiki.openmoko.org/wiki/Neo1973">Neo 1973</A> and
@@ -22,10 +16,13 @@ it integrates the principal functionality of the Openmoko
 Board</A>&nbsp;&mdash;&nbsp;USB access to a serial console and to
 JTAG&nbsp;&mdash;&nbsp;into the Neo itself.
 <P>
+There is also an IDBG variant for the
+<A href="http://en.qi-hardware.com/wiki/Ben_NanoNote">Ben NanoNote</A>.
+<P>
 
 Repository:<BR>
 <PRE>
-git clone http://www.almesberger.net/misc/idbg.git
+git clone https://github.com/wpwrak/idbg.git
 </PRE>
 <P>
 
@@ -218,9 +215,22 @@ plastic wall next to the LCM if the wires are thin enough.
 <P>
 Gee, it still runs !
 <P>
-<IMG src="works.jpg"></A>
+<IMG src="works.jpg">
 <P>
 
+
+<H2>Ben NanoNote</H2>
+
+The version for the Ben is a bit simpler and has no JTAG or I2C.
+A Ben-specific addition is the connection to the USB BOOT signal.
+This is what is looks like when installed:
+
+<P>
+<A href="http://www.almesberger.net/misc/ben/idbg-v2-install.jpg"><IMG
+src="http://www.almesberger.net/misc/ben/idbg-v2-install.jpg"
+width=418 height=287></A>
+<IMG src=""></A>
+<P>
 
 <H2>Status</H2>
 
@@ -302,7 +312,7 @@ For further study:
 
 <HR>
 <A href="mailto:werner@almesberger.net">Werner Almesberger</A>,
-30-JUN-2010
+30-MAR-2013
 <HR>
 </BODY>
 </HTML>

@@ -1,8 +1,8 @@
 #
 # idbg-con/Makefile - Build the IDBG console
 #
-# Written 2008, 2009 by Werner Almesberger
-# Copyright 2008, 2009 Werner Almesberger
+# Written 2008, 2009, 2013 by Werner Almesberger
+# Copyright 2008, 2009, 2013 Werner Almesberger
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,4 +17,4 @@ OBJS = ../lib/usb.o
 include ../Makefile.common
 
 CFLAGS += -I../../fw/include
-LDFLAGS += -lpthread
+LDLIBS += -lpthread
